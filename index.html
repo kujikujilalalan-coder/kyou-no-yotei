@@ -65,7 +65,7 @@ body {
 #parent-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 /* ── MAIN ── */
-#main { flex: 1; display: grid; grid-template-columns: 1fr 360px; min-height: 0; }
+#main { flex: 1; display: grid; grid-template-columns: 1fr 250px; min-height: 0; }
 #left-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
 /* ── 左：タイムライン（1本・現在区間がせり出す） ── */
@@ -175,8 +175,9 @@ body {
 .now-free { text-align: center; padding: 24px; }
 .now-free-text { font-size: 1.7rem; font-weight: 900; color: var(--off-color); margin-top: 8px; }
 .now-free-card { text-align: center; padding: 28px 24px 32px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.bag-label-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.92rem; font-weight: 700; color: var(--text); }
-.bag-label-toggle input { width: 22px; height: 22px; accent-color: var(--purple); cursor: pointer; }
+.bag-label-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.92rem; font-weight: 700; color: var(--text); line-height: 1.4; }
+.bag-label-toggle input { width: 22px; height: 22px; flex-shrink: 0; margin: 0; accent-color: var(--purple); cursor: pointer; }
+.bag-label-toggle span { flex: 1; }
 .now-free-big-title { font-size: 2.4rem; font-weight: 900; color: var(--off-color); line-height: 1; }
 .now-free-pie { margin: 10px 0 4px; line-height: 0; }
 .now-free-big-remain { font-size: 1.5rem; font-weight: 800; color: var(--text-mid); }
@@ -261,29 +262,29 @@ body {
   display: flex; flex-direction: column; overflow: hidden;
 }
 #want-header {
-  padding: 20px 22px 14px; border-bottom: 2px solid var(--border); flex-shrink: 0;
-  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px 10px; border-bottom: 2px solid var(--border); flex-shrink: 0;
+  display: flex; align-items: center; gap: 8px;
 }
-#want-title { font-size: 1.2rem; font-weight: 900; flex: 1; }
+#want-title { font-size: 1.05rem; font-weight: 900; flex: 1; }
 #want-add-btn {
   background: var(--off-color); border: none; color: #fff;
-  border-radius: 12px; font-size: 0.95rem; font-weight: 800; padding: 8px 16px;
-  cursor: pointer; font-family: inherit;
+  border-radius: 10px; font-size: 0.85rem; font-weight: 800; padding: 7px 12px;
+  cursor: pointer; font-family: inherit; flex-shrink: 0;
 }
 #want-list-area {
-  flex: 1; overflow-y: auto; padding: 16px 20px; scrollbar-width: thin;
+  flex: 1; overflow-y: auto; padding: 12px 14px; scrollbar-width: thin;
   transition: background 0.4s;
 }
 #want-list-area.off-active { background: rgba(4,120,87,0.05); }
 .want-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 14px 16px; background: var(--bg); border: 2.5px solid var(--border);
-  border-radius: 14px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 12px; background: var(--bg); border: 2.5px solid var(--border);
+  border-radius: 12px; margin-bottom: 8px;
 }
 .want-item.done-want { opacity: 0.4; }
 .off-active .want-item { border-color: rgba(4,120,87,0.4); }
-.want-emoji { font-size: 1.5rem; }
-.want-name { flex: 1; font-size: 1.1rem; font-weight: 700; }
+.want-emoji { font-size: 1.25rem; }
+.want-name { flex: 1; font-size: 0.98rem; font-weight: 700; }
 .want-done-btn {
   background: none; border: 2.5px solid var(--border); color: var(--text-dim);
   border-radius: 50%; width: 30px; height: 30px; font-size: 0.85rem;
@@ -291,6 +292,13 @@ body {
 }
 .want-done-btn:hover { background: var(--off-color); border-color: var(--off-color); color: #fff; }
 .want-del-btn { background: none; border: none; color: var(--text-dim); font-size: 0.85rem; cursor: pointer; padding: 3px 6px; opacity: 0.5; }
+.want-chip {
+  display: inline-flex; align-items: center; gap: 5px; padding: 8px 13px;
+  border: 2px solid var(--off-color); border-radius: 18px; background: rgba(4,120,87,0.08);
+  color: var(--off-color); font-size: 0.95rem; font-weight: 800; cursor: pointer; font-family: inherit;
+}
+.want-chip:active { transform: scale(0.96); }
+.want-chip .wc-del { color: var(--text-dim); font-size: 0.78rem; opacity: 0.6; padding-left: 2px; }
 
 /* 完了演出 */
 #complete-overlay {
@@ -307,6 +315,33 @@ body {
   animation: popIn 0.4s 0.2s both cubic-bezier(0.34,1.56,0.64,1);
 }
 @keyframes popIn { from { opacity:0; transform:scale(0.7); } to { opacity:1; transform:scale(1); } }
+
+/* オフタイム突入演出 */
+#offtime-overlay {
+  display: none; position: fixed; inset: 0; z-index: 310;
+  align-items: center; justify-content: center;
+  background: rgba(20,30,45,0.55); backdrop-filter: blur(6px);
+}
+#offtime-overlay.show { display: flex; }
+#offtime-card {
+  background: var(--surface); border-radius: 24px; padding: 28px 26px 24px;
+  max-width: 90vw; width: 420px; max-height: 84vh; overflow-y: auto;
+  text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.ot-emoji { font-size: 4rem; line-height: 1; }
+.ot-title { font-size: 1.9rem; font-weight: 900; color: var(--off-color); margin-top: 6px; }
+.ot-sub { font-size: 1rem; font-weight: 700; color: var(--text-mid); margin-top: 6px; margin-bottom: 16px; }
+#offtime-want-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.ot-want {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  background: var(--bg); border: 2.5px solid var(--off-color); border-radius: 14px;
+  font-size: 1.15rem; font-weight: 800; color: var(--text); cursor: pointer; font-family: inherit;
+}
+.ot-want:active { transform: scale(0.98); }
+.ot-want .ot-want-emoji { font-size: 1.6rem; }
+.ot-want.chosen { background: var(--off-color); color: #fff; }
+#offtime-want-list .ot-empty { color: var(--text-dim); font-size: 0.95rem; font-weight: 600; }
 
 /* 子ども追加ボタン */
 #child-add-btn {
@@ -382,6 +417,27 @@ body {
 .pending-info-meta { font-size: 0.7rem; color: var(--text-dim); margin-top: 1px; }
 .pending-actions { display: flex; gap: 5px; }
 .pending-badge { display: inline-block; background: #f59e0b; color: #fff; border-radius: 10px; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; margin-left: 5px; }
+
+/* ── 縦向き（タブレットを縦にしたとき）：横2分割をやめ、やりたいことを下部に ── */
+@media (orientation: portrait) {
+  #main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+  #right-panel {
+    border-left: none; border-top: 3px solid var(--border);
+    max-height: 32vh;
+  }
+  #want-header { padding: 12px 18px 10px; }
+  #want-title { font-size: 1.05rem; }
+  #topbar { padding: 0 12px; gap: 8px; }
+  #clock-big { font-size: 2.2rem; }
+  #date-big { font-size: 0.9rem; }
+  .topbar-left { gap: 10px; }
+  #child-switch-btn { font-size: 1.05rem; min-width: 0; padding: 4px 4px; }
+  #day-label-badge { gap: 4px; flex-wrap: wrap; justify-content: center; }
+  .dl-chip {
+    font-size: 0.72rem; padding: 3px 8px; border-width: 2px;
+    max-width: 30vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+}
 </style>
 </head>
 <body>
@@ -448,6 +504,17 @@ body {
   <button class="co-dismiss" id="dismiss-complete">とじる</button>
 </div>
 
+<!-- オフタイム突入演出 -->
+<div id="offtime-overlay">
+  <div id="offtime-card">
+    <div class="ot-emoji">🎈</div>
+    <div class="ot-title" id="offtime-title">オフタイムに なったよ</div>
+    <div class="ot-sub">なにを する？ えらんでね</div>
+    <div id="offtime-want-list"></div>
+    <button class="co-dismiss" id="dismiss-offtime">とじる</button>
+  </div>
+</div>
+
 
 <!-- 子ども追加ボタン -->
 <button id="child-add-btn">📅 よていを おねがい</button>
@@ -477,9 +544,17 @@ body {
 
 <!-- やりたいこと追加モーダル -->
 <div class="modal-overlay" id="want-modal">
-  <div class="modal" style="max-width:360px">
+  <div class="modal" style="max-width:380px">
     <h2 style="color:var(--off-color)">⭐ やりたいことを ついか</h2>
-    <div class="field"><label>なにをしたい？</label><input type="text" id="want-name-input" placeholder="例：ゲームをする" maxlength="16" style="font-size:1rem;font-weight:700"/></div>
+    <div class="field">
+      <label>えらぶ</label>
+      <div id="want-preset-grid" style="display:flex;flex-wrap:wrap;gap:7px"></div>
+    </div>
+    <div class="field" id="want-history-field" style="display:none">
+      <label>まえに えらんだもの</label>
+      <div id="want-history-grid" style="display:flex;flex-wrap:wrap;gap:7px"></div>
+    </div>
+    <div class="field"><label>じぶんで かく</label><input type="text" id="want-name-input" placeholder="例：ゲームをする" maxlength="16" style="font-size:1rem;font-weight:700"/></div>
     <div class="field"><label>アイコン</label><div class="emoji-grid" id="want-emoji-grid"></div></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="want-cancel">とじる</button>
@@ -524,6 +599,14 @@ body {
           <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">あいた時間の呼び名 🎈</label>
           <input type="text" id="free-label-input" placeholder="オフタイム" maxlength="10" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-size:1rem;font-weight:700;padding:10px 12px;outline:none;font-family:inherit;box-sizing:border-box"/>
           <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">予定のすきまや、ぜんぶ終わったあとの自由時間に出る言葉です。</p>
+        </div>
+        <div style="margin-top:12px">
+          <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">日づけの文字 ✏️</label>
+          <div class="type-toggle" id="kanji-toggle">
+            <button class="type-btn" id="kanji-hiragana" style="flex:1">ひらがな</button>
+            <button class="type-btn" id="kanji-kanji" style="flex:1">かんじ</button>
+          </div>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">小さい子は「ひらがな」、漢字が読める子は「かんじ」。</p>
         </div>
         <div style="margin-top:12px">
           <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:6px;font-weight:700">いえを でる・かえる じかんと いきさき（曜日ごと）</label>
@@ -838,12 +921,17 @@ function getTodayEvents(){
     if(e<=s) e=s+5;
     timed.push({...ev, _s:s, _e:e});
   });
-  // ルーティン（点的・既定30分）
+  // ルーティン：家を出る〜帰るを1本の帯に（両方の時刻がある日）。片方だけなら点で表示
   const dow=d.getDay();
   const leaveT=(rt.leaveByDow||{})[dow], returnT=(rt.returnByDow||{})[dow];
   const leaveLabel=(rt.leaveLabelByDow||{})[dow], returnLabel=(rt.returnLabelByDow||{})[dow];
-  if(leaveT){ const s=toMin(leaveT); timed.push({id:'routine-leave',time:leaveT,name:leaveLabel||'いえをでる',emoji:'🏫',type:'on',tasks:[],isRoutine:true,routineKey:'leave',_s:s,_e:s+15}); }
-  if(returnT){ const s=toMin(returnT); timed.push({id:'routine-return',time:returnT,name:returnLabel||'いえにかえる',emoji:'🏠',type:'on',tasks:[],isRoutine:true,routineKey:'return',_s:s,_e:s+15}); }
+  if(leaveT && returnT && toMin(returnT)>toMin(leaveT)){
+    const s=toMin(leaveT), e=toMin(returnT);
+    timed.push({id:'routine-out',time:leaveT,end:returnT,name:leaveLabel||'おでかけ',emoji:'🏫',type:'on',tasks:[],isRoutine:true,routineKey:'out',_s:s,_e:e});
+  } else {
+    if(leaveT){ const s=toMin(leaveT); timed.push({id:'routine-leave',time:leaveT,name:leaveLabel||'いえをでる',emoji:'🏫',type:'on',tasks:[],isRoutine:true,routineKey:'leave',_s:s,_e:s+15}); }
+    if(returnT){ const s=toMin(returnT); timed.push({id:'routine-return',time:returnT,name:returnLabel||'いえにかえる',emoji:'🏠',type:'on',tasks:[],isRoutine:true,routineKey:'return',_s:s,_e:s+15}); }
+  }
 
   // 開始順にソート
   timed=timed.filter(e=>e.time&&/^\d{1,2}:\d{2}$/.test(e.time)).sort((a,b)=>a._s-b._s);
@@ -1072,6 +1160,14 @@ function buildNowCard(ev, cur){
         <div class="now-free-big-remain">のこり <span class="now-free-num" style="color:${fcol}">${remainMin}</span> ふん</div>
       </div>`;
   }
+  // お出かけ中（家を出る〜帰るの帯）：完了チェックなし。帰るまでの残り時間を出す
+  if(ev.routineKey==='out'){
+    return `<div class="tl-band on now-free-card">
+        <div style="font-size:3.2rem;line-height:1">${ev.emoji}</div>
+        <div class="now-free-big-title" style="color:var(--on-color)">${ev.name}</div>
+        <div class="now-free-big-remain">かえるまで あと <span class="now-free-num" style="color:var(--on-color)">${remainMin}</span> ふん</div>
+      </div>`;
+  }
   if(!ev.tasks||!ev.tasks.length){
     inner = `<div class="now-free"><div class="now-free-text" style="color:var(--text-dim)">やることは ないよ</div></div>`;
   } else {
@@ -1241,8 +1337,11 @@ function updateClock(){
   const now=new Date();
   const h=String(now.getHours()).padStart(2,'0'), m=String(now.getMinutes()).padStart(2,'0');
   document.getElementById('clock-big').textContent=`${h}:${m}`;
-  const days=['日','月','火','水','木','金','土'];
-  document.getElementById('date-big').textContent=`${now.getMonth()+1}月${now.getDate()}日（${days[now.getDay()]}）`;
+  const kanji=!!(getChild()&&getChild().kanjiMode);
+  const days = kanji ? ['日','月','火','水','木','金','土'] : ['にち','げつ','か','すい','もく','きん','ど'];
+  document.getElementById('date-big').textContent = kanji
+    ? `${now.getMonth()+1}月${now.getDate()}日（${days[now.getDay()]}）`
+    : `${now.getMonth()+1}がつ${now.getDate()}にち（${days[now.getDay()]}）`;
   // 子ども切り替えボタン
   const switchBtn=document.getElementById('child-switch-btn');
   const showSwitch = data.showChildSwitch && data.children.length>1;
@@ -1294,6 +1393,26 @@ function buildEmojiGrid(containerId,current,onSelect){
 
 // ═══ やりたいこと ═══
 let wantEmoji='⭐';
+let prevInOff=null; // 初回はnull（演出を出さない）。以降true/false
+function showOfftimeOverlay(){
+  const ov=document.getElementById('offtime-overlay');
+  const title=document.getElementById('offtime-title');
+  title.textContent=(getChild().freeLabel||'オフタイム')+'に なったよ';
+  const box=document.getElementById('offtime-want-list'); box.innerHTML='';
+  const todo=wantList.filter(w=>!w.done);
+  if(!todo.length){
+    box.innerHTML='<div class="ot-empty">「やりたいこと」を ついかすると<br>ここに でるよ</div>';
+  } else {
+    todo.forEach(item=>{
+      const b=document.createElement('button'); b.className='ot-want';
+      b.innerHTML=`<span class="ot-want-emoji">${item.emoji}</span><span>${item.name}</span>`;
+      b.addEventListener('click',()=>{ b.classList.add('chosen'); setTimeout(()=>{ ov.classList.remove('show'); }, 500); });
+      box.appendChild(b);
+    });
+  }
+  ov.classList.add('show');
+}
+document.getElementById('dismiss-offtime').addEventListener('click',()=>document.getElementById('offtime-overlay').classList.remove('show'));
 function renderWantList(){
   const list=document.getElementById('want-list');
   const area=document.getElementById('want-list-area');
@@ -1305,6 +1424,11 @@ function renderWantList(){
     if(cur>=s&&cur<e&&sorted[i].type==='off'){ inOff=true; break; }
   }
   area.classList.toggle('off-active',inOff);
+  // オン→オフに切り替わった瞬間だけ演出（初回ロードでは出さない）
+  if(prevInOff===true || prevInOff===false){
+    if(prevInOff===false && inOff===true) showOfftimeOverlay();
+  }
+  prevInOff=inOff;
   list.innerHTML='';
   if(!wantList.length){ list.innerHTML='<div style="color:var(--text-dim);font-size:0.95rem;padding:8px 0;font-weight:600">まだ ありません。<br>ついかしてみよう！</div>'; return; }
   wantList.forEach((item,i)=>{
@@ -1316,9 +1440,55 @@ function renderWantList(){
     list.appendChild(row);
   });
 }
+// 定番の選択肢（子どもがタップで選べる）
+const WANT_PRESETS=[
+  {name:'ゲーム',emoji:'🎮'},{name:'えほん',emoji:'📖'},{name:'おえかき',emoji:'🖍️'},
+  {name:'ブロック',emoji:'🧱'},{name:'パズル',emoji:'🧩'},{name:'おそとあそび',emoji:'🏃'},
+  {name:'テレビ',emoji:'📺'},{name:'おりがみ',emoji:'🦢'},{name:'おかしタイム',emoji:'🍪'},
+  {name:'ねんど',emoji:'🎨'},{name:'おんがく',emoji:'🎵'},{name:'おてつだい',emoji:'🧹'}
+];
+let wantHistory=JSON.parse(localStorage.getItem('kodomo_want_history')||'[]');
+function saveWantHistory(){ localStorage.setItem('kodomo_want_history',JSON.stringify(wantHistory)); }
+function addWantHistory(name,emoji){
+  wantHistory=wantHistory.filter(h=>h.name!==name);
+  wantHistory.unshift({name,emoji});
+  if(wantHistory.length>12) wantHistory=wantHistory.slice(0,12);
+  saveWantHistory();
+}
+function pickWant(name,emoji){
+  // 選択肢/履歴をタップ → 即追加
+  wantList.push({id:Date.now().toString(),name,emoji,done:false});
+  addWantHistory(name,emoji);
+  saveWant(); renderWantList();
+  document.getElementById('want-modal').classList.remove('open');
+}
+function buildWantPickers(){
+  const pg=document.getElementById('want-preset-grid'); pg.innerHTML='';
+  WANT_PRESETS.forEach(p=>{
+    const chip=document.createElement('button'); chip.className='want-chip';
+    chip.innerHTML=`<span>${p.emoji}</span><span>${p.name}</span>`;
+    chip.addEventListener('click',()=>pickWant(p.name,p.emoji));
+    pg.appendChild(chip);
+  });
+  const hf=document.getElementById('want-history-field');
+  const hg=document.getElementById('want-history-grid'); hg.innerHTML='';
+  const presetNames=new Set(WANT_PRESETS.map(p=>p.name));
+  const hist=wantHistory.filter(h=>!presetNames.has(h.name));
+  if(hist.length){
+    hf.style.display='';
+    hist.forEach(h=>{
+      const chip=document.createElement('button'); chip.className='want-chip';
+      chip.innerHTML=`<span>${h.emoji}</span><span>${h.name}</span><span class="wc-del">✕</span>`;
+      chip.querySelector('.wc-del').addEventListener('click',ev=>{ ev.stopPropagation(); wantHistory=wantHistory.filter(x=>x.name!==h.name); saveWantHistory(); buildWantPickers(); });
+      chip.addEventListener('click',()=>pickWant(h.name,h.emoji));
+      hg.appendChild(chip);
+    });
+  } else { hf.style.display='none'; }
+}
 document.getElementById('want-add-btn').addEventListener('click',()=>{
   document.getElementById('want-name-input').value=''; wantEmoji='⭐';
   buildEmojiGrid('want-emoji-grid',wantEmoji,e=>{wantEmoji=e;});
+  buildWantPickers();
   document.getElementById('want-modal').classList.add('open');
 });
 document.getElementById('want-cancel').addEventListener('click',()=>document.getElementById('want-modal').classList.remove('open'));
@@ -1327,6 +1497,7 @@ document.getElementById('want-save').addEventListener('click',()=>{
   const name=document.getElementById('want-name-input').value.trim();
   if(!name){alert('なまえを いれてね');return;}
   wantList.push({id:Date.now().toString(),name,emoji:wantEmoji,done:false});
+  addWantHistory(name,wantEmoji);
   saveWant(); renderWantList(); document.getElementById('want-modal').classList.remove('open');
 });
 
@@ -1391,6 +1562,14 @@ function openChildEdit(idx){
   const freeInput=document.getElementById('free-label-input');
   freeInput.value=c.freeLabel||'オフタイム';
   freeInput.oninput=()=>{ c.freeLabel=freeInput.value.trim()||'オフタイム'; save(); tick(); };
+  // 日づけの文字（ひらがな/かんじ）
+  function updateKanjiToggle(){
+    document.getElementById('kanji-hiragana').className='type-btn'+(!c.kanjiMode?' active-on':'');
+    document.getElementById('kanji-kanji').className='type-btn'+(c.kanjiMode?' active-on':'');
+  }
+  updateKanjiToggle();
+  document.getElementById('kanji-hiragana').onclick=()=>{ c.kanjiMode=false; save(); updateKanjiToggle(); tick(); };
+  document.getElementById('kanji-kanji').onclick=()=>{ c.kanjiMode=true; save(); updateKanjiToggle(); tick(); };
   buildLeaveReturnGrid();
   document.getElementById('child-edit-field').style.display='';
   document.getElementById('pname-input').focus();
@@ -1709,10 +1888,28 @@ function renderBagTaskList(){
   bagTasks.forEach((t,i)=>{
     const row=document.createElement('div'); row.className='task-mini';
     row.innerHTML=`
-      <span style="flex:1">${t.name}</span>
+      <span class="task-mini-name" style="flex:1">${t.name}</span>
+      <button class="task-edit" data-i="${i}" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 5px">✎</button>
       <button class="task-up" data-i="${i}" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 5px;${i===0?'opacity:0.25':''}">▲</button>
       <button class="task-down" data-i="${i}" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 5px;${i===bagTasks.length-1?'opacity:0.25':''}">▼</button>
       <button class="task-mini-del" data-i="${i}">✕</button>`;
+    function startEdit(){
+      const cur=bagTasks[i].name;
+      row.innerHTML='';
+      row.style.gap='6px';
+      const inp=document.createElement('input');
+      inp.type='text'; inp.value=cur; inp.maxLength=20;
+      inp.style.cssText='flex:1;min-width:0;background:var(--surface);border:2px solid var(--purple);border-radius:7px;color:var(--text);font-size:0.9rem;padding:5px 8px;outline:none;font-family:inherit;font-weight:700;box-sizing:border-box';
+      const ok=document.createElement('button');
+      ok.textContent='OK'; ok.className='btn btn-primary'; ok.style.cssText='padding:5px 12px;font-size:0.78rem;flex-shrink:0';
+      function commit(){ const v=inp.value.trim(); if(v) bagTasks[i].name=v; renderBagTaskList(); }
+      ok.addEventListener('click',commit);
+      inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ commit(); } });
+      row.appendChild(inp); row.appendChild(ok);
+      inp.focus(); inp.select();
+    }
+    row.querySelector('.task-mini-name').addEventListener('click',startEdit);
+    row.querySelector('.task-edit').addEventListener('click',startEdit);
     row.querySelector('.task-mini-del').addEventListener('click',()=>{bagTasks.splice(i,1);renderBagTaskList();});
     row.querySelector('.task-up').addEventListener('click',()=>{ if(i>0){ [bagTasks[i-1],bagTasks[i]]=[bagTasks[i],bagTasks[i-1]]; renderBagTaskList(); } });
     row.querySelector('.task-down').addEventListener('click',()=>{ if(i<bagTasks.length-1){ [bagTasks[i+1],bagTasks[i]]=[bagTasks[i],bagTasks[i+1]]; renderBagTaskList(); } });
