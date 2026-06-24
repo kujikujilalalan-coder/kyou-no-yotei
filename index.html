@@ -40,15 +40,12 @@ body {
 
 /* ── TOPBAR ── */
 #topbar {
-  height: 78px; background: var(--surface); border-bottom: 3px solid var(--border);
-  display: flex; align-items: center; padding: 0 26px; gap: 18px; flex-shrink: 0;
+  background: var(--surface); border-bottom: 3px solid var(--border);
+  display: flex; flex-direction: column; padding: 8px 26px; gap: 4px; flex-shrink: 0;
 }
+#topbar-row1, #topbar-row2 { display: flex; align-items: center; gap: 18px; min-height: 38px; }
 .topbar-left { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
 .topbar-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; margin-left: auto; }
-#clock-big {
-  font-size: 3.2rem; font-weight: 900; color: var(--accent);
-  font-variant-numeric: tabular-nums; letter-spacing: -0.02em; line-height: 1;
-}
 #date-big { font-size: 1.3rem; color: var(--text-mid); font-weight: 800; white-space: nowrap; }
 #weather-badge { display: flex; align-items: center; gap: 4px; font-size: 0.95rem; font-weight: 800; color: var(--text-mid); margin-left: 6px; }
 #weather-badge .w-emoji { font-size: 1.15rem; }
@@ -238,7 +235,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
   width: 100%; padding: 18px; border: none; border-radius: 16px;
   font-size: 1.3rem; font-weight: 900; font-family: inherit; cursor: pointer;
 }
-.now-complete-btn.ready { background: var(--off-color); color: #fff; box-shadow: 0 4px 18px rgba(4,120,87,0.35); }
+.now-complete-btn.ready { background: var(--off-color); color: #fff; box-shadow: 0 4px 18px rgba(47,102,144,0.35); }
 .now-complete-btn.not-ready { background: var(--surface2); color: var(--text-dim); cursor: default; }
 
 /* 現在地マーカー（時刻の細線） */
@@ -328,14 +325,14 @@ body.viewing-other-day #date-big { color: var(--accent); }
   flex: 1; overflow-y: auto; padding: 12px 14px 90px; scrollbar-width: thin;
   transition: background 0.4s;
 }
-#want-list-area.off-active { background: rgba(4,120,87,0.05); }
+#want-list-area.off-active { background: rgba(47,102,144,0.05); }
 .want-item {
   display: flex; align-items: center; gap: 9px;
   padding: 10px 12px; background: var(--bg); border: 2.5px solid var(--border);
   border-radius: 12px; margin-bottom: 8px;
 }
 .want-item.done-want { opacity: 0.4; }
-.off-active .want-item { border-color: rgba(4,120,87,0.4); }
+.off-active .want-item { border-color: rgba(47,102,144,0.4); }
 .want-emoji { font-size: 1.25rem; }
 .want-name { flex: 1; font-size: 0.98rem; font-weight: 700; }
 .want-done-btn {
@@ -353,7 +350,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .want-del-btn { background: none; border: none; color: var(--text-dim); font-size: 0.85rem; cursor: pointer; padding: 3px 6px; opacity: 0.5; }
 .want-chip {
   display: inline-flex; align-items: center; gap: 5px; padding: 8px 13px;
-  border: 2px solid var(--off-color); border-radius: 18px; background: rgba(4,120,87,0.08);
+  border: 2px solid var(--off-color); border-radius: 18px; background: rgba(47,102,144,0.08);
   color: var(--off-color); font-size: 0.95rem; font-weight: 800; cursor: pointer; font-family: inherit;
 }
 .want-chip:active { transform: scale(0.96); }
@@ -363,7 +360,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
 #complete-overlay {
   display: none; position: fixed; inset: 0; z-index: 300;
   align-items: center; justify-content: center; flex-direction: column; gap: 16px;
-  background: rgba(4,120,87,0.12); backdrop-filter: blur(8px);
+  background: rgba(47,102,144,0.12); backdrop-filter: blur(8px);
 }
 #complete-overlay.show { display: flex; }
 .co-emoji { font-size: 6rem; animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
@@ -473,7 +470,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .timer-sub { font-size: 1rem; font-weight: 700; color: var(--text-mid); margin: 6px 0 16px; }
 #timer-preset-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 18px; }
 .timer-preset {
-  border: 2.5px solid var(--off-color); background: rgba(4,120,87,0.08); color: var(--off-color);
+  border: 2.5px solid var(--off-color); background: rgba(47,102,144,0.08); color: var(--off-color);
   border-radius: 14px; font-size: 1.1rem; font-weight: 800; padding: 12px 18px; cursor: pointer; font-family: inherit;
 }
 .timer-preset:active { transform: scale(0.95); }
@@ -611,8 +608,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
   }
   #want-header { padding: 12px 18px 10px; }
   #want-title { font-size: 1.05rem; }
-  #topbar { padding: 0 12px; gap: 8px; }
-  #clock-big { font-size: 2.2rem; }
+  #topbar { padding: 6px 12px; gap: 4px; }
   #date-big { font-size: 0.9rem; }
   .topbar-left { gap: 10px; }
   #child-switch-btn { font-size: 1.05rem; min-width: 0; padding: 4px 4px; }
@@ -622,13 +618,13 @@ body.viewing-other-day #date-big { color: var(--accent); }
     max-width: 30vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 }
-/* スマホ幅：ヘッダーを2行に分ける（1行目=時計+日付ナビ、2行目=バッジ+ボタン） */
+/* スマホ幅：ヘッダーの文字・ボタンを少し小さく */
 @media (orientation: portrait) and (max-width: 480px) {
-  #topbar { flex-wrap: wrap; height: auto; padding: 8px 10px; row-gap: 6px; }
+  #topbar { padding: 6px 10px; gap: 4px; }
+  #topbar-row1, #topbar-row2 { flex-wrap: wrap; row-gap: 4px; min-height: 0; }
   .topbar-left { width: 100%; justify-content: space-between; gap: 8px; }
-  #day-label-badge { order: 2; flex: 1 1 auto; justify-content: flex-start; min-width: 0; }
-  .topbar-right { order: 3; flex-shrink: 0; gap: 8px; margin-left: 0; }
-  #clock-big { font-size: 1.9rem; }
+  #day-label-badge { flex: 1 1 auto; justify-content: flex-start; min-width: 0; }
+  .topbar-right { flex-shrink: 0; gap: 8px; margin-left: auto; }
   #date-big { font-size: 0.85rem; }
   #parent-btn, #timer-btn, #fullscreen-btn { width: 40px; height: 40px; font-size: 1.1rem; }
   #child-switch-btn { font-size: 0.95rem; min-width: 0; padding: 4px 6px; }
@@ -640,21 +636,25 @@ body.viewing-other-day #date-big { color: var(--accent); }
 <body>
 
 <div id="topbar">
-  <div class="topbar-left">
-    <div id="date-nav">
-      <button id="date-prev" title="まえの日">◀</button>
-      <div id="date-big"></div>
-      <button id="date-next" title="つぎの日">▶</button>
-      <button id="date-today" style="display:none">きょうに もどる</button>
+  <div id="topbar-row1">
+    <div class="topbar-left">
+      <div id="date-nav">
+        <button id="date-prev" title="まえの日">◀</button>
+        <div id="date-big"></div>
+        <button id="date-next" title="つぎの日">▶</button>
+        <button id="date-today" style="display:none">きょうに もどる</button>
+      </div>
     </div>
+    <div id="weather-badge" style="display:none"></div>
   </div>
-  <div id="day-label-badge"></div>
-  <div id="weather-badge" style="display:none"></div>
-  <div class="topbar-right">
-    <button id="fullscreen-btn" title="全画面表示">⛶</button>
-    <button id="timer-btn" title="タイマー">⏲️</button>
-    <button id="child-switch-btn">なまえ ▼</button>
-    <button id="parent-btn">⚙️</button>
+  <div id="topbar-row2">
+    <div id="day-label-badge"></div>
+    <div class="topbar-right">
+      <button id="fullscreen-btn" title="全画面表示">⛶</button>
+      <button id="timer-btn" title="タイマー">⏲️</button>
+      <button id="child-switch-btn">なまえ ▼</button>
+      <button id="parent-btn" style="position:relative">⚙️<span id="header-pending-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#c2255c;color:#fff;font-size:0.65rem;font-weight:900;min-width:18px;height:18px;border-radius:9px;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 0 2px var(--surface)">0</span></button>
+    </div>
   </div>
 </div>
 
@@ -792,15 +792,15 @@ body.viewing-other-day #date-big { color: var(--accent); }
 <div class="modal-overlay" id="want-modal">
   <div class="modal" style="max-width:380px">
     <h2 style="color:var(--off-color)">⭐ やりたいことを ついか</h2>
-    <div class="field">
-      <label>えらぶ</label>
-      <select id="want-preset-select" class="kid-select"><option value="">▼ えらんでね</option></select>
+    <div id="want-chip-list" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px"></div>
+    <div class="field" id="want-custom-field" style="display:none;margin-top:10px">
+      <label>じぶんで かく</label>
+      <input type="text" id="want-name-input" placeholder="例：ゲームをする" maxlength="16" style="font-size:1rem;font-weight:700"/>
     </div>
-    <div class="field"><label>じぶんで かく</label><input type="text" id="want-name-input" placeholder="例：ゲームをする" maxlength="16" style="font-size:1rem;font-weight:700"/></div>
-    <p style="font-size:0.75rem;color:var(--text-dim);margin-top:2px;line-height:1.5">⏰ じかんは あとで きめるよ。ついかした あと、リストの 📅マーク を おしてね。</p>
+    <p style="font-size:0.75rem;color:var(--text-dim);margin-top:10px;line-height:1.5">⏰ じかんは あとで きめるよ。ついかした あと、リストの 📅マーク を おしてね。</p>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="want-cancel">とじる</button>
-      <button class="btn btn-green" id="want-save">ついか ⭐</button>
+      <button class="btn btn-green" id="want-save" style="display:none">ついか ⭐</button>
     </div>
   </div>
 </div>
@@ -1153,7 +1153,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
 
 <script>
 const EMOJIS = ['🌅','🌙','🍳','🥛','📚','✏️','🎒','🏫','🏠','⚽','🎮','🛁','😴','💤','❤️','✅'];
-const ON_COL='#d45a08', OFF_COL='#047857';
+const ON_COL='#d45a08', OFF_COL='#2f6690';
 
 // アプリ内トースト（ネイティブalertの代替）。非ブロックで数秒表示
 let _toastTimer=null;
@@ -2238,51 +2238,46 @@ function pickWant(name,emoji){
   addWantHistory(name,emoji);
   saveWant(); renderWantList();
   document.getElementById('want-modal').classList.remove('open');
+  showToast('ついかしたよ！じかんを おねがいする時は 📅 を おしてね');
 }
-function buildWantPickers(){
-  const sel=document.getElementById('want-preset-select');
-  sel.innerHTML='<option value="">▼ えらんでね</option>';
-  // 子どもが自分で追加したもの（履歴）を一番上に
+function buildWantChips(){
+  const wrap=document.getElementById('want-chip-list'); wrap.innerHTML='';
   const presetNames=new Set(WANT_PRESETS.map(p=>p.name));
   const hist=wantHistory.filter(h=>!presetNames.has(h.name));
-  if(hist.length){
-    const og=document.createElement('optgroup'); og.label='じぶんで ついかしたもの';
-    hist.forEach(h=>{
-      const o=document.createElement('option'); o.value=h.name; o.textContent=`${h.emoji} ${h.name}`; o.dataset.emoji=h.emoji;
-      og.appendChild(o);
-    });
-    sel.appendChild(og);
-  }
-  // ていばんの えらびもの
-  const og2=document.createElement('optgroup'); og2.label='えらびもの';
-  WANT_PRESETS.forEach(p=>{
-    const o=document.createElement('option'); o.value=p.name; o.textContent=`${p.emoji} ${p.name}`; o.dataset.emoji=p.emoji;
-    og2.appendChild(o);
+  const all=[...hist, ...WANT_PRESETS];
+  all.forEach(item=>{
+    const chip=document.createElement('button');
+    chip.type='button'; chip.className='want-chip';
+    chip.innerHTML=`<span>${item.emoji}</span><span>${item.name}</span>`;
+    chip.addEventListener('click',()=>pickWant(item.name,item.emoji));
+    wrap.appendChild(chip);
   });
-  sel.appendChild(og2);
+  // その他：自分で書く
+  const otherChip=document.createElement('button');
+  otherChip.type='button'; otherChip.className='want-chip';
+  otherChip.style.background='rgba(0,0,0,0.05)'; otherChip.style.borderColor='var(--text-dim)'; otherChip.style.color='var(--text-mid)';
+  otherChip.innerHTML=`<span>✏️</span><span>そのほか（じぶんで かく）</span>`;
+  otherChip.addEventListener('click',()=>{
+    document.getElementById('want-custom-field').style.display='';
+    document.getElementById('want-save').style.display='';
+    document.getElementById('want-name-input').focus();
+  });
+  wrap.appendChild(otherChip);
 }
 document.getElementById('want-add-btn').addEventListener('click',()=>{
   document.getElementById('want-name-input').value='';
-  buildWantPickers();
-  document.getElementById('want-preset-select').value='';
+  document.getElementById('want-custom-field').style.display='none';
+  document.getElementById('want-save').style.display='none';
+  buildWantChips();
   document.getElementById('want-modal').classList.add('open');
 });
 document.getElementById('want-cancel').addEventListener('click',()=>document.getElementById('want-modal').classList.remove('open'));
 // 子ども用モーダルは入力途中の誤操作を防ぐため、外側タップでは閉じない（とじるボタンのみ）
 document.getElementById('want-save').addEventListener('click',()=>{
   const custom=document.getElementById('want-name-input').value.trim();
-  let name, emoji;
-  if(custom){
-    name=custom; emoji='⭐';
-  } else {
-    const sel=document.getElementById('want-preset-select');
-    name=sel.value;
-    if(!name){showToast('やりたいことを えらぶか かいてね');return;}
-    const opt=sel.options[sel.selectedIndex];
-    emoji=(opt&&opt.dataset.emoji)||'⭐';
-  }
-  wantList.push({id:Date.now().toString(),name,emoji,done:false});
-  addWantHistory(name,emoji);
+  if(!custom){ showToast('やりたいことを かいてね'); return; }
+  wantList.push({id:Date.now().toString(),name:custom,emoji:'⭐',done:false});
+  addWantHistory(custom,'⭐');
   saveWant(); renderWantList(); document.getElementById('want-modal').classList.remove('open');
   showToast('ついかしたよ！じかんを おねがいする時は 📅 を おしてね');
 });
@@ -2423,6 +2418,7 @@ document.getElementById('add-child-btn').addEventListener('click',()=>{
 function updatePendingBadge(){
   const b=document.getElementById('pending-count'); if(pending.length>0){b.style.display='';b.textContent=pending.length;}else b.style.display='none';
   const bt=document.getElementById('pending-count-tab'); if(bt){ if(pending.length>0){bt.style.display='';bt.textContent=pending.length;}else bt.style.display='none'; }
+  const hb=document.getElementById('header-pending-badge'); if(hb){ if(pending.length>0){hb.style.display='flex';hb.textContent=pending.length;}else hb.style.display='none'; }
 }
 function renderPendingList(){
   const list=document.getElementById('pending-list'); list.innerHTML='';
