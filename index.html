@@ -249,9 +249,12 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .tl-now-walker {
   font-size: 1.8rem; margin-left: 44px; flex-shrink: 0;
   filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
-  animation: walkBob 0.8s ease-in-out infinite;
 }
-@keyframes walkBob { 0%,100%{transform:translateY(0) rotate(-4deg);} 50%{transform:translateY(-3px) rotate(4deg);} }
+.tl-now-digital {
+  font-size: 1.35rem; font-weight: 900; color: #fff; background: #c2255c;
+  border-radius: 16px; padding: 7px 16px; font-variant-numeric: tabular-nums;
+  box-shadow: 0 3px 9px rgba(194,37,92,0.45); white-space: nowrap;
+}
 .tl-now-bar { flex: 1; height: 3px; background: var(--accent); opacity: 0.6; margin-right: 16px; border-radius: 2px; }
 
 /* フェード */
@@ -638,7 +641,6 @@ body.viewing-other-day #date-big { color: var(--accent); }
 
 <div id="topbar">
   <div class="topbar-left">
-    <div id="clock-big">00:00</div>
     <div id="date-nav">
       <button id="date-prev" title="まえの日">◀</button>
       <div id="date-big"></div>
@@ -933,6 +935,23 @@ body.viewing-other-day #date-big { color: var(--accent); }
             <button class="type-btn" id="awake-off" style="flex:1">ふつう</button>
           </div>
         </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
+          <label style="display:block;font-size:0.8rem;color:var(--text-mid);margin-bottom:6px;font-weight:700">タイムラインの 間隔 📏</label>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">1時間ぶんの たての長さを 調整します。広くすると 見やすいですが、スクロールが 増えます。</p>
+          <div class="type-toggle" id="zoom-toggle">
+            <button class="type-btn" id="zoom-narrow" style="flex:1">コンパクト</button>
+            <button class="type-btn" id="zoom-normal" style="flex:1">ふつう</button>
+            <button class="type-btn" id="zoom-wide" style="flex:1">ゆったり</button>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
+          <label style="display:block;font-size:0.8rem;color:var(--text-mid);margin-bottom:6px;font-weight:700">いまの じこく の しるし 🕐</label>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">タイムライン上の「いま」の線につける しるしを えらびます。</p>
+          <div class="type-toggle" id="nowmarker-toggle">
+            <button class="type-btn" id="nowmarker-digital" style="flex:1">デジタル時計</button>
+            <button class="type-btn" id="nowmarker-analog" style="flex:1">まる時計</button>
+          </div>
+        </div>
       </div>
     </div>
     <div class="acc-section" data-acc="backup" data-tab-group="settings">
@@ -1202,6 +1221,8 @@ if(!data.children) data.children=[{id:'1',name:'こどものなまえ',events:[]
 if(data.activeChild===undefined) data.activeChild=0;
 if(!data.parentLock) data.parentLock={enabled:false,pin:''};
 if(data.requireTimeEditPin===undefined) data.requireTimeEditPin=false;
+if(data.timelineZoom===undefined) data.timelineZoom=1.4;
+if(data.nowMarkerStyle===undefined) data.nowMarkerStyle='digital';
 if(!data.destHistory) data.destHistory=[];
 if(!data.nightMode) data.nightMode={enabled:false,start:'21:00',end:'06:00'};
 if(data.keepAwake===undefined) data.keepAwake=false;
@@ -1420,6 +1441,22 @@ function getTopLabels(){
 
 // ═══ タイムライン描画 ═══
 // 指定の「時」を指す小さなアナログ時計（時計学習の補助）
+// 現在地マーカー用：分まで正確なアナログ時計（時計学習の補助・歩くキャラの代わり）
+function analogNowClockSVG(totalMin, size){
+  size = size||40;
+  const hour=Math.floor(totalMin/60)%12, minute=totalMin%60;
+  const minAngle=(minute/60)*360;
+  const hourAngle=((hour+minute/60)/12)*360;
+  function pt(angleDeg, len){ const rad=angleDeg*Math.PI/180; return [17+len*Math.sin(rad),17-len*Math.cos(rad)]; }
+  const [hx,hy]=pt(hourAngle,8);
+  const [mx,my]=pt(minAngle,12);
+  return `<svg width="${size}" height="${size}" viewBox="0 0 34 34" style="display:block;filter:drop-shadow(0 2px 5px rgba(194,37,92,0.4))">
+    <circle cx="17" cy="17" r="15" fill="#fff" stroke="#c2255c" stroke-width="2.6"/>
+    <line x1="17" y1="17" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}" stroke="#c2255c" stroke-width="2" stroke-linecap="round"/>
+    <line x1="17" y1="17" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#c2255c" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="17" cy="17" r="1.8" fill="#c2255c"/>
+  </svg>`;
+}
 function analogClockSVG(h, faded){
   const ang=((h%12)*30)*Math.PI/180;       // 12時を上として時針の角度
   const hx=12+5.2*Math.sin(ang), hy=12-5.2*Math.cos(ang);
@@ -1473,7 +1510,7 @@ let currentNowEvId = null;
 let userScrolledAway = false;
 let scrollTimer = null;
 
-const PX_PER_MIN = 1.4;  // 1分の高さ
+let PX_PER_MIN = data.timelineZoom||1.4;  // 1分の高さ（保護者設定の「タイムラインの間隔」で変更可）
 const TL_SIDE = 8;       // タイムライン左右の余白(%)（グラデーション帯の幅）
 
 function renderTimeline(){
@@ -1564,12 +1601,14 @@ function renderTimeline(){
     const isNow=(ev.id===nowEvId);
     const isPast=(displayDayOffset<0) || (isViewingToday() && cur>=e);
     const y=s*PX_PER_MIN;
-    const h=Math.max((e-s)*PX_PER_MIN-4, isNow?64:40);
+    const naturalH=(e-s)*PX_PER_MIN-4;
+    const h=Math.max(naturalH, isNow?64:40);
+    const extra=isNow?Math.max(0,h-naturalH):0; // 最低高さで増えた分。下端（終了時刻）はそのままに、上方向だけ伸ばす
 
     const block=document.createElement('div');
     if(isNow && !editMode){
       // 今の予定：幅広く大きく（左右ほぼいっぱい）。開始〜終了の長さどおりの1枚のカードにする
-      block.style.cssText=`position:absolute;left:62px;right:14px;top:${y+2}px;height:${h}px;z-index:5;display:flex;flex-direction:column;`;
+      block.style.cssText=`position:absolute;left:62px;right:14px;top:${y+2-extra}px;height:${h}px;z-index:5;display:flex;flex-direction:column;`;
       const card=document.createElement('div');
       card.style.cssText='width:100%;flex:1;display:flex;flex-direction:column;min-height:0;position:relative;';
       card.innerHTML=buildNowCard(ev,cur,h);
@@ -1622,10 +1661,13 @@ function renderTimeline(){
     if(isNow) nowEl=block;
   });
 
-  // ── 現在地マーカー（歩くキャラ・常に表示） ──
+  // ── 現在地マーカー（時計・常に表示。デジタル/アナログは保護者設定で選択） ──
   const nm=document.createElement('div');
   nm.style.cssText=`position:absolute;left:0;right:0;top:${cur*PX_PER_MIN}px;height:0;display:flex;align-items:center;z-index:8;pointer-events:none;`;
-  nm.innerHTML=`<div class="tl-now-walker">${faceSVG(getChild().face||'🧒',30)}</div><div class="tl-now-bar"></div>`;
+  const nowMarkerHtml = (data.nowMarkerStyle==='analog')
+    ? `<div class="tl-now-walker">${analogNowClockSVG(Math.round(cur),40)}</div>`
+    : `<div class="tl-now-walker tl-now-digital">${fmtTimeDisp(fmtMin(cur))}</div>`;
+  nm.innerHTML=`${nowMarkerHtml}<div class="tl-now-bar"></div>`;
   inner.appendChild(nm);
 
   if(nowEvId && !editMode) bindNowCardEl(scroll, sorted.find(x=>x.id===nowEvId));
@@ -1894,9 +1936,6 @@ document.getElementById('undo-complete').addEventListener('click',()=>{
 
 // ═══ ヘッダー ═══
 function updateClock(){
-  const now=new Date();
-  const h=String(now.getHours()).padStart(2,'0'), m=String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('clock-big').textContent=fmtTimeDisp(`${h}:${m}`);
   const kanji=!!(getChild()&&getChild().kanjiMode);
   const days = kanji ? ['日','月','火','水','木','金','土'] : ['にち','げつ','か','すい','もく','きん','ど'];
   const dd=getDisplayDate();
@@ -2567,6 +2606,8 @@ function openParent(){
   updateBackupReminder();
   updateNightUI();
   updateAwakeUI();
+  updateZoomUI();
+  updateNowMarkerUI();
   showParentTab('pending');
   document.getElementById('parent-modal').classList.add('open');
 }
@@ -2595,6 +2636,27 @@ function updateAwakeUI(){
 }
 document.getElementById('awake-on').addEventListener('click',()=>{ data.keepAwake=true; save(); updateAwakeUI(); applyKeepAwake(); });
 document.getElementById('awake-off').addEventListener('click',()=>{ data.keepAwake=false; save(); updateAwakeUI(); applyKeepAwake(); });
+function updateZoomUI(){
+  const z=data.timelineZoom||1.4;
+  document.getElementById('zoom-narrow').className='type-btn'+(z===1.0?' active-on':'');
+  document.getElementById('zoom-normal').className='type-btn'+(z===1.4?' active-on':'');
+  document.getElementById('zoom-wide').className='type-btn'+(z===2.0?' active-on':'');
+}
+function setZoom(z){
+  data.timelineZoom=z; PX_PER_MIN=z; save(); updateZoomUI();
+  userScrolledAway=false; // ズーム変更後は今の位置に自動で戻す
+  tick();
+}
+document.getElementById('zoom-narrow').addEventListener('click',()=>setZoom(1.0));
+document.getElementById('zoom-normal').addEventListener('click',()=>setZoom(1.4));
+document.getElementById('zoom-wide').addEventListener('click',()=>setZoom(2.0));
+function updateNowMarkerUI(){
+  const a=data.nowMarkerStyle==='analog';
+  document.getElementById('nowmarker-digital').className='type-btn'+(!a?' active-on':'');
+  document.getElementById('nowmarker-analog').className='type-btn'+(a?' active-on':'');
+}
+document.getElementById('nowmarker-digital').addEventListener('click',()=>{ data.nowMarkerStyle='digital'; save(); updateNowMarkerUI(); tick(); });
+document.getElementById('nowmarker-analog').addEventListener('click',()=>{ data.nowMarkerStyle='analog'; save(); updateNowMarkerUI(); tick(); });
 function updateBackupReminder(){
   const el=document.getElementById('backup-reminder');
   const badge=document.getElementById('backup-badge');
@@ -2667,19 +2729,19 @@ function renderBagList(){
     const timeText=bag.defaultTime?`きほん ${bag.defaultTime}`:'時刻はそのつど';
     const taskText=(bag.tasks||[]).length?`${bag.tasks.length}こ`:'なし';
     const row=document.createElement('div');
-    row.style.cssText=`border:2px solid ${bag.enabled?'var(--border)':'#ddd'};border-radius:12px;padding:11px 13px;margin-bottom:8px;background:${bag.enabled?'var(--surface)':'#f3f3f3'};opacity:${bag.enabled?1:0.6}`;
+    row.style.cssText=`border:2px solid ${bag.enabled?'var(--border)':'#ddd'};border-radius:12px;padding:11px 13px;margin-bottom:8px;background:${bag.enabled?'var(--surface)':'#f3f3f3'};opacity:${bag.enabled?1:0.6};cursor:pointer`;
     row.innerHTML=`
       <div style="display:flex;align-items:center;gap:10px">
         <span style="font-size:1.5rem">${bag.emoji}</span>
-        <div style="flex:1">
+        <div style="flex:1;min-width:0">
           <div style="font-size:1rem;font-weight:800">${bag.name}</div>
           <div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px">${bag.type==='on'?'オンタイム':'オフタイム'} ／ ${dowText} ／ ${timeText} ／ なかみ${taskText}</div>
         </div>
-        <button class="bag-toggle" style="flex-shrink:0;background:${bag.enabled?'var(--off-color)':'var(--surface2)'};color:${bag.enabled?'#fff':'var(--text-dim)'};border:none;border-radius:14px;padding:6px 13px;font-size:0.78rem;font-weight:800;cursor:pointer;font-family:inherit">${bag.enabled?'オン':'オフ'}</button>
-        <button class="bag-edit" style="flex-shrink:0;background:var(--surface2);border:none;border-radius:8px;padding:6px 10px;font-size:0.85rem;cursor:pointer">✎</button>
+        <button class="bag-toggle" style="flex-shrink:0;background:${bag.enabled?'var(--off-color)':'var(--surface2)'};color:${bag.enabled?'#fff':'var(--text-dim)'};border:none;border-radius:14px;padding:9px 14px;font-size:0.78rem;font-weight:800;cursor:pointer;font-family:inherit">${bag.enabled?'オン':'オフ'}</button>
+        <span style="flex-shrink:0;color:var(--text-dim);font-size:0.85rem;padding:6px 4px">✎</span>
       </div>`;
-    row.querySelector('.bag-toggle').addEventListener('click',()=>{ bag.enabled=!bag.enabled; save(); renderBagList(); tick(); });
-    row.querySelector('.bag-edit').addEventListener('click',()=>{ document.getElementById('parent-modal').classList.remove('open'); openBagModal(bag.id); });
+    row.addEventListener('click',()=>{ document.getElementById('parent-modal').classList.remove('open'); openBagModal(bag.id); });
+    row.querySelector('.bag-toggle').addEventListener('click',e=>{ e.stopPropagation(); bag.enabled=!bag.enabled; save(); renderBagList(); tick(); });
     wrap.appendChild(row);
   });
 }
