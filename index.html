@@ -220,7 +220,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .now-free { text-align: center; padding: 24px; }
 .now-free-text { font-size: 1.7rem; font-weight: 900; color: var(--off-color); margin-top: 8px; }
 .now-free-card { text-align: center; padding: 16px 20px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; overflow: hidden; flex: 1; min-height: 0; }
-.bag-label-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.92rem; font-weight: 700; color: var(--text); line-height: 1.4; }
+.bag-label-toggle.bag-label-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.92rem; font-weight: 700; color: var(--text); line-height: 1.4; margin-bottom: 0; }
 .bag-label-toggle input { width: 22px; height: 22px; flex-shrink: 0; margin: 0; accent-color: var(--purple); cursor: pointer; }
 .bag-label-toggle span { flex: 1; }
 .now-free-big-title { font-size: 2.4rem; font-weight: 900; color: var(--off-color); line-height: 1.15; max-width: 100%; }
@@ -2119,7 +2119,7 @@ function renderTimeline(){
       const tappable = ev._bagId && !editMode && !isPast; // カバン由来・通常時・過去でない
       const pastStyle = isPast ? 'border-color:rgba(100,105,115,0.45);background:rgba(100,105,115,0.12)' : '';
       const soonClass = (ev.id===soonEvId) ? ' tl-band-soon' : '';
-      block.innerHTML=`<div class="tl-band ${ev.type}${soonClass}" style="height:100%;width:100%;max-width:380px;position:relative;min-height:0;${pastStyle}">
+      block.innerHTML=`<div class="tl-band ${ev.type}${soonClass}" style="height:100%;width:100%;position:relative;min-height:0;${pastStyle}">
         <div style="min-width:0;${isPast?'opacity:0.75':''}"><div class="tl-band-name">${ev.name}</div><div class="tl-band-tag" style="${isPast?'color:var(--text-dim)':''}">${fmtTimeDisp(ev.time)}〜${routineTag}</div></div>
         ${tappable?'<button class="tl-time-edit-icon" type="button" title="じかんへんこう">⏰</button>':''}
       </div>`;
