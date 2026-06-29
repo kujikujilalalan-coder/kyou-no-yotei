@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>きょうのよてい</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -65,23 +65,29 @@ body {
 }
 #parent-btn {
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-mid);
-  width: 48px; height: 48px; border-radius: 50%; font-size: 1.4rem; cursor: pointer;
+  width: 36px; height: 36px; border-radius: 50%; font-size: 1.05rem; cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 #parent-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 #timer-btn {
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-mid);
-  width: 48px; height: 48px; border-radius: 50%; font-size: 1.4rem; cursor: pointer;
+  width: 56px; height: 56px; border-radius: 50%; font-size: 1.7rem; cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit;
 }
 #timer-btn:hover { background: var(--off-color); color: #fff; border-color: var(--off-color); }
 #fullscreen-btn {
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-mid);
-  width: 48px; height: 48px; border-radius: 50%; font-size: 1.25rem; cursor: pointer;
+  width: 40px; height: 40px; border-radius: 50%; font-size: 1.15rem; cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit;
 }
 #fullscreen-btn:hover { background: var(--purple); color: #fff; border-color: var(--purple); }
 #fullscreen-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+#panels-collapse-btn {
+  background: var(--surface2); border: 2px solid var(--border); color: var(--text-mid);
+  width: 32px; height: 32px; border-radius: 50%; font-size: 0.95rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit;
+}
+#panels-collapse-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
 #date-nav { display: flex; align-items: center; gap: 6px; }
 #date-prev, #date-next {
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-mid);
@@ -89,10 +95,6 @@ body {
   display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit; padding: 0;
 }
 #date-prev:hover, #date-next:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
-#date-today {
-  background: var(--accent); border: none; color: #fff; border-radius: 14px;
-  font-size: 0.8rem; font-weight: 800; padding: 6px 12px; cursor: pointer; font-family: inherit; flex-shrink: 0;
-}
 /* 他の日を見ているとき：画面全体を少しくすませて「今じゃない」と伝える */
 body.viewing-other-day #timeline-scroll,
 body.viewing-other-day #untimed-tray { filter: grayscale(0.55) opacity(0.82); transition: filter 0.3s; }
@@ -100,6 +102,8 @@ body.viewing-other-day #date-big { color: var(--accent); }
 
 /* ── MAIN ── */
 #main { flex: 1; display: grid; grid-template-columns: 1fr 250px; min-height: 0; }
+#main.panels-collapsed { grid-template-columns: 1fr 0px; }
+#main.panels-collapsed #right-panel { padding: 0; border: none; }
 #left-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
 /* ── 左：タイムライン（1本・現在区間がせり出す） ── */
@@ -114,6 +118,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
 }
 #untimed-tray:empty { display: none; }
 #untimed-tray.hidden { display: none; }
+#untimed-tray.tray-collapsed { max-height: 0; padding: 0; overflow: hidden; border-top-width: 0; }
 #untimed-tray-title { font-size: 0.9rem; font-weight: 900; color: var(--purple); margin-bottom: 8px; }
 #untimed-tray-list { display: flex; flex-wrap: wrap; gap: 8px; }
 .tray-card {
@@ -221,8 +226,8 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .now-free-text { font-size: 1.7rem; font-weight: 900; color: var(--off-color); margin-top: 8px; }
 .now-free-card { text-align: center; padding: 16px 20px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; overflow: hidden; flex: 1; min-height: 0; }
 .bag-label-toggle.bag-label-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.92rem; font-weight: 700; color: var(--text); line-height: 1.4; margin-bottom: 0; }
-.bag-label-toggle input { width: 22px; height: 22px; flex-shrink: 0; margin: 0; accent-color: var(--purple); cursor: pointer; }
-.bag-label-toggle span { flex: 1; }
+.field .bag-label-toggle input[type="checkbox"] { width: 22px !important; height: 22px !important; flex-shrink: 0; margin: 0; accent-color: var(--purple); cursor: pointer; }
+.bag-label-toggle span { flex: 1; min-width: 0; }
 .now-free-big-title { font-size: 2.4rem; font-weight: 900; color: var(--off-color); line-height: 1.15; max-width: 100%; }
 .now-free-remain { font-weight: 900; font-variant-numeric: tabular-nums; }
 .now-free-pie { margin: 10px 0 4px; line-height: 0; }
@@ -359,7 +364,8 @@ body.viewing-other-day #date-big { color: var(--accent); }
   color: var(--off-color); font-size: 0.95rem; font-weight: 800; cursor: pointer; font-family: inherit;
 }
 .want-chip:active { transform: scale(0.96); }
-.want-chip .wc-del { color: var(--text-dim); font-size: 0.78rem; opacity: 0.6; padding-left: 2px; }
+.want-chip .wc-del { color: var(--text-dim); font-size: 0.85rem; opacity: 0.6; padding: 2px 5px; margin-left: 1px; border-radius: 8px; }
+.want-chip .wc-del:active { background: rgba(0,0,0,0.1); opacity: 1; }
 
 /* 完了演出 */
 #complete-overlay {
@@ -671,6 +677,8 @@ body.viewing-other-day #date-big { color: var(--accent); }
 /* ── 縦向き（タブレットを縦にしたとき）：横2分割をやめ、やりたいことを下部に ── */
 @media (orientation: portrait) {
   #main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+  #main.panels-collapsed { grid-template-columns: 1fr; grid-template-rows: 1fr 0px; }
+  #main.panels-collapsed #right-panel { border-top-width: 0; }
   #right-panel {
     border-left: none; border-top: 3px solid var(--border);
     max-height: 32vh;
@@ -695,10 +703,11 @@ body.viewing-other-day #date-big { color: var(--accent); }
   #day-label-badge { flex: 1 1 auto; justify-content: flex-start; min-width: 0; }
   .topbar-right { flex-shrink: 0; gap: 8px; margin-left: auto; }
   #date-big { font-size: 0.85rem; }
-  #parent-btn, #timer-btn, #fullscreen-btn { width: 40px; height: 40px; font-size: 1.1rem; }
+  #parent-btn { width: 32px; height: 32px; font-size: 0.95rem; }
+  #timer-btn { width: 46px; height: 46px; font-size: 1.4rem; }
+  #fullscreen-btn { width: 34px; height: 34px; font-size: 1rem; }
   #child-switch-btn { font-size: 0.95rem; min-width: 0; padding: 4px 6px; }
   #date-prev, #date-next { width: 30px; height: 30px; }
-  #date-today { font-size: 0.7rem; padding: 4px 8px; }
 }
 </style>
 </head>
@@ -711,19 +720,19 @@ body.viewing-other-day #date-big { color: var(--accent); }
         <button id="date-prev" title="まえの日">◀</button>
         <div id="date-big"></div>
         <button id="date-next" title="つぎの日">▶</button>
-        <button id="date-today" style="display:none">きょうに もどる</button>
       </div>
     </div>
     <div id="weather-badge" style="display:none"></div>
-  </div>
-  <div id="topbar-row2">
-    <div id="day-label-badge"></div>
     <div class="topbar-right">
+      <button id="panels-collapse-btn" title="した・よこの らんを たたむ">🔽</button>
       <button id="fullscreen-btn" title="全画面表示">⛶</button>
       <button id="timer-btn" title="タイマー">⏲️</button>
       <button id="child-switch-btn">なまえ ▼</button>
       <button id="parent-btn" style="position:relative">⚙️<span id="header-pending-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#c2255c;color:#fff;font-size:0.65rem;font-weight:900;min-width:18px;height:18px;border-radius:9px;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 0 2px var(--surface)">0</span></button>
     </div>
+  </div>
+  <div id="topbar-row2">
+    <div id="day-label-badge"></div>
   </div>
 </div>
 
@@ -979,20 +988,20 @@ body.viewing-other-day #date-big { color: var(--accent); }
           <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">予定のすきまや、ぜんぶ終わったあとの自由時間に出る言葉です。</p>
         </div>
         <div style="margin-top:12px">
-          <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">日づけの文字 ✏️</label>
+          <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">日付の表記 ✏️</label>
           <div class="type-toggle" id="kanji-toggle">
             <button class="type-btn" id="kanji-hiragana" style="flex:1">ひらがな</button>
-            <button class="type-btn" id="kanji-kanji" style="flex:1">かんじ</button>
+            <button class="type-btn" id="kanji-kanji" style="flex:1">漢字</button>
           </div>
-          <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">小さい子は「ひらがな」、漢字が読める子は「かんじ」。</p>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">小さい子には「ひらがな」、漢字が読める子には「漢字」。</p>
         </div>
         <div style="margin-top:12px">
-          <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">じこくの 出しかた 🕒</label>
+          <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">時刻の表示形式 🕒</label>
           <div class="type-toggle" id="time12-toggle">
-            <button class="type-btn" id="time12-on" style="flex:1">12じかん</button>
-            <button class="type-btn" id="time12-off" style="flex:1">24じかん</button>
+            <button class="type-btn" id="time12-on" style="flex:1">12時間表示</button>
+            <button class="type-btn" id="time12-off" style="flex:1">24時間表示</button>
           </div>
-          <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">「12じかん」は ごぜん/ごご つき（ごご 3:00）。小さい子は こちらが わかりやすいです。</p>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">「12時間表示」は午前/午後付き（午後3:00）。小さい子にはこちらが分かりやすいです。</p>
         </div>
       </div>
       </div>
@@ -1000,15 +1009,15 @@ body.viewing-other-day #date-big { color: var(--accent); }
     <div class="acc-section" data-acc="lock" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="lock">🔒 保護者ロック<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-        <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:10px;line-height:1.5">ロックを かけると、この⚙️設定をひらくときに あんしょうばんごう（4けた）が ひつようになります。子どもが かってに 設定を かえるのを ふせげます。</p>
+        <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:10px;line-height:1.5">ロックをかけると、この⚙️設定を開くときに暗証番号（4桁）が必要になります。子どもが勝手に設定を変えるのを防げます。</p>
         <div class="type-toggle" id="lock-toggle">
-          <button class="type-btn" id="lock-on" style="flex:1">ロックを つかう</button>
-          <button class="type-btn" id="lock-off" style="flex:1">つかわない</button>
+          <button class="type-btn" id="lock-on" style="flex:1">ロックを使う</button>
+          <button class="type-btn" id="lock-off" style="flex:1">使わない</button>
         </div>
-        <button class="btn btn-secondary" id="lock-change-btn" style="width:100%;margin-top:10px;font-size:0.82rem;display:none">🔑 あんしょうばんごうを 変える</button>
+        <button class="btn btn-secondary" id="lock-change-btn" style="width:100%;margin-top:10px;font-size:0.82rem;display:none">🔑 暗証番号を変更</button>
         <div style="margin-top:14px;padding-top:14px;border-top:2px solid var(--border)">
-          <label style="display:block;font-size:0.82rem;font-weight:800;color:var(--text);margin-bottom:6px">⏰ 時刻変更アイコンにも あんしょうばんごうを 要求する</label>
-          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.4">タイムラインの予定についてる⏰アイコンを押した時にも、あんしょうばんごうを求めます。あんしょうばんごう自体は保護者ロックと共通です。</p>
+          <label style="display:block;font-size:0.82rem;font-weight:800;color:var(--text);margin-bottom:6px">⏰ 時刻変更アイコンにも暗証番号を要求する</label>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.4">タイムラインの予定についている⏰アイコンを押した時にも、暗証番号を求めます。暗証番号自体は保護者ロックと共通です。</p>
           <div class="type-toggle" id="timeedit-lock-toggle">
             <button class="type-btn" id="timeeditlock-on" style="flex:1">要求する</button>
             <button class="type-btn" id="timeeditlock-off" style="flex:1">要求しない</button>
@@ -1019,18 +1028,18 @@ body.viewing-other-day #date-big { color: var(--accent); }
     <div class="acc-section" data-acc="night" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="night">🌃 ナイトモード<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-        <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:10px;line-height:1.5">きめた じかんに なると、画面を くらくして 小さな とけいだけ にします（つけっぱなしの 焼きつき・電池の せつやく）。画面を タッチすると しばらく ふつうに もどります。</p>
+        <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:10px;line-height:1.5">設定した時間になると、画面を暗くして小さな時計だけにします（つけっぱなしによる画面の焼き付き防止・電池の節約）。画面をタッチするとしばらく通常表示に戻ります。</p>
         <div class="type-toggle" id="night-toggle">
-          <button class="type-btn" id="night-on" style="flex:1">つかう</button>
-          <button class="type-btn" id="night-off" style="flex:1">つかわない</button>
+          <button class="type-btn" id="night-on" style="flex:1">使う</button>
+          <button class="type-btn" id="night-off" style="flex:1">使わない</button>
         </div>
         <div id="night-times" style="display:none;margin-top:10px">
           <div style="display:flex;gap:10px;align-items:center">
-            <label style="font-size:0.8rem;color:var(--text-mid);font-weight:700;width:64px">はじまり</label>
+            <label style="font-size:0.8rem;color:var(--text-mid);font-weight:700;width:64px">開始</label>
             <div id="night-start-sel" style="display:flex;gap:6px;flex:1"></div>
           </div>
           <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
-            <label style="font-size:0.8rem;color:var(--text-mid);font-weight:700;width:64px">おわり</label>
+            <label style="font-size:0.8rem;color:var(--text-mid);font-weight:700;width:64px">終了</label>
             <div id="night-end-sel" style="display:flex;gap:6px;flex:1"></div>
           </div>
         </div>
@@ -1040,36 +1049,36 @@ body.viewing-other-day #date-big { color: var(--accent); }
       <button class="acc-head" type="button" data-acc-toggle="display">🖥️ 画面・タイムラインの 見え方<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
         <div>
-          <label style="display:block;font-size:0.8rem;color:var(--text-mid);margin-bottom:6px;font-weight:700">画面を 消さない 📱</label>
-          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">アプリを ひらいている あいだ、画面が きえないように します（とけいのように つけっぱなしに したいとき）。※たいおうしていない 端末では きかないことがあります。</p>
+          <label style="display:block;font-size:0.8rem;color:var(--text-mid);margin-bottom:6px;font-weight:700">画面を消さない 📱</label>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">アプリを開いている間、画面が消えないようにします（時計のようにつけっぱなしにしたい場合）。※対応していない端末では効かないことがあります。</p>
           <div class="type-toggle" id="awake-toggle">
             <button class="type-btn" id="awake-on" style="flex:1">消さない</button>
-            <button class="type-btn" id="awake-off" style="flex:1">ふつう</button>
+            <button class="type-btn" id="awake-off" style="flex:1">通常</button>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size:0.8rem;color:var(--text-mid);margin-bottom:6px;font-weight:700">タイムラインの 間隔 📏</label>
-          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">1時間ぶんの たての長さを 調整します。広くすると 見やすいですが、スクロールが 増えます。</p>
+          <label style="display:block;font-size:0.8rem;color:var(--text-mid);margin-bottom:6px;font-weight:700">タイムラインの間隔 📏</label>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">1時間分の縦の長さを調整します。広くすると見やすくなりますが、スクロール量が増えます。</p>
           <div class="type-toggle" id="zoom-toggle">
             <button class="type-btn" id="zoom-narrow" style="flex:1">コンパクト</button>
-            <button class="type-btn" id="zoom-normal" style="flex:1">ふつう</button>
+            <button class="type-btn" id="zoom-normal" style="flex:1">通常</button>
             <button class="type-btn" id="zoom-wide" style="flex:1">ゆったり</button>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size:0.8rem;color:var(--text-mid);margin-bottom:6px;font-weight:700">いまの じこく の しるし 🕐</label>
-          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">タイムライン上の「いま」の線につける しるしを えらびます。</p>
+          <label style="display:block;font-size:0.8rem;color:var(--text-mid);margin-bottom:6px;font-weight:700">現在時刻のマーカー 🕐</label>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">タイムライン上の「現在」の線につけるマーカーを選びます。</p>
           <div class="type-toggle" id="nowmarker-toggle">
             <button class="type-btn" id="nowmarker-digital" style="flex:1">デジタル時計</button>
-            <button class="type-btn" id="nowmarker-analog" style="flex:1">まる時計</button>
+            <button class="type-btn" id="nowmarker-analog" style="flex:1">アナログ時計</button>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size:0.8rem;color:var(--text-mid);margin-bottom:6px;font-weight:700">おしらせの 音 🔔</label>
-          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">オフタイムに切り替わった時・「ぜんぶおわった」を押した時・つぎの予定の5分前に、やさしい音を鳴らします。</p>
+          <label style="display:block;font-size:0.8rem;color:var(--text-mid);margin-bottom:6px;font-weight:700">通知音 🔔</label>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">オフタイムに切り替わった時・「ぜんぶおわった」を押した時・次の予定の5分前に、やさしい音を鳴らします。</p>
           <div class="type-toggle" id="sound-toggle">
-            <button class="type-btn" id="sound-on" style="flex:1">なる</button>
-            <button class="type-btn" id="sound-off" style="flex:1">ならさない</button>
+            <button class="type-btn" id="sound-on" style="flex:1">鳴らす</button>
+            <button class="type-btn" id="sound-off" style="flex:1">鳴らさない</button>
           </div>
         </div>
       </div>
@@ -1077,15 +1086,15 @@ body.viewing-other-day #date-big { color: var(--accent); }
     <div class="acc-section" data-acc="weather" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="weather">🌤️ おてんき<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-        <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px;line-height:1.6">すんでいる ちいき を いれると、その ばしょの おてんき（はれ・くもり・あめ・ゆき）を タイムラインの そらに だします。<br>ちいきを いれると、おてんきを しらべるために いちじょうほうとして つかいます。いれない ばあいは、あたりさわりのない おてんき（はれ・くもり）が ランダムで でます。</p>
-        <div class="field"><label>ちいき（市町村名など）</label>
+        <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px;line-height:1.6">住んでいる地域を入れると、その場所の天気（晴れ・くもり・雨・雪）をタイムラインの空に表示します。<br>地域を入れると、天気を調べるために位置情報として使用します。入れない場合は、当たり障りのない天気（晴れ・くもり）がランダムで表示されます。</p>
+        <div class="field"><label>地域（市町村名など）</label>
           <div style="display:flex;gap:8px">
             <input type="text" id="weather-region-input" placeholder="例：横浜市" style="flex:1" maxlength="30"/>
-            <button class="btn btn-secondary" id="weather-region-set" style="white-space:nowrap;font-size:0.82rem">けってい</button>
+            <button class="btn btn-secondary" id="weather-region-set" style="white-space:nowrap;font-size:0.82rem">決定</button>
           </div>
           <div id="weather-region-status" style="font-size:0.78rem;color:var(--text-dim);margin-top:8px"></div>
         </div>
-        <button class="btn btn-secondary" id="weather-clear" style="font-size:0.8rem;margin-top:4px">ちいきを けして ランダムに もどす</button>
+        <button class="btn btn-secondary" id="weather-clear" style="font-size:0.8rem;margin-top:4px">地域を削除してランダムに戻す</button>
       </div>
     </div>
     <div class="acc-section" data-acc="backup" data-tab-group="settings">
@@ -1104,6 +1113,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
       <input type="file" id="import-file" accept="application/json" style="display:none"/>
       </div>
     </div>
+    <div style="text-align:center;font-size:0.68rem;color:var(--text-dim);margin-top:2px">v5・2026-06-30</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -1202,8 +1212,8 @@ body.viewing-other-day #date-big { color: var(--accent); }
       </div>
     </div>
     <div class="field">
-      <label class="bag-label-toggle"><input type="checkbox" id="bag-allow-free" checked/><span>おわったら じゆうじかんに できる</span></label>
-      <p style="font-size:0.72rem;color:var(--text-dim);margin:4px 0 0;line-height:1.4">オフにすると、「ぜんぶおわった！」を おしても、きめた おわりの じかんまでは じゆうじかんに なりません（がっこうなど）。</p>
+      <label class="bag-label-toggle"><input type="checkbox" id="bag-allow-free" checked/><span>終わったら自由時間にできる</span></label>
+      <p style="font-size:0.72rem;color:var(--text-dim);margin:4px 0 0;line-height:1.4">オフにすると、「ぜんぶおわった！」を押しても、決めた終了時刻までは自由時間になりません（学校など）。</p>
     </div>
     <div class="field">
       <label>使う曜日</label>
@@ -1275,7 +1285,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
 <!-- 保護者ロック PINテンキー -->
 <div id="pin-overlay">
   <div id="pin-card">
-    <div id="pin-title">あんしょうばんごうを いれてね</div>
+    <div id="pin-title">暗証番号を入力してください</div>
     <div id="pin-dots"></div>
     <div id="pin-keypad">
       <button class="pin-key" data-d="1">1</button>
@@ -1337,7 +1347,7 @@ function pinPush(d){
 }
 // あたらしい暗証番号を2回入力で設定
 function setNewPin(onDone){
-  openPinPad('あたらしい あんしょうばんごう（4けた）', p1=>{
+  openPinPad('新しい暗証番号（4桁）', p1=>{
     openPinPad('もういちど かくにん', p2=>{
       if(p1===p2){ onDone(p1); }
       else { showToast('ちがいます。もういちど さいしょから'); setNewPin(onDone); }
@@ -1346,9 +1356,9 @@ function setNewPin(onDone){
 }
 // いまの暗証番号を確認してからonOk
 function requireCurrentPin(onOk){
-  openPinPad('いまの あんしょうばんごう', pin=>{
+  openPinPad('現在の暗証番号', pin=>{
     if(pin===(data.parentLock&&data.parentLock.pin)){ onOk(); }
-    else { pinShakeReset('ちがうよ。もういちど'); }
+    else { pinShakeReset('暗証番号が違います。もう一度入力してください'); }
   });
 }
 document.querySelectorAll('#pin-keypad .pin-key[data-d]').forEach(b=>{
@@ -2052,22 +2062,30 @@ function renderTimeline(){
 
     if(splitMode){
       // ── 分割モード：左の細い列。全予定を実時間どおりの帯で（名前のみ・時刻表記なし） ──
-      const tappable = ev._bagId && !isPast;
+      const editable = ev._bagId && !isPast; // ⏰アイコンの表示条件
+      const hasTasksSplit = !!(ev.tasks && ev.tasks.length>0); // 本体タップ(覗く)の表示条件
       const pastStyle = isPast ? 'border-color:rgba(100,105,115,0.45);background:rgba(100,105,115,0.12)' : '';
       const nowHi = isSplitNow ? 'box-shadow:0 0 0 3px var(--accent);' : '';
-      const tooShort = naturalH < 22; // 細すぎる帯は名前を省いて色だけ
+      const tooShort = naturalH < 22; // 細すぎる帯は名前・アイコンを省いて色だけ
       block.style.cssText=`position:absolute;left:0;right:2px;top:${y+2}px;height:${h}px;z-index:${isSplitNow?5:3};`;
       block.innerHTML=`<div class="tl-band ${ev.type}" style="height:100%;width:100%;position:relative;${pastStyle}${nowHi}">
         ${tooShort?'':`<div style="min-width:0;${isPast?'opacity:0.75':''}"><div class="tl-band-name">${ev._free&&!ev.name?'':ev.name}</div></div>`}
+        ${(editable&&!tooShort)?'<button class="tl-time-edit-icon" type="button" title="じかんへんこう" style="transform:scale(0.8);transform-origin:bottom right">⏰</button>':''}
       </div>`;
-      if(tappable){
+      // 本体タップ → 中身を覗く（やることがある時だけ。今のやることは右に出てるので対象外）
+      if(hasTasksSplit && !isSplitNow){
         block.style.cursor='pointer';
-        block.addEventListener('click',e=>{
+        block.addEventListener('click',()=>{ openPeekModal(ev); });
+      }
+      // ⏰アイコン → 時刻編集（本体タップとは別。伝播を止める）
+      if(editable && !tooShort){
+        const icon=block.querySelector('.tl-time-edit-icon');
+        if(icon) icon.addEventListener('click',e=>{
           e.stopPropagation();
           if(data.requireTimeEditPin && data.parentLock && data.parentLock.pin){
-            openPinPad('あんしょうばんごうを いれてね', pin=>{
+            openPinPad('暗証番号を入力してください', pin=>{
               if(pin===data.parentLock.pin){ closePinPad(); openTimeModal(ev._bagId); }
-              else { pinShakeReset('ちがうよ。もういちど'); }
+              else { pinShakeReset('暗証番号が違います。もう一度入力してください'); }
             });
           } else { openTimeModal(ev._bagId); }
         });
@@ -2100,9 +2118,9 @@ function renderTimeline(){
         icon.addEventListener('click',e=>{
           e.stopPropagation();
           if(data.requireTimeEditPin && data.parentLock && data.parentLock.pin){
-            openPinPad('あんしょうばんごうを いれてね', pin=>{
+            openPinPad('暗証番号を入力してください', pin=>{
               if(pin===data.parentLock.pin){ closePinPad(); openTimeModal(ev._bagId); }
-              else { pinShakeReset('ちがうよ。もういちど'); }
+              else { pinShakeReset('暗証番号が違います。もう一度入力してください'); }
             });
           } else {
             openTimeModal(ev._bagId);
@@ -2116,27 +2134,30 @@ function renderTimeline(){
       block.style.cssText=`position:absolute;left:6px;right:14px;top:${y+2}px;z-index:3;display:flex;justify-content:center;overflow:hidden;`;
       block.style.height=h+'px';
       const routineTag=ev.isRoutine?' ・ ルーティン':'';
-      const tappable = ev._bagId && !editMode && !isPast; // カバン由来・通常時・過去でない
+      const tappable = ev._bagId && !editMode && !isPast; // ⏰時刻編集アイコンの表示条件
+      const hasTasks = !!(ev.tasks && ev.tasks.length>0); // 覗く(peek)の表示条件＝やることがあるかどうか
       const pastStyle = isPast ? 'border-color:rgba(100,105,115,0.45);background:rgba(100,105,115,0.12)' : '';
       const soonClass = (ev.id===soonEvId) ? ' tl-band-soon' : '';
       block.innerHTML=`<div class="tl-band ${ev.type}${soonClass}" style="height:100%;width:100%;position:relative;min-height:0;${pastStyle}">
-        <div style="min-width:0;${isPast?'opacity:0.75':''}"><div class="tl-band-name">${ev.name}</div><div class="tl-band-tag" style="${isPast?'color:var(--text-dim)':''}">${fmtTimeDisp(ev.time)}〜${routineTag}</div></div>
+        <div style="min-width:0;${isPast?'opacity:0.75':''}"><div class="tl-band-name">${ev.name}</div><div class="tl-band-tag" style="${isPast?'color:var(--text-dim)':''}">${fmtTimeDisp(ev.time)}〜${ev.end?fmtTimeDisp(ev.end):''}${routineTag}</div></div>
         ${tappable?'<button class="tl-time-edit-icon" type="button" title="じかんへんこう">⏰</button>':''}
       </div>`;
       if(editMode){ setupDragForBlock(block, ev); }
       else {
-        // カード本体タップ → 中身を覗く（チェックは表示のみ）
-        block.style.cursor='pointer';
-        block.addEventListener('click',()=>{ openPeekModal(ev); });
+        // カード本体タップ → 中身を覗く（やることがある時だけ。チェックは表示のみ）
+        if(hasTasks){
+          block.style.cursor='pointer';
+          block.addEventListener('click',()=>{ openPeekModal(ev); });
+        }
         // ⏰アイコン → 時刻編集（本体タップとは別。伝播を止める）
         if(tappable){
           const icon=block.querySelector('.tl-time-edit-icon');
           if(icon) icon.addEventListener('click',e=>{
             e.stopPropagation();
             if(data.requireTimeEditPin && data.parentLock && data.parentLock.pin){
-              openPinPad('あんしょうばんごうを いれてね', pin=>{
+              openPinPad('暗証番号を入力してください', pin=>{
                 if(pin===data.parentLock.pin){ closePinPad(); openTimeModal(ev._bagId); }
-                else { pinShakeReset('ちがうよ。もういちど'); }
+                else { pinShakeReset('暗証番号が違います。もう一度入力してください'); }
               });
             } else {
               openTimeModal(ev._bagId);
@@ -2326,9 +2347,9 @@ function openPeekModal(ev){
   if(tasks.length===0){
     box.innerHTML=`<p style="font-size:0.9rem;color:var(--text-dim);text-align:center;padding:8px 0">この じかんは じゆうに すごせるよ</p>`;
   } else {
-    box.innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+tasks.map(t=>
-      `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:2px solid var(--border);border-radius:12px;background:var(--surface)">
-        <div style="width:26px;height:26px;border-radius:50%;border:2px solid var(--border);flex-shrink:0"></div>
+    box.innerHTML='<div style="display:flex;flex-direction:column">'+tasks.map((t,i)=>
+      `<div style="display:flex;align-items:center;gap:10px;padding:10px 4px;${i<tasks.length-1?'border-bottom:1.5px solid var(--border)':''}">
+        <span style="color:var(--text-dim);font-size:0.9rem">・</span>
         <div style="font-size:1rem;font-weight:700">${t.name}</div>
       </div>`).join('')+'</div>';
   }
@@ -2338,9 +2359,7 @@ document.getElementById('peek-close').addEventListener('click',()=>document.getE
 document.getElementById('peek-modal').addEventListener('click',e=>{ if(e.target.id==='peek-modal') document.getElementById('peek-modal').classList.remove('open'); });
 
 function buildTaskCard(ev){
-  const MAX_SHOW=4; // チェック項目は最大4つまで表示（窮屈さ回避）
-  const tasks=(ev.tasks||[]).slice(0,MAX_SHOW);
-  const hiddenCount=Math.max(0,(ev.tasks||[]).length-MAX_SHOW);
+  const tasks=(ev.tasks||[]); // 全件表示。多い時はカード内スクロールで見る
   const accent = ev.type==='on' ? 'var(--on-color)' : 'var(--off-color)';
   const accentLight = ev.type==='on' ? 'var(--on-light)' : 'var(--off-light)';
 
@@ -2348,7 +2367,6 @@ function buildTaskCard(ev){
   tasks.forEach((t,ti)=>{
     tasksHtml+=`<div class="now-task-item ${t.done?'done':''}" data-ti="${ti}" style="padding:11px 13px;gap:10px;margin-bottom:8px"><div class="now-task-check" style="width:28px;height:28px">${t.done?'✓':''}</div><div class="now-task-name" style="font-size:1.1rem">${t.name}</div></div>`;
   });
-  if(hiddenCount>0) tasksHtml+=`<div style="font-size:0.78rem;color:var(--text-dim);padding:4px 8px">ほか ${hiddenCount}こ</div>`;
   tasksHtml+='</div>';
 
   const allDone=(ev.tasks||[]).every(t=>t.done) && ev.tasks.length>0;
@@ -2524,7 +2542,7 @@ function updateClock(){
   document.getElementById('date-big').textContent=dateText;
   updateWeatherBadge();
   // 日付送り状態
-  document.getElementById('date-today').style.display = isViewingToday()?'none':'';
+  // (date-todayボタンは廃止。タイムライン内のback-to-nowが同じ役割を担う)
   document.body.classList.toggle('viewing-other-day', !isViewingToday());
   // 子ども切り替えボタン
   const switchBtn=document.getElementById('child-switch-btn');
@@ -2544,7 +2562,7 @@ function updateClock(){
 // 日付送りボタン
 document.getElementById('date-prev').addEventListener('click',()=>{ displayDayOffset--; tick(); });
 document.getElementById('date-next').addEventListener('click',()=>{ displayDayOffset++; tick(); });
-document.getElementById('date-today').addEventListener('click',()=>{ displayDayOffset=0; tick(); });
+// (date-todayボタンは廃止。back-to-now側のハンドラに統合済み)
 
 // 今日の達成状況（保護者設定の上部に出す）：何個中何個おわったか・かせいだ時間の合計
 function getTodayStats(){
@@ -3045,8 +3063,7 @@ function renderWantList(){
     prevInOff=null;
   } else {
     if(prevInOff===false && inOff===true){
-      const anyModalOpen=document.querySelector('.modal-overlay.open')||document.getElementById('parent-modal').classList.contains('open');
-      if(!anyModalOpen){ playOfftimeChime(); showOfftimeOverlay(); }
+      playOfftimeChime();
     }
     prevInOff=inOff;
   }
@@ -3098,8 +3115,21 @@ function buildWantChips(){
   const wrap=document.getElementById('want-chip-list'); wrap.innerHTML='';
   const presetNames=new Set(WANT_PRESETS.map(p=>p.name));
   const hist=wantHistory.filter(h=>!presetNames.has(h.name));
-  const all=[...hist, ...WANT_PRESETS];
-  all.forEach(item=>{
+  hist.forEach(item=>{
+    const chip=document.createElement('button');
+    chip.type='button'; chip.className='want-chip';
+    chip.innerHTML=`<span>${item.name}</span><span class="wc-del" title="りれきを けす">✕</span>`;
+    chip.addEventListener('click',e=>{
+      if(e.target.closest('.wc-del')){
+        wantHistory=wantHistory.filter(h=>h.name!==item.name);
+        saveWantHistory(); buildWantChips();
+        return;
+      }
+      pickWant(item.name);
+    });
+    wrap.appendChild(chip);
+  });
+  WANT_PRESETS.forEach(item=>{
     const chip=document.createElement('button');
     chip.type='button'; chip.className='want-chip';
     chip.innerHTML=`<span>${item.name}</span>`;
@@ -3300,9 +3330,9 @@ function renderPendingList(){
 document.getElementById('parent-btn').addEventListener('click',()=>{
   const lock=data.parentLock;
   if(lock && lock.enabled && lock.pin){
-    openPinPad('あんしょうばんごうを いれてね', pin=>{
+    openPinPad('暗証番号を入力してください', pin=>{
       if(pin===lock.pin){ closePinPad(); openParent(); }
-      else { pinShakeReset('ちがうよ。もういちど'); }
+      else { pinShakeReset('暗証番号が違います。もう一度入力してください'); }
     });
   } else { openParent(); }
 });
@@ -3541,10 +3571,10 @@ function updateWeatherUI(){
   if(status){
     if(w.lat!=null){
       const lab=COND_LABEL[getTodayCond()]||COND_LABEL.cloud;
-      status.textContent=`✅ 「${w.region}」のおてんきを ひょうじします（きょう：${lab.j}）`;
+      status.textContent=`✅ 「${w.region}」の天気を表示します（今日：${lab.j}）`;
       status.style.color='var(--text-mid)';
     } else {
-      status.textContent='いま：ランダム（はれ・くもり）で ひょうじしています';
+      status.textContent='現在：ランダム（晴れ・くもり）で表示しています';
       status.style.color='var(--text-dim)';
     }
   }
@@ -3552,25 +3582,25 @@ function updateWeatherUI(){
 document.getElementById('weather-region-set').addEventListener('click',async()=>{
   const name=document.getElementById('weather-region-input').value.trim();
   const status=document.getElementById('weather-region-status');
-  if(!name){ showToast('ちいきを いれてね'); return; }
-  status.textContent='しらべています…'; status.style.color='var(--text-dim)';
+  if(!name){ showToast('地域を入力してください'); return; }
+  status.textContent='検索中…'; status.style.color='var(--text-dim)';
   try{
     const geo=await geocodeRegion(name);
-    if(!geo){ status.textContent='⚠️ みつかりませんでした。べつの かきかたで ためしてね（例：横浜市）'; status.style.color='var(--on-color)'; return; }
+    if(!geo){ status.textContent='⚠️ 見つかりませんでした。別の表記で試してください（例：横浜市）'; status.style.color='var(--on-color)'; return; }
     data.weather.region=name; data.weather.lat=geo.lat; data.weather.lon=geo.lon;
     data.weather.cache=null; data.weather.cacheDate=''; save();
     const code=await fetchWeather(geo.lat,geo.lon);
     if(code!=null){ data.weather.cache=code; data.weather.cacheDate=dateKey(new Date()); save(); }
     updateWeatherUI(); updateWeatherBadge(); renderTimeline();
-    showToast(`「${geo.label}」の おてんきを せっていしたよ`);
+    showToast(`「${geo.label}」の天気を設定しました`);
   }catch(e){
-    status.textContent='⚠️ つうしんに しっぱいしました。インターネットを かくにんしてね'; status.style.color='var(--on-color)';
+    status.textContent='⚠️ 通信に失敗しました。インターネット接続を確認してください'; status.style.color='var(--on-color)';
   }
 });
 document.getElementById('weather-clear').addEventListener('click',()=>{
   data.weather={region:'', lat:null, lon:null, cache:null, cacheDate:'', cacheHourly:null};
   save(); updateWeatherUI(); updateWeatherBadge(); renderTimeline();
-  showToast('ランダムひょうじに もどしたよ');
+  showToast('ランダム表示に戻しました');
 });
 function updateBackupReminder(){
   const el=document.getElementById('backup-reminder');
@@ -3612,7 +3642,7 @@ document.getElementById('lock-change-btn').addEventListener('click',()=>{
   requireCurrentPin(()=>{
     setNewPin(pin=>{
       data.parentLock.pin=pin; save(); closePinPad(); updateLockUI();
-      showToast('あんしょうばんごうを 変えました 🔑');
+      showToast('暗証番号を変更しました 🔑');
     });
   });
 });
@@ -3622,7 +3652,7 @@ function updateTimeEditLockUI(){
   document.getElementById('timeeditlock-off').className='type-btn'+(!on?' active-on':'');
 }
 document.getElementById('timeeditlock-on').addEventListener('click',()=>{
-  if(!(data.parentLock&&data.parentLock.pin)){ showToast('先に「保護者ロック」で あんしょうばんごうを 作ってください'); return; }
+  if(!(data.parentLock&&data.parentLock.pin)){ showToast('先に「保護者ロック」で暗証番号を設定してください'); return; }
   data.requireTimeEditPin=true; save(); updateTimeEditLockUI();
 });
 document.getElementById('timeeditlock-off').addEventListener('click',()=>{
@@ -3986,6 +4016,21 @@ document.getElementById('fullscreen-btn').addEventListener('click',()=>{
 });
 document.addEventListener('fullscreenchange', updateFullscreenBtn);
 updateFullscreenBtn();
+
+// ── 下・横のパネル（やりたいこと／まだ時間がきまってないこと）を一時的にたたむ ──
+let panelsCollapsed=false;
+function applyPanelsCollapsed(){
+  document.getElementById('main').classList.toggle('panels-collapsed', panelsCollapsed);
+  document.getElementById('untimed-tray').classList.toggle('tray-collapsed', panelsCollapsed);
+  const btn=document.getElementById('panels-collapse-btn');
+  btn.classList.toggle('active', panelsCollapsed);
+  btn.textContent = panelsCollapsed ? '🔼' : '🔽';
+  btn.title = panelsCollapsed ? 'らんを もとに もどす' : 'した・よこの らんを たたむ';
+}
+document.getElementById('panels-collapse-btn').addEventListener('click',()=>{
+  panelsCollapsed=!panelsCollapsed;
+  applyPanelsCollapsed();
+});
 
 // ═══ 初期化 ═══
 updatePendingBadge(); tick(); applyKeepAwake(); refreshWeatherIfNeeded();
