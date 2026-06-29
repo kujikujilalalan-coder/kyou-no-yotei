@@ -82,12 +82,6 @@ body {
 }
 #fullscreen-btn:hover { background: var(--purple); color: #fff; border-color: var(--purple); }
 #fullscreen-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
-#panels-collapse-btn {
-  background: var(--surface2); border: 2px solid var(--border); color: var(--text-mid);
-  width: 32px; height: 32px; border-radius: 50%; font-size: 0.95rem; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit;
-}
-#panels-collapse-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
 #date-nav { display: flex; align-items: center; gap: 6px; }
 #date-prev, #date-next {
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-mid);
@@ -101,9 +95,18 @@ body.viewing-other-day #untimed-tray { filter: grayscale(0.55) opacity(0.82); tr
 body.viewing-other-day #date-big { color: var(--accent); }
 
 /* ── MAIN ── */
-#main { flex: 1; display: grid; grid-template-columns: 1fr 250px; min-height: 0; }
+#main { flex: 1; display: grid; grid-template-columns: 1fr 250px; min-height: 0; position: relative; }
 #main.panels-collapsed { grid-template-columns: 1fr 0px; }
 #main.panels-collapsed #right-panel { padding: 0; border: none; }
+#panels-collapse-btn {
+  position: absolute; z-index: 20; top: 10px; right: 258px;
+  background: var(--surface2); border: 2px solid var(--border); color: var(--text-mid);
+  width: 30px; height: 30px; border-radius: 50%; font-size: 0.85rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-family: inherit;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: right 0.3s, bottom 0.3s, top 0.3s;
+}
+#main.panels-collapsed #panels-collapse-btn { right: 6px; }
+#panels-collapse-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
 #left-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
 /* ── 左：タイムライン（1本・現在区間がせり出す） ── */
@@ -249,15 +252,16 @@ body.viewing-other-day #date-big { color: var(--accent); }
   display: flex; align-items: center; pointer-events: none;
 }
 .tl-now-walker {
-  font-size: 1.8rem; margin-left: 44px; flex-shrink: 0;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
 }
 .tl-now-digital {
-  font-size: 1.35rem; font-weight: 900; color: #fff; background: #c2255c;
-  border-radius: 16px; padding: 7px 16px; font-variant-numeric: tabular-nums;
-  box-shadow: 0 3px 9px rgba(194,37,92,0.45); white-space: nowrap;
+  font-size: 0.78rem; font-weight: 900; color: #fff; background: var(--purple);
+  border-radius: 10px; padding: 3px 7px; font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 6px rgba(99,102,241,0.45); white-space: nowrap;
 }
-.tl-now-bar { flex: 1; height: 3px; background: var(--accent); opacity: 0.6; margin-right: 16px; border-radius: 2px; }
+.tl-now-analog-margin { border-radius: 50%; box-shadow: 0 0 0 2.5px var(--purple), 0 2px 5px rgba(99,102,241,0.4); }
+.tl-now-bar { flex: 1; height: 3px; background: var(--purple); opacity: 0.7; margin-right: 16px; border-radius: 2px; }
 
 /* フェード */
 #fade-top, #fade-bottom {
@@ -320,11 +324,11 @@ body.viewing-other-day #date-big { color: var(--accent); }
   padding: 14px 16px 10px; border-bottom: 2px solid var(--border); flex-shrink: 0;
   display: flex; align-items: center; gap: 8px;
 }
-#want-title { font-size: 1.05rem; font-weight: 900; flex: 1; }
+#want-title { font-size: 1.05rem; font-weight: 900; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #stamp-view-btn {
   background: rgba(245,158,11,0.12); border: 2px solid #f59e0b; color: #f59e0b;
-  border-radius: 10px; font-size: 1.05rem; padding: 5px 10px;
-  cursor: pointer; font-family: inherit; flex-shrink: 0;
+  border-radius: 10px; font-size: 0.88rem; font-weight: 800; padding: 5px 9px;
+  cursor: pointer; font-family: inherit; flex-shrink: 0; white-space: nowrap;
 }
 #want-add-btn {
   background: var(--off-color); border: none; color: #fff;
@@ -683,6 +687,8 @@ body.viewing-other-day #date-big { color: var(--accent); }
     border-left: none; border-top: 3px solid var(--border);
     max-height: 32vh;
   }
+  #panels-collapse-btn { top: auto; right: 10px; bottom: calc(32vh + 6px); }
+  #main.panels-collapsed #panels-collapse-btn { bottom: 6px; right: 6px; }
   #want-header { padding: 12px 18px 10px; }
   #want-title { font-size: 1.05rem; }
   #topbar { padding: 6px 12px; gap: 4px; }
@@ -724,7 +730,6 @@ body.viewing-other-day #date-big { color: var(--accent); }
     </div>
     <div id="weather-badge" style="display:none"></div>
     <div class="topbar-right">
-      <button id="panels-collapse-btn" title="した・よこの らんを たたむ">🔽</button>
       <button id="fullscreen-btn" title="全画面表示">⛶</button>
       <button id="timer-btn" title="タイマー">⏲️</button>
       <button id="child-switch-btn">なまえ ▼</button>
@@ -770,14 +775,15 @@ body.viewing-other-day #date-big { color: var(--accent); }
   <!-- 右：やりたいこと -->
   <div id="right-panel">
     <div id="want-header">
-      <div id="want-title">⭐ やりたいこと</div>
-      <button id="stamp-view-btn" title="きろくを みる">🌟</button>
+      <div id="want-title">やりたいこと</div>
+      <button id="stamp-view-btn" title="きろくを みる">🌟 きろく</button>
       <button id="want-add-btn">＋ ついか</button>
     </div>
     <div id="want-list-area">
       <div id="want-list"></div>
     </div>
   </div>
+  <button id="panels-collapse-btn" title="した・よこの らんを たたむ">🔽</button>
 </div>
 
 <!-- スタンプカレンダー -->
@@ -1609,11 +1615,11 @@ function analogNowClockSVG(totalMin, size){
   function pt(angleDeg, len){ const rad=angleDeg*Math.PI/180; return [17+len*Math.sin(rad),17-len*Math.cos(rad)]; }
   const [hx,hy]=pt(hourAngle,8);
   const [mx,my]=pt(minAngle,12);
-  return `<svg width="${size}" height="${size}" viewBox="0 0 34 34" style="display:block;filter:drop-shadow(0 2px 5px rgba(194,37,92,0.4))">
-    <circle cx="17" cy="17" r="15" fill="#fff" stroke="#c2255c" stroke-width="2.6"/>
-    <line x1="17" y1="17" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}" stroke="#c2255c" stroke-width="2" stroke-linecap="round"/>
-    <line x1="17" y1="17" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#c2255c" stroke-width="3" stroke-linecap="round"/>
-    <circle cx="17" cy="17" r="1.8" fill="#c2255c"/>
+  return `<svg width="${size}" height="${size}" viewBox="0 0 34 34" style="display:block;filter:drop-shadow(0 2px 5px rgba(99,102,241,0.4))">
+    <circle cx="17" cy="17" r="15" fill="#fff" stroke="#6366f1" stroke-width="2.6"/>
+    <line x1="17" y1="17" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}" stroke="#6366f1" stroke-width="2" stroke-linecap="round"/>
+    <line x1="17" y1="17" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#6366f1" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="17" cy="17" r="1.8" fill="#6366f1"/>
   </svg>`;
 }
 function analogClockSVG(h, faded){
@@ -2170,14 +2176,21 @@ function renderTimeline(){
     if(isNow) nowEl=block;
   });
 
-  // ── 現在地マーカー（時計・常に表示。デジタル/アナログは保護者設定で選択） ──
-  const nm=document.createElement('div');
-  nm.style.cssText=`position:absolute;left:0;right:0;top:${cur*PX_PER_MIN}px;height:0;display:flex;align-items:center;z-index:8;pointer-events:none;`;
-  const nowMarkerHtml = (data.nowMarkerStyle==='analog')
-    ? `<div class="tl-now-walker">${analogNowClockSVG(Math.round(cur),40)}</div>`
-    : `<div class="tl-now-walker tl-now-digital">${fmtTimeDisp(fmtMin(cur))}</div>`;
-  nm.innerHTML=`${nowMarkerHtml}<div class="tl-now-bar"></div>`;
-  inner.appendChild(nm);
+  // ── 現在地マーカー：横線はタイムライン全幅に、時刻表示は左余白（目盛りのそば）に出す ──
+  const nowLine=document.createElement('div');
+  nowLine.style.cssText=`position:absolute;left:0;right:0;top:${cur*PX_PER_MIN}px;height:0;display:flex;align-items:center;z-index:8;pointer-events:none;`;
+  nowLine.innerHTML=`<div class="tl-now-bar"></div>`;
+  inner.appendChild(nowLine);
+
+  const nowY=cur*PX_PER_MIN;
+  const nowBadge=document.createElement('div');
+  nowBadge.style.cssText=`position:absolute;left:2px;top:${nowY}px;transform:translateY(-50%);z-index:9;display:flex;align-items:center;gap:4px;`;
+  if(data.nowMarkerStyle==='analog'){
+    nowBadge.innerHTML=`<div class="tl-now-walker tl-now-analog-margin">${analogNowClockSVG(Math.round(cur),26)}</div>`;
+  } else {
+    nowBadge.innerHTML=`<div class="tl-now-walker tl-now-digital">${fmtTimeDisp(fmtMin(cur))}</div>`;
+  }
+  lg.appendChild(nowBadge);
 
   if(nowEvId && !editMode) bindNowCardEl(scroll, sorted.find(x=>x.id===nowEvId));
 
