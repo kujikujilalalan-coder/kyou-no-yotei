@@ -43,9 +43,9 @@ body {
   background: var(--surface); border-bottom: 3px solid var(--border);
   display: flex; flex-direction: column; padding: 8px 26px; gap: 4px; flex-shrink: 0;
 }
-#topbar-row1, #topbar-row2 { display: flex; align-items: center; gap: 18px; min-height: 38px; }
+#topbar-row1, #topbar-row2 { display: flex; align-items: center; gap: 8px; min-height: 38px; }
 .topbar-left { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
-.topbar-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; margin-left: auto; }
+.topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto; }
 #date-big { font-size: 1.3rem; color: var(--text-mid); font-weight: 800; white-space: nowrap; }
 #weather-badge { display: flex; align-items: center; gap: 4px; font-size: 0.95rem; font-weight: 800; color: var(--text-mid); margin-left: 6px; }
 #weather-badge .w-emoji { font-size: 1.15rem; }
@@ -729,15 +729,15 @@ body.viewing-other-day #date-big { color: var(--accent); }
       </div>
     </div>
     <div id="weather-badge" style="display:none"></div>
+  </div>
+  <div id="topbar-row2">
+    <div id="day-label-badge"></div>
     <div class="topbar-right">
       <button id="fullscreen-btn" title="全画面表示">⛶</button>
       <button id="timer-btn" title="タイマー">⏲️</button>
       <button id="child-switch-btn">なまえ ▼</button>
       <button id="parent-btn" style="position:relative">⚙️<span id="header-pending-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#c2255c;color:#fff;font-size:0.65rem;font-weight:900;min-width:18px;height:18px;border-radius:9px;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 0 2px var(--surface)">0</span></button>
     </div>
-  </div>
-  <div id="topbar-row2">
-    <div id="day-label-badge"></div>
   </div>
 </div>
 
