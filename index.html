@@ -172,7 +172,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
   cursor: pointer; padding: 0; opacity: 0.55;
 }
 .tl-time-edit-icon:active { opacity: 1; background: rgba(0,0,0,0.14); transform: scale(0.92); }
-.tl-band-name { font-size: 0.98rem; font-weight: 800; }
+.tl-band-name { font-size: 0.98rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tl-band-tag { font-size: 0.7rem; font-weight: 700; color: var(--text-dim); }
 .tl-band.on  .tl-band-tag { color: var(--on-color); }
 .tl-band.off .tl-band-tag { color: var(--off-color); }
@@ -212,14 +212,16 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .now-tasks { padding: 14px 22px 8px; }
 .now-task-item {
   display: flex; align-items: center; gap: 14px;
-  padding: 15px 18px; background: var(--surface); border: 3px solid var(--border);
+  padding: 18px 18px; background: var(--surface); border: 3px solid var(--border);
   border-radius: 15px; margin-bottom: 10px; cursor: pointer;
+  min-height: 60px; /* タップ最低高さ保証 */ -webkit-tap-highlight-color: rgba(0,0,0,0.06);
+  user-select: none;
 }
 .now-task-item.done { border-color: var(--off-color); }
 .now-task-check {
-  width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--border);
+  width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--border);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  font-size: 1.1rem; font-weight: 900;
+  font-size: 1.3rem; font-weight: 900;
 }
 .now-task-item.done .now-task-check { background: var(--off-color); border-color: var(--off-color); color: #fff; }
 .now-task-name { font-size: 1.35rem; font-weight: 800; flex: 1; }
@@ -256,10 +258,13 @@ body.viewing-other-day #date-big { color: var(--accent); }
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
 }
 .tl-now-digital {
-  font-size: 0.78rem; font-weight: 900; color: #fff; background: var(--purple);
-  border-radius: 10px; padding: 3px 7px; font-variant-numeric: tabular-nums;
+  font-weight: 900; color: #fff; background: var(--purple);
+  border-radius: 10px; font-variant-numeric: tabular-nums;
   box-shadow: 0 2px 6px rgba(99,102,241,0.45); white-space: nowrap;
 }
+.tl-now-digital.size-s { font-size: 0.78rem; padding: 3px 7px; border-radius: 8px; }
+.tl-now-digital.size-m { font-size: 0.98rem; padding: 4px 9px; border-radius: 10px; }
+.tl-now-digital.size-l { font-size: 1.22rem; padding: 5px 11px; border-radius: 12px; }
 .tl-now-analog-margin { border-radius: 50%; box-shadow: 0 0 0 2.5px var(--purple), 0 2px 5px rgba(99,102,241,0.4); }
 .tl-now-bar { flex: 1; height: 3px; background: var(--purple); opacity: 0.7; margin-right: 16px; border-radius: 2px; }
 
@@ -322,7 +327,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
 }
 #want-header {
   padding: 14px 16px 10px; border-bottom: 2px solid var(--border); flex-shrink: 0;
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
 #want-title { font-size: 1.05rem; font-weight: 900; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #stamp-view-btn {
@@ -330,6 +335,28 @@ body.viewing-other-day #date-big { color: var(--accent); }
   border-radius: 10px; font-size: 0.88rem; font-weight: 800; padding: 5px 9px;
   cursor: pointer; font-family: inherit; flex-shrink: 0; white-space: nowrap;
 }
+#zukan-btn {
+  background: rgba(99,102,241,0.1); border: 2px solid var(--purple); color: var(--purple);
+  border-radius: 10px; font-size: 0.88rem; font-weight: 800; padding: 5px 9px;
+  cursor: pointer; font-family: inherit; flex-shrink: 0; white-space: nowrap;
+}
+/* 図鑑グリッドの各セル */
+.zukan-cell {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 4px; border-radius: 14px; background: var(--surface2);
+  border: 2px solid var(--border); position: relative;
+}
+.zukan-cell.owned { border-color: var(--purple); background: rgba(99,102,241,0.08); }
+.zukan-cell .zukan-count {
+  position: absolute; top: -6px; right: -6px;
+  background: var(--purple); color: #fff; font-size: 0.65rem; font-weight: 900;
+  min-width: 18px; height: 18px; border-radius: 9px; display: flex;
+  align-items: center; justify-content: center; padding: 0 4px;
+  box-shadow: 0 1px 4px rgba(99,102,241,0.4);
+}
+.zukan-cell .zukan-name { font-size: 0.7rem; font-weight: 800; color: var(--text-mid); text-align: center; }
+.zukan-cell.locked .zukan-name { color: var(--text-dim); }
+.zukan-q { font-size: 1.6rem; line-height: 1; opacity: 0.3; }
 #want-add-btn {
   background: var(--off-color); border: none; color: #fff;
   border-radius: 10px; font-size: 0.85rem; font-weight: 800; padding: 7px 12px;
@@ -502,8 +529,68 @@ body.viewing-other-day #date-big { color: var(--accent); }
 }
 .bf-item {
   position: absolute; top: -44px; line-height: 1; opacity: 0;
-  transition: top 0.8s cubic-bezier(0.5,0,0.55,1), opacity 0.3s, transform 0.8s;
-  pointer-events: none; will-change: top, transform;
+  transition: top 0.8s cubic-bezier(0.5,0,0.55,1), opacity 0.3s;
+  pointer-events: none; will-change: top;
+}
+.bf-item-inner { display: inline-block; will-change: transform; }
+
+/* A: テーマごとの動きアニメーション（ラッパー本体に付ける） */
+@keyframes bf-sway {
+  0%,100%{ transform: rotate(-12deg) translateX(0); }
+  25%{ transform: rotate(8deg) translateX(-10px); }
+  75%{ transform: rotate(-8deg) translateX(10px); }
+}
+@keyframes bf-spin {
+  from{ transform: rotate(0deg); }
+  to{ transform: rotate(720deg); }
+}
+@keyframes bf-drift {
+  0%{ transform: rotate(-5deg) translateX(0); }
+  50%{ transform: rotate(5deg) translateX(-16px); }
+  100%{ transform: rotate(-5deg) translateX(4px); }
+}
+@keyframes bf-flutter {
+  0%,100%{ transform: scaleX(1) rotate(-6deg); }
+  40%{ transform: scaleX(0.4) rotate(6deg); }
+}
+@keyframes bf-bounce {
+  0%,100%{ transform: translateY(0) rotate(0deg); }
+  45%{ transform: translateY(-10px) rotate(-8deg); }
+  65%{ transform: translateY(-4px) rotate(8deg); }
+}
+.bf-motion-sway .bf-item-inner { animation: bf-sway 1.1s ease-in-out infinite; }
+.bf-motion-spin .bf-item-inner { animation: bf-spin 0.9s linear infinite; }
+.bf-motion-drift .bf-item-inner { animation: bf-drift 1.4s ease-in-out infinite; }
+.bf-motion-flutter .bf-item-inner { animation: bf-flutter 0.7s ease-in-out infinite; }
+.bf-motion-bounce .bf-item-inner { animation: bf-bounce 0.8s ease-in-out infinite; }
+
+/* D: レア虹フラッシュ */
+@keyframes bf-rainbow {
+  0%{ background:hsla(0,90%,60%,0.25); }
+  16%{ background:hsla(60,90%,60%,0.25); }
+  33%{ background:hsla(120,90%,50%,0.25); }
+  50%{ background:hsla(200,90%,60%,0.25); }
+  66%{ background:hsla(260,90%,60%,0.25); }
+  83%{ background:hsla(310,90%,60%,0.25); }
+  100%{ background:hsla(0,90%,60%,0.25); }
+}
+.bf-rare-flash { animation: bf-rainbow 0.6s linear 3; }
+
+/* B: 生き物が画面を横切る */
+@keyframes bf-fly-right { from{ transform:translateX(-80px) scaleX(1); } to{ transform:translateX(calc(100vw + 80px)) scaleX(1); } }
+@keyframes bf-fly-left  { from{ transform:translateX(calc(100vw + 80px)) scaleX(-1); } to{ transform:translateX(-80px) scaleX(-1); } }
+.bf-creature-fly {
+  position: absolute; z-index: 12; pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+/* C: コンボバッジ */
+.bf-combo {
+  position: absolute; top: 8px; right: 8px; z-index: 13;
+  background: linear-gradient(135deg,#f59e0b,#ef4444);
+  color: #fff; font-size: 1rem; font-weight: 900; padding: 4px 12px;
+  border-radius: 20px; box-shadow: 0 3px 10px rgba(245,158,11,0.5);
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
 }
 .bf-newfriend {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%) scale(0.6);
@@ -776,6 +863,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
   <div id="right-panel">
     <div id="want-header">
       <div id="want-title">やりたいこと</div>
+      <button id="zukan-btn" title="ずかんをみる">📖 ずかん</button>
       <button id="stamp-view-btn" title="きろくを みる">🌟 きろく</button>
       <button id="want-add-btn">＋ ついか</button>
     </div>
@@ -799,6 +887,17 @@ body.viewing-other-day #date-big { color: var(--accent); }
     <p style="font-size:0.75rem;color:var(--text-dim);margin-top:12px;line-height:1.5">その日の よていを ぜんぶ おわると 🌟が つきます。</p>
     <div style="text-align:center;margin-top:6px;font-size:0.85rem;font-weight:800;color:#f59e0b" id="stamp-streak"></div>
     <div class="modal-actions"><button class="btn btn-secondary" id="stamp-close">とじる</button></div>
+  </div>
+</div>
+
+<!-- 📖 ずかん -->
+<div class="modal-overlay" id="zukan-modal">
+  <div class="modal" style="max-width:420px">
+    <h2 style="color:var(--purple)">📖 ずかん</h2>
+    <div id="zukan-progress" style="font-size:0.85rem;font-weight:700;color:var(--text-mid);margin-bottom:14px;text-align:center"></div>
+    <div id="zukan-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px"></div>
+    <p style="font-size:0.72rem;color:var(--text-dim);margin-top:8px;line-height:1.5">よていを はやく おわらせると、なかまが ふえるよ！</p>
+    <div class="modal-actions"><button class="btn btn-secondary" id="zukan-close">とじる</button></div>
   </div>
 </div>
 
@@ -1077,6 +1176,11 @@ body.viewing-other-day #date-big { color: var(--accent); }
           <div class="type-toggle" id="nowmarker-toggle">
             <button class="type-btn" id="nowmarker-digital" style="flex:1">デジタル時計</button>
             <button class="type-btn" id="nowmarker-analog" style="flex:1">アナログ時計</button>
+          </div>
+          <div class="type-toggle" id="nowmarker-size-toggle" style="margin-top:8px">
+            <button class="type-btn" id="nowmarker-size-s" style="flex:1">小</button>
+            <button class="type-btn" id="nowmarker-size-m" style="flex:1">中</button>
+            <button class="type-btn" id="nowmarker-size-l" style="flex:1">大</button>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
@@ -1383,6 +1487,8 @@ if(!data.parentLock) data.parentLock={enabled:false,pin:''};
 if(data.requireTimeEditPin===undefined) data.requireTimeEditPin=false;
 if(data.timelineZoom===undefined) data.timelineZoom=1.4;
 if(data.nowMarkerStyle===undefined) data.nowMarkerStyle='digital';
+if(data.nowMarkerSize===undefined) data.nowMarkerSize='m'; // s/m/l
+if(!data.todayCombo) data.todayCombo={date:'',count:0};
 if(data.soundEnabled===undefined) data.soundEnabled=true;
 if(!data.destHistory) data.destHistory=[];
 if(!data.nightMode) data.nightMode={enabled:false,start:'21:00',end:'06:00'};
@@ -1483,7 +1589,10 @@ function getEvents(){
     const time=bagTimeOn(bag,date);
     if(time){
       const completedAt=(bag.completedByDate&&bag.completedByDate[dk]!==undefined)?bag.completedByDate[dk]:null;
-      evs.push({ id:bag.id, time, end:bagEndOn(bag,date), name:bag.name, emoji:bag.emoji, type:bag.type||'on', tasks:bag.tasks||[], _bagId:bag.id, _completedAt:completedAt, allowFree:bag.allowFree!==false });
+      // done状態は日付ごとに管理（bag.taskDoneByDate[dk]）。今日のdone配列が無ければ全部false
+      const todayDone=(bag.taskDoneByDate&&bag.taskDoneByDate[dk])||[];
+      const tasks=(bag.tasks||[]).map((t,i)=>({...t, done:!!todayDone[i]}));
+      evs.push({ id:bag.id, time, end:bagEndOn(bag,date), name:bag.name, emoji:bag.emoji, type:bag.type||'on', tasks, _bagId:bag.id, _completedAt:completedAt, allowFree:bag.allowFree!==false });
     }
   });
   return evs;
@@ -1845,6 +1954,7 @@ const TIMEBAND_ICONS=[
   {h:23.3,i:'sleep',side:'L',dx:0.4,sc:1.0}
 ];
 let currentNowEvId = null;
+let selectedNowTaskId = null; // 同時刻に複数のオンタイムがある時、どれを右に出すか（子どもが選ぶ）
 
 let userScrolledAway = false;
 let scrollTimer = null;
@@ -1872,9 +1982,9 @@ function renderTimeline(){
   scroll.appendChild(stage);
   // 左右の余白に 時間帯グラデーション（朝昼夕夜）
   const lg=document.createElement('div');
-  lg.style.cssText=`position:absolute;left:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:0;`;
+  lg.style.cssText=`position:absolute;left:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;`;
   const rg=document.createElement('div');
-  rg.style.cssText=`position:absolute;right:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:0;`;
+  rg.style.cssText=`position:absolute;right:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;`;
   stage.appendChild(lg); stage.appendChild(rg);
   // 左右の余白に 時間帯のアイコンを散りばめる（不規則配置・片側ごと・縦横ともにばらつき）
   TIMEBAND_ICONS.forEach(ic=>{
@@ -1936,22 +2046,29 @@ function renderTimeline(){
   }
   // 「カバン由来のオンタイム予定」が「今・進行中」かつ「やること(tasks)を持ち」かつ「まだ完了していない」時だけ分割する。
   // オフタイムや、やること無し・完了済みでは分割しない（＝普段の全幅タイムライン）。
+  // 同時刻に複数のオンタイムが重なっていたら、全部を候補として集める（やり終える順番は子どもが決められる）。
   const curForSplit=nowMin();
-  let splitMode=false, splitEvId=null;
+  let splitMode=false, splitEvId=null, nowCandidateIds=[];
   {
-    const sortedTmp=getTodayEvents();
-    function evEndTmp(i){const ev=sortedTmp[i];if(ev.end)return toMin(ev.end);return i<sortedTmp.length-1?toMin(sortedTmp[i+1].time):sleep;}
+    function evEndTmp(i){const ev=sorted[i];if(ev.end)return toMin(ev.end);return i<sorted.length-1?toMin(sorted[i+1].time):sleep;}
     if(isViewingToday() && !editMode){
-      for(let i=0;i<sortedTmp.length;i++){
-        const ev=sortedTmp[i];
+      for(let i=0;i<sorted.length;i++){
+        const ev=sorted[i];
         const s=toMin(ev.time), e=evEndTmp(i);
         if(curForSplit>=s && curForSplit<e){
-          if(ev._completedAt!=null) break; // 完了済みなら分割しない（通常表示でグレーアウト）
+          if(ev._completedAt!=null) continue; // 完了済みは候補にしない
           const isOnWithTasks = ev.type==='on' && !ev._free && ev.tasks && ev.tasks.length>0;
-          if(isOnWithTasks){ splitMode=true; splitEvId=ev.id; }
-          break; // 「今」の予定は1つ。やること無し/オフタイムなら分割しない
+          if(isOnWithTasks) nowCandidateIds.push(ev.id);
         }
       }
+    }
+    if(nowCandidateIds.length>0){
+      splitMode=true;
+      // 前回選んだものがまだ候補にあればそれを継続。無ければ一番開始が早いもの（先頭）にする
+      splitEvId = nowCandidateIds.includes(selectedNowTaskId) ? selectedNowTaskId : nowCandidateIds[0];
+      selectedNowTaskId = splitEvId;
+    } else {
+      selectedNowTaskId = null;
     }
   }
   // 分割時：本体（タイムライン一式）を左の細い列に圧縮。右はグラデーションの上に「いまのやること」カードを大きく出す
@@ -2070,21 +2187,46 @@ function renderTimeline(){
       // ── 分割モード：左の細い列。全予定を実時間どおりの帯で（名前のみ・時刻表記なし） ──
       const editable = ev._bagId && !isPast; // ⏰アイコンの表示条件
       const hasTasksSplit = !!(ev.tasks && ev.tasks.length>0); // 本体タップ(覗く)の表示条件
+      const isNowCandidate = nowCandidateIds.includes(ev.id); // 今の時間帯にかぶってる「やること」候補か
       const pastStyle = isPast ? 'border-color:rgba(100,105,115,0.45);background:rgba(100,105,115,0.12)' : '';
-      const nowHi = isSplitNow ? 'box-shadow:0 0 0 3px var(--accent);' : '';
+      const nowHi = isSplitNow ? 'box-shadow:0 0 0 3px var(--accent);'
+                  : isNowCandidate ? 'box-shadow:0 0 0 2px var(--purple);' : '';
       const tooShort = naturalH < 22; // 細すぎる帯は名前・アイコンを省いて色だけ
-      block.style.cssText=`position:absolute;left:0;right:2px;top:${y+2}px;height:${h}px;z-index:${isSplitNow?5:3};`;
-      block.innerHTML=`<div class="tl-band ${ev.type}" style="height:100%;width:100%;position:relative;${pastStyle}${nowHi}">
+
+      // 同時刻に複数の「今の候補」が重なっていたら、左帯の中で横に並べて両方タップできるようにする
+      let leftPos='0', widthPos='calc(100% - 2px)';
+      if(isNowCandidate && nowCandidateIds.length>1){
+        const colIdx=nowCandidateIds.indexOf(ev.id), totalCols=nowCandidateIds.length;
+        leftPos=`calc(${(100/totalCols)*colIdx}% + 1px)`;
+        widthPos=`calc(${100/totalCols}% - 3px)`;
+      }
+      block.style.cssText=`position:absolute;left:${leftPos};width:${widthPos};top:${y+2}px;height:${h}px;z-index:${isSplitNow?5:(isNowCandidate?4:3)};`;
+      // ⏰アイコン：複数候補が横並びの場合は帯の上部外（top: -20px）に出して幅に関係なく押せるようにする
+      const multiCandidate = isNowCandidate && nowCandidateIds.length>1;
+      const showEditIcon = editable && !tooShort;
+      const editIconHtml = showEditIcon
+        ? (multiCandidate
+          // 複数候補：帯の上端より外に出す（absoluteで-22px上）→ 幅が細くなっても隠れない
+          ? `<button class="tl-time-edit-icon" type="button" title="じかんへんこう" style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);width:20px;height:20px;font-size:0.7rem;z-index:10">⏰</button>`
+          // 通常：今まで通り右下
+          : `<button class="tl-time-edit-icon" type="button" title="じかんへんこう" style="transform:scale(0.8);transform-origin:bottom right">⏰</button>`)
+        : '';
+      block.innerHTML=`<div class="tl-band ${ev.type}" style="height:100%;width:100%;position:relative;overflow:visible;${pastStyle}${nowHi}">
         ${tooShort?'':`<div style="min-width:0;${isPast?'opacity:0.75':''}"><div class="tl-band-name">${ev._free&&!ev.name?'':ev.name}</div></div>`}
-        ${(editable&&!tooShort)?'<button class="tl-time-edit-icon" type="button" title="じかんへんこう" style="transform:scale(0.8);transform-origin:bottom right">⏰</button>':''}
+        ${editIconHtml}
       </div>`;
-      // 本体タップ → 中身を覗く（やることがある時だけ。今のやることは右に出てるので対象外）
-      if(hasTasksSplit && !isSplitNow){
+      // 本体タップ：
+      //   ・今の候補で、まだ選ばれてない方 → タップで「これをやる」に切り替え（右のカードが変わる）
+      //   ・それ以外でやることがある予定 → 中身を覗く
+      if(isNowCandidate && !isSplitNow){
+        block.style.cursor='pointer';
+        block.addEventListener('click',()=>{ selectedNowTaskId=ev.id; renderTimeline(); });
+      } else if(hasTasksSplit && !isSplitNow){
         block.style.cursor='pointer';
         block.addEventListener('click',()=>{ openPeekModal(ev); });
       }
       // ⏰アイコン → 時刻編集（本体タップとは別。伝播を止める）
-      if(editable && !tooShort){
+      if(showEditIcon){
         const icon=block.querySelector('.tl-time-edit-icon');
         if(icon) icon.addEventListener('click',e=>{
           e.stopPropagation();
@@ -2185,10 +2327,12 @@ function renderTimeline(){
   const nowY=cur*PX_PER_MIN;
   const nowBadge=document.createElement('div');
   nowBadge.style.cssText=`position:absolute;left:2px;top:${nowY}px;transform:translateY(-50%);z-index:9;display:flex;align-items:center;gap:4px;`;
+  const sizeKey = data.nowMarkerSize||'m';
+  const analogPx = {s:22, m:30, l:40}[sizeKey] || 30;
   if(data.nowMarkerStyle==='analog'){
-    nowBadge.innerHTML=`<div class="tl-now-walker tl-now-analog-margin">${analogNowClockSVG(Math.round(cur),26)}</div>`;
+    nowBadge.innerHTML=`<div class="tl-now-walker tl-now-analog-margin">${analogNowClockSVG(Math.round(cur),analogPx)}</div>`;
   } else {
-    nowBadge.innerHTML=`<div class="tl-now-walker tl-now-digital">${fmtTimeDisp(fmtMin(cur))}</div>`;
+    nowBadge.innerHTML=`<div class="tl-now-walker tl-now-digital size-${sizeKey}">${fmtTimeDisp(fmtMin(cur))}</div>`;
   }
   lg.appendChild(nowBadge);
 
@@ -2310,7 +2454,13 @@ function bindNowCardEl(scroll, ev){
     root.querySelectorAll('.now-task-item').forEach(item=>{
       item.addEventListener('click',()=>{
         const ti=Number(item.dataset.ti);
-        ev.tasks[ti].done=!ev.tasks[ti].done; save(); renderTimeline();
+        const bag=getBags().find(b=>b.id===ev._bagId);
+        if(!bag) return;
+        if(!bag.taskDoneByDate) bag.taskDoneByDate={};
+        const dk=dateKey(getDisplayDate());
+        if(!bag.taskDoneByDate[dk]) bag.taskDoneByDate[dk]=(bag.tasks||[]).map(()=>false);
+        bag.taskDoneByDate[dk][ti]=!bag.taskDoneByDate[dk][ti];
+        save(); renderTimeline();
       });
     });
     const cb=root.querySelector('#now-complete');
@@ -2651,6 +2801,47 @@ function renderStampCalendar(){
 }
 document.getElementById('stamp-view-btn').addEventListener('click',openStampModal);
 document.getElementById('stamp-close').addEventListener('click',()=>document.getElementById('stamp-modal').classList.remove('open'));
+
+// ── 📖 ずかん ──
+function renderZukan(){
+  const child=getChild();
+  const owned=child.creatures||{};
+  const kanji=!!(child&&child.kanjiMode);
+  const total=CREATURE_ORDER.length;
+  const ownedKinds=CREATURE_ORDER.filter(c=>(owned[c.key]||0)>0).length;
+  document.getElementById('zukan-progress').textContent=`${ownedKinds} / ${total} しゅるい あつまったよ`;
+  const grid=document.getElementById('zukan-grid');
+  grid.innerHTML='';
+  CREATURE_ORDER.forEach(c=>{
+    const count=owned[c.key]||0;
+    const isOwned=count>0;
+    const cell=document.createElement('div');
+    cell.className='zukan-cell'+(isOwned?' owned':' locked');
+    if(isOwned){
+      // フルカラーSVG ＋ 匹数バッジ
+      cell.innerHTML=`
+        ${count>1?`<div class="zukan-count">×${count}</div>`:''}
+        ${creatureSvg(c.key,48)}
+        <div class="zukan-name">${kanji?c.name.kanji:c.name.hira}</div>
+      `;
+    } else {
+      // グレーシルエット ＋ ？
+      cell.innerHTML=`
+        <div style="position:relative;width:48px;height:48px">
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:grayscale(1) opacity(0.22)">${creatureSvg(c.key,48)}</div>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;color:var(--text-dim)">？</div>
+        </div>
+        <div class="zukan-name">？？？</div>
+      `;
+    }
+    grid.appendChild(cell);
+  });
+}
+document.getElementById('zukan-btn').addEventListener('click',()=>{
+  renderZukan();
+  document.getElementById('zukan-modal').classList.add('open');
+});
+document.getElementById('zukan-close').addEventListener('click',()=>document.getElementById('zukan-modal').classList.remove('open'));
 document.getElementById('stamp-prev-month').addEventListener('click',()=>{
   stampViewMonth--; if(stampViewMonth<0){stampViewMonth=11;stampViewYear--;} renderStampCalendar();
 });
@@ -2686,19 +2877,35 @@ function addBonusMinAndCheckMilestone(child, addMin){
 // ═══ ごほうび演出（予定より早く終わった＝じかんを いっぱい つくれた おいわい） ═══
 // 仕組みは1種類（いいものが降ってくる）。テーマ・色・段階・メッセージで毎回ちがって見せる。
 const REWARD_THEMES=[
-  {emoji:'⭐', name:{kanji:'ほし',hira:'おほしさま'}},
-  {emoji:'🌸', name:{kanji:'はなびら',hira:'おはな'}},
-  {emoji:'🪙', name:{kanji:'コイン',hira:'コイン'}},
-  {emoji:'🎈', name:{kanji:'ふうせん',hira:'ふうせん'}},
-  {emoji:'🍃', name:{kanji:'はっぱ',hira:'はっぱ'}},
-  {emoji:'❄️', name:{kanji:'ゆき',hira:'ゆき'}},
-  {emoji:'🫧', name:{kanji:'シャボン',hira:'しゃぼんだま'}},
-  {emoji:'🌰', name:{kanji:'どんぐり',hira:'どんぐり'}},
-  {emoji:'💗', name:{kanji:'ハート',hira:'はーと'}},
-  {emoji:'🎵', name:{kanji:'おんぷ',hira:'おんぷ'}},
-  {emoji:'🍬', name:{kanji:'あめ',hira:'あめ'}},
-  {emoji:'🌟', name:{kanji:'きらきら',hira:'きらきら'}}
+  // 既存12種
+  {emoji:'⭐', motion:'spin',    name:{kanji:'ほし',    hira:'おほしさま'}},
+  {emoji:'🌸', motion:'flutter', name:{kanji:'はなびら', hira:'おはな'}},
+  {emoji:'🪙', motion:'spin',    name:{kanji:'コイン',  hira:'コイン'}},
+  {emoji:'🎈', motion:'sway',    name:{kanji:'ふうせん', hira:'ふうせん'}},
+  {emoji:'🍃', motion:'flutter', name:{kanji:'はっぱ',  hira:'はっぱ'}},
+  {emoji:'❄️', motion:'drift',   name:{kanji:'ゆき',   hira:'ゆき'}},
+  {emoji:'🫧', motion:'sway',    name:{kanji:'シャボン', hira:'しゃぼんだま'}},
+  {emoji:'🌰', motion:'bounce',  name:{kanji:'どんぐり', hira:'どんぐり'}},
+  {emoji:'💗', motion:'sway',    name:{kanji:'ハート',  hira:'はーと'}},
+  {emoji:'🎵', motion:'bounce',  name:{kanji:'おんぷ',  hira:'おんぷ'}},
+  {emoji:'🍬', motion:'spin',    name:{kanji:'あめ',   hira:'あめ'}},
+  {emoji:'🌟', motion:'flutter', name:{kanji:'きらきら', hira:'きらきら'}},
+  // 追加12種
+  {emoji:'🍓', motion:'bounce',  name:{kanji:'いちご',  hira:'いちご'}},
+  {emoji:'🌺', motion:'flutter', name:{kanji:'はな',   hira:'おはな'}},
+  {emoji:'🔮', motion:'spin',    name:{kanji:'ほうぎょく',hira:'まほうのたま'}},
+  {emoji:'🎠', motion:'sway',    name:{kanji:'メリーゴーランド',hira:'くるくる'}},
+  {emoji:'⚡', motion:'spin',    name:{kanji:'かみなり', hira:'ぴかぴか'}},
+  {emoji:'🍀', motion:'flutter', name:{kanji:'よつば',  hira:'よつばのクローバー'}},
+  {emoji:'🎀', motion:'sway',    name:{kanji:'リボン',  hira:'りぼん'}},
+  {emoji:'🌙', motion:'drift',   name:{kanji:'つき',   hira:'おつきさま'}},
+  {emoji:'🦋', motion:'flutter', name:{kanji:'ちょうちょ',hira:'ちょうちょ'}},
+  {emoji:'🍭', motion:'spin',    name:{kanji:'ペロペロキャンディ',hira:'ぺろぺろ'}},
+  {emoji:'🎪', motion:'bounce',  name:{kanji:'テント',  hira:'テント'}},
+  {emoji:'💎', motion:'spin',    name:{kanji:'ダイヤ',  hira:'ダイヤモンド'}},
 ];
+// レア：虹色テーマ（10%で出る）
+const RARE_THEME={emoji:'🌈', motion:'spin', name:{kanji:'にじ',hira:'にじ'}};
 // 段階：ギリギリ(0-2)/ちょっと(3-9)/たくさん(10-29)/どっさり(30〜=とくべつ)
 function rewardTier(min){
   if(min<=2) return 0;
@@ -2706,9 +2913,27 @@ function rewardTier(min){
   if(min<=29) return 2;
   return 3;
 }
+// C: コンボ管理（その日何回目の完了か）
+function getTodayCombo(){
+  if(!data.todayCombo) return 0;
+  if(data.todayCombo.date!==dateKey(new Date())) return 0;
+  return data.todayCombo.count||0;
+}
+function incrementCombo(){
+  const today=dateKey(new Date());
+  if(!data.todayCombo||data.todayCombo.date!==today) data.todayCombo={date:today,count:0};
+  data.todayCombo.count++;
+  save();
+  return data.todayCombo.count;
+}
 // メッセージ（漢字＝文字多め・ひらがな＝みじかく絵中心。名前があれば頭につける）
-function rewardMessage(min, tier, kanji, name){
+function rewardMessage(min, tier, kanji, name, combo, isRare){
   const np = name ? (kanji? name+'、' : name+' ') : '';
+  // コンボプレフィックス
+  let comboPrefix='';
+  if(isRare){ comboPrefix = kanji ? '🌈 レア！' : '🌈 すごいの きた！'; }
+  else if(combo>=3){ comboPrefix = kanji ? `🔥 ${combo}かいれんぞく！` : `🔥 ${combo}かいめ！！`; }
+  else if(combo===2){ comboPrefix = kanji ? '✨ 2かいめ！' : '✨ もいっかい！'; }
   const pools = kanji ? [
     [`${np}ギリギリ セーフ！あぶなかったね`, `${np}まにあった！すごい`],
     [`${np}にげきれた！じかんを ${min}ふん つくれたよ`, `${np}よゆうで かんりょう！＋${min}ふん`],
@@ -2721,7 +2946,7 @@ function rewardMessage(min, tier, kanji, name){
     [`${np}だいせいこう！👑✨`, `${np}キラキラ〜！🌈`]
   ];
   const arr=pools[tier];
-  return arr[Math.floor(Math.random()*arr.length)];
+  return comboPrefix + arr[Math.floor(Math.random()*arr.length)];
 }
 
 function showRewardAnimation(reward){
@@ -2730,68 +2955,123 @@ function showRewardAnimation(reward){
   const tier = rewardTier(savedMin);
   const kanji = !!(getChild()&&getChild().kanjiMode);
   const name = (getChild()&&getChild().name)||'';
-  const theme = REWARD_THEMES[Math.floor(Math.random()*REWARD_THEMES.length)];
-  // カバンの帯色からアイテムの縁色を取る（オンタイム/オフタイム）
+
+  // C: コンボカウントを進める
+  const combo = incrementCombo();
+
+  // D: レア判定（10%）
+  const isRare = Math.random() < 0.1;
+
+  // A: テーマ選択（レアの時は虹テーマ強制）
+  const theme = isRare ? RARE_THEME : REWARD_THEMES[Math.floor(Math.random()*REWARD_THEMES.length)];
+
+  // カバンの帯色からアイテムの縁色を取る
   const styles=getComputedStyle(document.documentElement);
-  const itemColor = (bagType==='on' ? styles.getPropertyValue('--on-color') : styles.getPropertyValue('--off-color')).trim() || '#f59e0b';
+  const baseColor = (bagType==='on' ? styles.getPropertyValue('--on-color') : styles.getPropertyValue('--off-color')).trim() || '#f59e0b';
+  // レアは虹色（アイテムごとに色相を変える）
+  const getRareColor=(i,n)=>`hsl(${Math.round(i/n*360)},90%,50%)`;
 
   const stage=document.getElementById('blockfall-stage');
-  stage.querySelectorAll('.bf-block,.bf-item').forEach(b=>b.remove());
+  stage.querySelectorAll('.bf-block,.bf-item,.bf-combo,.bf-creature-fly').forEach(b=>b.remove());
   const charEl=document.getElementById('blockfall-char');
   charEl.textContent = (getChild()&&getChild().face)||'🧒';
-  charEl.style.transition='none'; charEl.style.left='50%'; charEl.style.transform='translateX(-50%) scale(1)'; charEl.style.opacity='1';
+  charEl.style.transition='none'; charEl.style.left='50%';
+  charEl.style.transform='translateX(-50%) scale(1)'; charEl.style.opacity='1';
   requestAnimationFrame(()=>{ charEl.style.transition=''; });
   document.getElementById('blockfall-result').textContent='';
   document.getElementById('blockfall-close').style.display='none';
 
+  // D: レア → 虹フラッシュ
+  if(isRare){
+    stage.classList.add('bf-rare-flash');
+    setTimeout(()=>stage.classList.remove('bf-rare-flash'), 1800);
+  }
+
+  // C: コンボバッジ（2回目以上）
+  if(combo>=2){
+    const badge=document.createElement('div'); badge.className='bf-combo';
+    badge.textContent = combo>=3 ? `🔥 ${combo}かい れんぞく！` : '✨ 2かいめ！';
+    stage.appendChild(badge);
+  }
+
   const stageH=stage.clientHeight||380;
-  // 段階で降る数を決める（多いほど豪華）
+  // C: コンボ＋Dレアでアイテム数を増やす（上限28）
   const countByTier=[4, 9, 16, 26];
-  const n=countByTier[tier];
-  const pile = tier>=2;      // たくさん以上は積もる
-  const blast = tier===3;    // どっさりは下のものを弾く特大
+  let n = countByTier[tier];
+  if(combo===2) n = Math.min(28, Math.round(n*1.3));
+  if(combo>=3)  n = Math.min(28, Math.round(n*1.6));
+  if(isRare)    n = Math.min(28, Math.round(n*1.5));
+  const pile = tier>=2 || combo>=2;
+  const blast = tier===3 || (combo>=3 && tier>=2);
 
   for(let i=0;i<n;i++){
-    const it=document.createElement('div'); it.className='bf-item';
-    it.textContent=theme.emoji;
+    const it=document.createElement('div');
+    it.className=`bf-item bf-motion-${theme.motion}`;
+    const inner=document.createElement('span');
+    inner.className='bf-item-inner';
+    inner.textContent=theme.emoji;
+    it.appendChild(inner);
     const leftPct = 8 + Math.random()*84;
     it.style.left = `calc(${leftPct}% - 14px)`;
+    const itemColor = isRare ? getRareColor(i,n) : baseColor;
     it.style.color = itemColor;
     it.style.filter = `drop-shadow(0 1px 2px ${itemColor}66)`;
-    it.style.fontSize = (20+Math.random()*12)+'px';
-    it.style.transform = `rotate(${Math.round(Math.random()*60-30)}deg)`;
+    const baseSize = 20+Math.random()*12;
+    // コンボが高いほどアイテムが大きくなる（1回目=通常、5回以上=最大2倍）
+    const sizeMulti = Math.min(2.0, 1 + Math.max(0,combo-1)*0.2);
+    it.style.fontSize = Math.round(baseSize * sizeMulti)+'px';
     stage.appendChild(it);
     const pileLevel = pile ? Math.floor(i/4) : 0;
     const landTop = pile
       ? (stageH - 34 - 8 - pileLevel*22 - Math.random()*6)
-      : (40 + Math.random()*(stageH-120)); // 少ない時はふわっと舞う高さに散らす
+      : (40 + Math.random()*(stageH-120));
     const delay = 50+i*55;
     setTimeout(()=>{ it.style.top = Math.max(6,landTop)+'px'; it.style.opacity='1'; }, delay);
   }
 
   // キャラのリアクション
   if(tier<=1){
-    // 喜んでジャンプ
     setTimeout(()=>{ charEl.style.transform='translateX(-50%) translateY(-14px) scale(1.1)'; }, 250);
     setTimeout(()=>{ charEl.style.transform='translateX(-50%) scale(1)'; }, 650);
   } else if(blast){
-    // どっさり：いったん埋もれ→バンと弾けて飛び散る特大演出
     setTimeout(()=>{ charEl.style.transform='translateX(-50%) scale(1.25)'; }, 60+n*55);
     setTimeout(()=>{
       stage.querySelectorAll('.bf-item').forEach(el=>{
-        el.style.transition='top 0.5s cubic-bezier(0.3,-0.5,0.7,1.5), left 0.5s, transform 0.5s, opacity 0.6s';
+        el.style.transition='top 0.5s cubic-bezier(0.3,-0.5,0.7,1.5), left 0.5s, opacity 0.6s';
         el.style.top = (Math.random()*stageH*0.5)+'px';
         el.style.left = (Math.random()*90+5)+'%';
-        el.style.transform = `rotate(${Math.round(Math.random()*720-360)}deg) scale(1.2)`;
       });
     }, 60+n*55+400);
   } else {
     setTimeout(()=>{ charEl.style.transform='translateX(-50%) scale(1.08)'; }, 60+n*55);
   }
 
-  const totalDelay = 60+n*55+ (blast?1100:900);
+  const totalDelay = 60+n*55+(blast?1100:900);
+
+  // B: 集めた生き物が画面を横切る（アイテムが落ち着いた後）
+  const child=getChild();
+  if(child&&creatureTotalOwned(child)>0){
+    const candidates=pickSkyCreatures(child);
+    if(candidates.length>0){
+      const pick=candidates[Math.floor(Math.random()*candidates.length)];
+      const goRight=Math.random()<0.5;
+      const fly=document.createElement('div');
+      fly.className='bf-creature-fly';
+      const flyTop=15+Math.random()*55; // 画面の15〜70%の高さ
+      const flyDur=1.6+Math.random()*0.8;
+      fly.style.cssText=`top:${flyTop}%;animation:${goRight?'bf-fly-right':'bf-fly-left'} ${flyDur}s ease-in-out forwards;`;
+      fly.style.left='0'; fly.style.width='100%';
+      const svgWrap=document.createElement('div');
+      svgWrap.style.cssText='position:absolute;top:0;left:0;';
+      svgWrap.innerHTML=creatureSvg(pick.key, 40);
+      fly.appendChild(svgWrap);
+      stage.appendChild(fly);
+      setTimeout(()=>fly.remove(), totalDelay+(flyDur*1000)+200);
+    }
+  }
+
   setTimeout(()=>{
-    document.getElementById('blockfall-result').textContent = rewardMessage(savedMin, tier, kanji, name);
+    document.getElementById('blockfall-result').textContent = rewardMessage(savedMin, tier, kanji, name, combo, isRare);
     document.getElementById('blockfall-close').style.display='';
     // あたらしいなかま（生き物ゲット）を見せる
     if(pendingNewCreatures.length){
@@ -3447,7 +3727,16 @@ function migrateChild(c){
     });
     delete c.daySets; delete c.setOverrides;
   }
-  c.bags.forEach(b=>{ if(!b.tasks)b.tasks=[]; if(!b.dow)b.dow=[]; if(b.enabled===undefined)b.enabled=true; if(b.showInLabel===undefined)b.showInLabel=false; if(b.labelOrder===undefined)b.labelOrder=1; if(b.allowFree===undefined)b.allowFree=true; if(b.defaultTime===undefined)b.defaultTime=''; if(!b.timeByDate)b.timeByDate={}; if(!b.completedByDate)b.completedByDate={}; if(b.defaultEndTime===undefined)b.defaultEndTime=''; if(!b.endByDate)b.endByDate={}; if(b.onlyDate===undefined)b.onlyDate=''; });
+  c.bags.forEach(b=>{ if(!b.tasks)b.tasks=[]; if(!b.dow)b.dow=[]; if(b.enabled===undefined)b.enabled=true; if(b.showInLabel===undefined)b.showInLabel=false; if(b.labelOrder===undefined)b.labelOrder=1; if(b.allowFree===undefined)b.allowFree=true; if(b.defaultTime===undefined)b.defaultTime=''; if(!b.timeByDate)b.timeByDate={}; if(!b.completedByDate)b.completedByDate={}; if(b.defaultEndTime===undefined)b.defaultEndTime=''; if(!b.endByDate)b.endByDate={}; if(b.onlyDate===undefined)b.onlyDate='';
+    // taskDoneByDateがなければ初期化（日付ごとにdone状態を管理）
+    if(!b.taskDoneByDate) b.taskDoneByDate={};
+    // 旧方式で task.done が true のまま残っていれば今日分に移行してクリア
+    if(b.tasks.some(t=>t.done)){
+      const today=dateKey(new Date());
+      if(!b.taskDoneByDate[today]) b.taskDoneByDate[today]=b.tasks.map(t=>!!t.done);
+      b.tasks.forEach(t=>{ t.done=false; });
+    }
+  });
 }
 
 // ── データ読み込み ──
@@ -3566,9 +3855,16 @@ function updateNowMarkerUI(){
   const a=data.nowMarkerStyle==='analog';
   document.getElementById('nowmarker-digital').className='type-btn'+(!a?' active-on':'');
   document.getElementById('nowmarker-analog').className='type-btn'+(a?' active-on':'');
+  const sz=data.nowMarkerSize||'m';
+  ['s','m','l'].forEach(k=>{
+    document.getElementById('nowmarker-size-'+k).className='type-btn'+(sz===k?' active-on':'');
+  });
 }
 document.getElementById('nowmarker-digital').addEventListener('click',()=>{ data.nowMarkerStyle='digital'; save(); updateNowMarkerUI(); tick(); });
 document.getElementById('nowmarker-analog').addEventListener('click',()=>{ data.nowMarkerStyle='analog'; save(); updateNowMarkerUI(); tick(); });
+['s','m','l'].forEach(k=>{
+  document.getElementById('nowmarker-size-'+k).addEventListener('click',()=>{ data.nowMarkerSize=k; save(); updateNowMarkerUI(); tick(); });
+});
 function updateSoundUI(){
   const on=data.soundEnabled!==false;
   document.getElementById('sound-on').className='type-btn'+(on?' active-on':'');
