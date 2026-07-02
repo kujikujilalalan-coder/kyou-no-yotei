@@ -46,17 +46,17 @@ body {
 #topbar-row1, #topbar-row2 { display: flex; align-items: center; gap: 8px; min-height: 38px; }
 .topbar-left { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
 .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto; }
-#date-big { font-size: 1.3rem; color: var(--text-mid); font-weight: 800; white-space: nowrap; }
+#date-big { font-size: 1.8rem; color: var(--text-mid); font-weight: 900; white-space: nowrap; }
 #weather-badge { display: flex; align-items: center; gap: 4px; font-size: 0.95rem; font-weight: 800; color: var(--text-mid); margin-left: 6px; }
 #weather-badge .w-emoji { font-size: 1.15rem; }
-#child-switch-btn { flex-shrink: 0; text-align: right; font-size: 1.4rem; font-weight: 900; min-width: 80px; background: none; border: none; color: var(--text); font-family: inherit; cursor: pointer; padding: 4px 8px; border-radius: 12px; }
+#child-switch-btn { flex-shrink: 0; text-align: right; font-size: 1.15rem; font-weight: 900; min-width: 60px; background: none; border: none; color: var(--text); font-family: inherit; cursor: pointer; padding: 4px 6px; border-radius: 12px; }
 #child-switch-btn.switchable:hover { background: var(--surface2); }
-#child-switch-btn .arrow { font-size: 0.85rem; color: var(--text-dim); }
+#child-switch-btn .arrow { font-size: 0.8rem; color: var(--text-dim); }
 #day-label-badge {
   flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: nowrap; min-width: 0; overflow: hidden;
 }
 .dl-chip {
-  font-size: 1.2rem; font-weight: 900; padding: 6px 16px; border-radius: 20px;
+  font-size: 1.35rem; font-weight: 900; padding: 8px 18px; border-radius: 20px;
   background: rgba(99,102,241,0.14); color: var(--purple); border: 2.5px solid var(--purple);
   white-space: nowrap;
 }
@@ -65,19 +65,19 @@ body {
 }
 #parent-btn {
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-mid);
-  width: 36px; height: 36px; border-radius: 50%; font-size: 1.05rem; cursor: pointer;
+  width: 28px; height: 28px; border-radius: 50%; font-size: 0.88rem; cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 #parent-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 #timer-btn {
-  background: var(--surface2); border: 2px solid var(--border); color: var(--text-mid);
-  width: 56px; height: 56px; border-radius: 50%; font-size: 1.7rem; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit;
+  background: rgba(37,99,235,0.1); border: 2px solid var(--off-color); color: var(--off-color);
+  border-radius: 10px; font-size: 0.88rem; font-weight: 800; padding: 5px 9px;
+  cursor: pointer; font-family: inherit; flex-shrink: 0; white-space: nowrap;
 }
-#timer-btn:hover { background: var(--off-color); color: #fff; border-color: var(--off-color); }
+#timer-btn:hover { background: var(--off-color); color: #fff; }
 #fullscreen-btn {
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-mid);
-  width: 40px; height: 40px; border-radius: 50%; font-size: 1.15rem; cursor: pointer;
+  width: 30px; height: 30px; border-radius: 50%; font-size: 0.9rem; cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit;
 }
 #fullscreen-btn:hover { background: var(--purple); color: #fff; border-color: var(--purple); }
@@ -85,7 +85,7 @@ body {
 #date-nav { display: flex; align-items: center; gap: 6px; }
 #date-prev, #date-next {
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-mid);
-  width: 34px; height: 34px; border-radius: 50%; font-size: 0.85rem; cursor: pointer;
+  width: 30px; height: 30px; border-radius: 50%; font-size: 0.8rem; cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit; padding: 0;
 }
 #date-prev:hover, #date-next:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -105,8 +105,6 @@ body.viewing-other-day #date-big { color: var(--accent); }
   display: flex; align-items: center; justify-content: center; font-family: inherit;
   box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: right 0.3s, bottom 0.3s, top 0.3s;
 }
-#main.panels-collapsed #panels-collapse-btn { right: 6px; }
-#panels-collapse-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
 #left-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
 /* ── 左：タイムライン（1本・現在区間がせり出す） ── */
@@ -323,8 +321,18 @@ body.viewing-other-day #date-big { color: var(--accent); }
 /* ── 右パネル ── */
 #right-panel {
   background: var(--surface); border-left: 3px solid var(--border);
-  display: flex; flex-direction: column; overflow: hidden;
+  display: flex; flex-direction: column; overflow: visible; position: relative;
 }
+/* 収納ボタン：横向き＝左境目の中央、縦向き＝上境目の中央 */
+#panels-collapse-btn {
+  position: absolute; z-index: 20;
+  left: -16px; top: 50%; transform: translateY(-50%);
+  background: var(--surface); border: 2px solid var(--border); color: var(--text-mid);
+  width: 30px; height: 30px; border-radius: 50%; font-size: 0.82rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-family: inherit;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: background 0.2s, color 0.2s;
+}
+#panels-collapse-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
 #want-header {
   padding: 14px 16px 10px; border-bottom: 2px solid var(--border); flex-shrink: 0;
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
@@ -357,6 +365,16 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .zukan-cell .zukan-name { font-size: 0.7rem; font-weight: 800; color: var(--text-mid); text-align: center; }
 .zukan-cell.locked .zukan-name { color: var(--text-dim); }
 .zukan-q { font-size: 1.6rem; line-height: 1; opacity: 0.3; }
+.zukan-color-cell {
+  border-radius: 14px; border: 3px solid var(--border);
+  cursor: pointer; position: relative; min-height: 64px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+}
+.zukan-color-cell.selected { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(99,102,241,0.3); }
+.zukan-color-cell.locked { opacity: 0.5; cursor: default; }
+.zukan-color-cell .zukan-color-name { font-size: 0.78rem; font-weight: 900; color: var(--text); text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+.zukan-color-lock { position: absolute; top: 4px; right: 6px; font-size: 0.85rem; }
+.zukan-color-unlock-need { font-size: 0.62rem; color: var(--text-dim); font-weight: 700; }
 #want-add-btn {
   background: var(--off-color); border: none; color: #fff;
   border-radius: 10px; font-size: 0.85rem; font-weight: 800; padding: 7px 12px;
@@ -774,18 +792,18 @@ body.viewing-other-day #date-big { color: var(--accent); }
     border-left: none; border-top: 3px solid var(--border);
     max-height: 32vh;
   }
-  #panels-collapse-btn { top: auto; right: 10px; bottom: calc(32vh + 6px); }
-  #main.panels-collapsed #panels-collapse-btn { bottom: 6px; right: 6px; }
+  /* 縦向き：上境目の中央に配置 */
+  #panels-collapse-btn { left: 50%; top: -16px; transform: translateX(-50%); }
   #want-header { padding: 12px 18px 10px; }
   #want-title { font-size: 1.05rem; }
   #topbar { padding: 6px 12px; gap: 4px; }
-  #date-big { font-size: 0.9rem; }
+  #date-big { font-size: 1.3rem; }
   .topbar-left { gap: 10px; }
-  #child-switch-btn { font-size: 1.05rem; min-width: 0; padding: 4px 4px; }
+  #child-switch-btn { font-size: 1rem; min-width: 0; padding: 4px 4px; }
   #day-label-badge { gap: 4px; flex-wrap: wrap; justify-content: center; }
   .dl-chip {
-    font-size: 0.72rem; padding: 3px 8px; border-width: 2px;
-    max-width: 30vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 1.0rem; padding: 5px 10px; border-width: 2px;
+    max-width: 40vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 }
 /* スマホ幅：ヘッダーの文字・ボタンを少し小さく */
@@ -794,13 +812,13 @@ body.viewing-other-day #date-big { color: var(--accent); }
   #topbar-row1, #topbar-row2 { flex-wrap: wrap; row-gap: 4px; min-height: 0; }
   .topbar-left { width: 100%; justify-content: space-between; gap: 8px; }
   #day-label-badge { flex: 1 1 auto; justify-content: flex-start; min-width: 0; }
-  .topbar-right { flex-shrink: 0; gap: 8px; margin-left: auto; }
-  #date-big { font-size: 0.85rem; }
-  #parent-btn { width: 32px; height: 32px; font-size: 0.95rem; }
-  #timer-btn { width: 46px; height: 46px; font-size: 1.4rem; }
-  #fullscreen-btn { width: 34px; height: 34px; font-size: 1rem; }
-  #child-switch-btn { font-size: 0.95rem; min-width: 0; padding: 4px 6px; }
-  #date-prev, #date-next { width: 30px; height: 30px; }
+  .topbar-right { flex-shrink: 0; gap: 6px; margin-left: auto; }
+  #date-big { font-size: 1.15rem; }
+  #parent-btn { width: 24px; height: 24px; font-size: 0.78rem; }
+  #fullscreen-btn { width: 26px; height: 26px; font-size: 0.78rem; }
+  #child-switch-btn { font-size: 0.95rem; min-width: 0; padding: 4px 4px; }
+  #date-prev, #date-next { width: 28px; height: 28px; font-size: 0.75rem; }
+  .dl-chip { font-size: 0.9rem; padding: 4px 8px; }
 }
 </style>
 </head>
@@ -821,7 +839,6 @@ body.viewing-other-day #date-big { color: var(--accent); }
     <div id="day-label-badge"></div>
     <div class="topbar-right">
       <button id="fullscreen-btn" title="全画面表示">⛶</button>
-      <button id="timer-btn" title="タイマー">⏲️</button>
       <button id="child-switch-btn">なまえ ▼</button>
       <button id="parent-btn" style="position:relative">⚙️<span id="header-pending-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#c2255c;color:#fff;font-size:0.65rem;font-weight:900;min-width:18px;height:18px;border-radius:9px;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 0 2px var(--surface)">0</span></button>
     </div>
@@ -861,8 +878,10 @@ body.viewing-other-day #date-big { color: var(--accent); }
 
   <!-- 右：やりたいこと -->
   <div id="right-panel">
+    <button id="panels-collapse-btn" title="した・よこの らんを たたむ">🔽</button>
     <div id="want-header">
       <div id="want-title">やりたいこと</div>
+      <button id="timer-btn" title="タイマー">⏱️</button>
       <button id="zukan-btn" title="ずかんをみる">📖 ずかん</button>
       <button id="stamp-view-btn" title="きろくを みる">🌟 きろく</button>
       <button id="want-add-btn">＋ ついか</button>
@@ -871,7 +890,6 @@ body.viewing-other-day #date-big { color: var(--accent); }
       <div id="want-list"></div>
     </div>
   </div>
-  <button id="panels-collapse-btn" title="した・よこの らんを たたむ">🔽</button>
 </div>
 
 <!-- スタンプカレンダー -->
@@ -894,9 +912,22 @@ body.viewing-other-day #date-big { color: var(--accent); }
 <div class="modal-overlay" id="zukan-modal">
   <div class="modal" style="max-width:420px">
     <h2 style="color:var(--purple)">📖 ずかん</h2>
-    <div id="zukan-progress" style="font-size:0.85rem;font-weight:700;color:var(--text-mid);margin-bottom:14px;text-align:center"></div>
-    <div id="zukan-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px"></div>
-    <p style="font-size:0.72rem;color:var(--text-dim);margin-top:8px;line-height:1.5">よていを はやく おわらせると、なかまが ふえるよ！</p>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="type-btn active-on" id="zukan-tab-creature" style="flex:1">🦋 なかま</button>
+      <button class="type-btn" id="zukan-tab-color" style="flex:1">🎨 いろ</button>
+    </div>
+    <!-- なかまタブ -->
+    <div id="zukan-creature-panel">
+      <div id="zukan-progress" style="font-size:0.85rem;font-weight:700;color:var(--text-mid);margin-bottom:14px;text-align:center"></div>
+      <div id="zukan-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px"></div>
+      <p style="font-size:0.72rem;color:var(--text-dim);margin-top:8px;line-height:1.5">よていを はやく おわらせると、なかまが ふえるよ！</p>
+    </div>
+    <!-- いろタブ -->
+    <div id="zukan-color-panel" style="display:none">
+      <div id="zukan-color-progress" style="font-size:0.85rem;font-weight:700;color:var(--text-mid);margin-bottom:14px;text-align:center"></div>
+      <div id="zukan-color-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:8px"></div>
+      <p style="font-size:0.72rem;color:var(--text-dim);margin-top:8px;line-height:1.5">🔒 は もっと じかんを ためると つかえるよ！</p>
+    </div>
     <div class="modal-actions"><button class="btn btn-secondary" id="zukan-close">とじる</button></div>
   </div>
 </div>
@@ -1034,122 +1065,89 @@ body.viewing-other-day #date-big { color: var(--accent); }
     </div>
     <div id="child-switcher-top" style="padding:10px 18px 4px"></div>
     <div id="today-stats" style="padding:0 18px 10px;font-size:0.85rem;font-weight:800;color:var(--text-mid)"></div>
-    <div id="parent-tab-bar" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 18px 12px">
-      <button class="ptab-btn" type="button" data-tab="pending">📨 申請<span class="pending-badge" id="pending-count-tab" style="display:none">0</span></button>
+    <div id="parent-tab-bar" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 18px 12px">
+      <button class="ptab-btn" type="button" data-tab="pending">📨 今日<span class="pending-badge" id="pending-count-tab" style="display:none">0</span></button>
       <button class="ptab-btn" type="button" data-tab="bag">🎒 カバン</button>
-      <button class="ptab-btn" type="button" data-tab="child">👦 こども</button>
-      <button class="ptab-btn" type="button" data-tab="settings">⚙️ せってい<span id="settings-tab-badge" style="display:none;background:var(--accent);color:#fff;font-size:0.6rem;font-weight:900;padding:1px 6px;border-radius:10px">！</span></button>
+      <button class="ptab-btn" type="button" data-tab="settings">⚙️ 設定<span id="settings-tab-badge" style="display:none;background:var(--accent);color:#fff;font-size:0.6rem;font-weight:900;padding:1px 6px;border-radius:10px">！</span></button>
     </div>
+
+    <!-- ── 今日タブ ── -->
     <div class="acc-section open" data-acc="pending" data-tab-group="pending">
       <button class="acc-head" type="button" data-acc-toggle="pending">📨 子どもからの申請 <span class="pending-badge" id="pending-count" style="display:none">0</span><span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-
-      <div id="pending-list"></div>
+        <div id="pending-list"></div>
       </div>
     </div>
+
+    <!-- ── カバンタブ ── -->
     <div class="acc-section open" data-acc="bag" data-tab-group="bag">
       <button class="acc-head" type="button" data-acc-toggle="bag">🎒 やることカバン<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
+        <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">「学校の宿題」などのカバンを作り、中身（やること）を入れます。オンにして曜日を決めると、その日に出ます。時刻はあとから決められます。</p>
+        <div id="bag-list"></div>
+        <button class="btn btn-primary" id="add-bag-btn" style="width:100%;margin-top:8px;font-size:0.82rem">＋ カバンを作る</button>
+        <button class="btn btn-purple" id="drag-mode-btn" style="width:100%;margin-top:8px;font-size:0.82rem">✋ タイムラインで 予定を動かす</button>
+      </div>
+    </div>
 
-      <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">「学校の宿題」などのカバンを作り、中身（やること）を入れます。オンにして曜日を決めると、その日に出ます。時刻はあとから決められます。</p>
-      <div id="bag-list"></div>
-      <button class="btn btn-primary" id="add-bag-btn" style="width:100%;margin-top:8px;font-size:0.82rem">＋ カバンを作る</button>
-      <button class="btn btn-purple" id="drag-mode-btn" style="width:100%;margin-top:8px;font-size:0.82rem">✋ タイムラインで 予定を動かす</button>
-      </div>
-    </div>
-    <div class="acc-section" data-acc="child" data-tab-group="child">
-      <button class="acc-head" type="button" data-acc-toggle="child">👦 子ども管理・初期せってい<span class="acc-chevron">▶</span></button>
-      <div class="acc-body">
+    <!-- ── 設定タブ ── -->
 
-      <div id="child-switcher"></div>
-      <button class="btn btn-secondary" id="add-child-btn" style="width:100%;margin-top:6px;font-size:0.82rem">＋ 子どもを追加</button>
-      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:0.82rem;font-weight:700;color:var(--text-mid);cursor:pointer">
-        <input type="checkbox" id="show-switch-toggle" style="width:18px;height:18px"/>
-        トップ画面に「子ども切り替えボタン」を表示する
-      </label>
-      <div id="child-edit-field" style="display:none;margin-top:10px">
-        <div class="name-edit-row">
-          <input type="text" id="pname-input" placeholder="例：はなちゃん" maxlength="10"/>
-          <button class="btn btn-primary" id="pname-save-btn">保存</button>
-          <button class="btn btn-danger" id="pname-del-btn">削除</button>
-        </div>
-        <div style="margin-top:10px">
-          <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">ヘッダーの いろ</label>
-          <div class="emoji-grid" id="header-color-grid"></div>
-        </div>
-        <div style="margin-top:12px;display:flex;gap:12px">
-          <div style="flex:1">
-            <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">起きる時間 🌅</label>
-            <div id="wake-sel"></div>
-          </div>
-          <div style="flex:1">
-            <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">寝る時間 🌙</label>
-            <div id="sleep-sel"></div>
-          </div>
-        </div>
-        <div style="margin-top:12px">
-          <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">あいた時間の呼び名 🎈</label>
-          <input type="text" id="free-label-input" placeholder="オフタイム" maxlength="10" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-size:1rem;font-weight:700;padding:10px 12px;outline:none;font-family:inherit;box-sizing:border-box"/>
-          <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">予定のすきまや、ぜんぶ終わったあとの自由時間に出る言葉です。</p>
-        </div>
-        <div style="margin-top:12px">
-          <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">日付の表記 ✏️</label>
-          <div class="type-toggle" id="kanji-toggle">
-            <button class="type-btn" id="kanji-hiragana" style="flex:1">ひらがな</button>
-            <button class="type-btn" id="kanji-kanji" style="flex:1">漢字</button>
-          </div>
-          <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">小さい子には「ひらがな」、漢字が読める子には「漢字」。</p>
-        </div>
-        <div style="margin-top:12px">
-          <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">時刻の表示形式 🕒</label>
-          <div class="type-toggle" id="time12-toggle">
-            <button class="type-btn" id="time12-on" style="flex:1">12時間表示</button>
-            <button class="type-btn" id="time12-off" style="flex:1">24時間表示</button>
-          </div>
-          <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">「12時間表示」は午前/午後付き（午後3:00）。小さい子にはこちらが分かりやすいです。</p>
-        </div>
-      </div>
-      </div>
-    </div>
-    <div class="acc-section" data-acc="lock" data-tab-group="settings">
-      <button class="acc-head" type="button" data-acc-toggle="lock">🔒 保護者ロック<span class="acc-chevron">▶</span></button>
+    <!-- 子ども設定（旧「こども」タブ → 設定の最初に統合） -->
+    <div class="acc-section" data-acc="child" data-tab-group="settings">
+      <button class="acc-head" type="button" data-acc-toggle="child">👦 子ども設定<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-        <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:10px;line-height:1.5">ロックをかけると、この⚙️設定を開くときに暗証番号（4桁）が必要になります。子どもが勝手に設定を変えるのを防げます。</p>
-        <div class="type-toggle" id="lock-toggle">
-          <button class="type-btn" id="lock-on" style="flex:1">ロックを使う</button>
-          <button class="type-btn" id="lock-off" style="flex:1">使わない</button>
-        </div>
-        <button class="btn btn-secondary" id="lock-change-btn" style="width:100%;margin-top:10px;font-size:0.82rem;display:none">🔑 暗証番号を変更</button>
-        <div style="margin-top:14px;padding-top:14px;border-top:2px solid var(--border)">
-          <label style="display:block;font-size:0.82rem;font-weight:800;color:var(--text);margin-bottom:6px">⏰ 時刻変更アイコンにも暗証番号を要求する</label>
-          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.4">タイムラインの予定についている⏰アイコンを押した時にも、暗証番号を求めます。暗証番号自体は保護者ロックと共通です。</p>
-          <div class="type-toggle" id="timeedit-lock-toggle">
-            <button class="type-btn" id="timeeditlock-on" style="flex:1">要求する</button>
-            <button class="type-btn" id="timeeditlock-off" style="flex:1">要求しない</button>
+        <div id="child-switcher"></div>
+        <button class="btn btn-secondary" id="add-child-btn" style="width:100%;margin-top:6px;font-size:0.82rem">＋ 子どもを追加</button>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:0.82rem;font-weight:700;color:var(--text-mid);cursor:pointer">
+          <input type="checkbox" id="show-switch-toggle" style="width:18px;height:18px"/>
+          トップ画面に「子ども切り替えボタン」を表示する
+        </label>
+        <div id="child-edit-field" style="display:none;margin-top:10px">
+          <div class="name-edit-row">
+            <input type="text" id="pname-input" placeholder="例：はなちゃん" maxlength="10"/>
+            <button class="btn btn-primary" id="pname-save-btn">保存</button>
+            <button class="btn btn-danger" id="pname-del-btn">削除</button>
+          </div>
+          <div style="margin-top:10px">
+            <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">ヘッダーの いろ</label>
+            <div class="emoji-grid" id="header-color-grid"></div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:12px">
+            <div style="flex:1">
+              <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">起きる時間 🌅</label>
+              <div id="wake-sel"></div>
+            </div>
+            <div style="flex:1">
+              <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">寝る時間 🌙</label>
+              <div id="sleep-sel"></div>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">あいた時間の呼び名 🎈</label>
+            <input type="text" id="free-label-input" placeholder="オフタイム" maxlength="10" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-size:1rem;font-weight:700;padding:10px 12px;outline:none;font-family:inherit;box-sizing:border-box"/>
+            <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">予定のすきまや、ぜんぶ終わったあとの自由時間に出る言葉です。</p>
+          </div>
+          <div style="margin-top:12px">
+            <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">日付の表記 ✏️</label>
+            <div class="type-toggle" id="kanji-toggle">
+              <button class="type-btn" id="kanji-hiragana" style="flex:1">ひらがな</button>
+              <button class="type-btn" id="kanji-kanji" style="flex:1">漢字</button>
+            </div>
+            <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">小さい子には「ひらがな」、漢字が読める子には「漢字」。</p>
+          </div>
+          <div style="margin-top:12px">
+            <label style="display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:5px;font-weight:700">時刻の表示形式 🕒</label>
+            <div class="type-toggle" id="time12-toggle">
+              <button class="type-btn" id="time12-on" style="flex:1">12時間表示</button>
+              <button class="type-btn" id="time12-off" style="flex:1">24時間表示</button>
+            </div>
+            <p style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;line-height:1.4">「12時間表示」は午前/午後付き（午後3:00）。小さい子にはこちらが分かりやすいです。</p>
           </div>
         </div>
       </div>
     </div>
-    <div class="acc-section" data-acc="night" data-tab-group="settings">
-      <button class="acc-head" type="button" data-acc-toggle="night">🌃 ナイトモード<span class="acc-chevron">▶</span></button>
-      <div class="acc-body">
-        <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:10px;line-height:1.5">設定した時間になると、画面を暗くして小さな時計だけにします（つけっぱなしによる画面の焼き付き防止・電池の節約）。画面をタッチするとしばらく通常表示に戻ります。</p>
-        <div class="type-toggle" id="night-toggle">
-          <button class="type-btn" id="night-on" style="flex:1">使う</button>
-          <button class="type-btn" id="night-off" style="flex:1">使わない</button>
-        </div>
-        <div id="night-times" style="display:none;margin-top:10px">
-          <div style="display:flex;gap:10px;align-items:center">
-            <label style="font-size:0.8rem;color:var(--text-mid);font-weight:700;width:64px">開始</label>
-            <div id="night-start-sel" style="display:flex;gap:6px;flex:1"></div>
-          </div>
-          <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
-            <label style="font-size:0.8rem;color:var(--text-mid);font-weight:700;width:64px">終了</label>
-            <div id="night-end-sel" style="display:flex;gap:6px;flex:1"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+
+    <!-- 画面・表示設定 -->
     <div class="acc-section" data-acc="display" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="display">🖥️ 画面・タイムラインの 見え方<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
@@ -1193,6 +1191,51 @@ body.viewing-other-day #date-big { color: var(--accent); }
         </div>
       </div>
     </div>
+
+    <!-- 保護者ロック -->
+    <div class="acc-section" data-acc="lock" data-tab-group="settings">
+      <button class="acc-head" type="button" data-acc-toggle="lock">🔒 保護者ロック<span class="acc-chevron">▶</span></button>
+      <div class="acc-body">
+        <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:10px;line-height:1.5">ロックをかけると、この⚙️設定を開くときに暗証番号（4桁）が必要になります。子どもが勝手に設定を変えるのを防げます。</p>
+        <div class="type-toggle" id="lock-toggle">
+          <button class="type-btn" id="lock-on" style="flex:1">ロックを使う</button>
+          <button class="type-btn" id="lock-off" style="flex:1">使わない</button>
+        </div>
+        <button class="btn btn-secondary" id="lock-change-btn" style="width:100%;margin-top:10px;font-size:0.82rem;display:none">🔑 暗証番号を変更</button>
+        <div style="margin-top:14px;padding-top:14px;border-top:2px solid var(--border)">
+          <label style="display:block;font-size:0.82rem;font-weight:800;color:var(--text);margin-bottom:6px">⏰ 時刻変更アイコンにも暗証番号を要求する</label>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;line-height:1.4">タイムラインの予定についている⏰アイコンを押した時にも、暗証番号を求めます。暗証番号自体は保護者ロックと共通です。</p>
+          <div class="type-toggle" id="timeedit-lock-toggle">
+            <button class="type-btn" id="timeeditlock-on" style="flex:1">要求する</button>
+            <button class="type-btn" id="timeeditlock-off" style="flex:1">要求しない</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ナイトモード -->
+    <div class="acc-section" data-acc="night" data-tab-group="settings">
+      <button class="acc-head" type="button" data-acc-toggle="night">🌃 ナイトモード<span class="acc-chevron">▶</span></button>
+      <div class="acc-body">
+        <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:10px;line-height:1.5">設定した時間になると、画面を暗くして小さな時計だけにします（つけっぱなしによる画面の焼き付き防止・電池の節約）。画面をタッチするとしばらく通常表示に戻ります。</p>
+        <div class="type-toggle" id="night-toggle">
+          <button class="type-btn" id="night-on" style="flex:1">使う</button>
+          <button class="type-btn" id="night-off" style="flex:1">使わない</button>
+        </div>
+        <div id="night-times" style="display:none;margin-top:10px">
+          <div style="display:flex;gap:10px;align-items:center">
+            <label style="font-size:0.8rem;color:var(--text-mid);font-weight:700;width:64px">開始</label>
+            <div id="night-start-sel" style="display:flex;gap:6px;flex:1"></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+            <label style="font-size:0.8rem;color:var(--text-mid);font-weight:700;width:64px">終了</label>
+            <div id="night-end-sel" style="display:flex;gap:6px;flex:1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- おてんき -->
     <div class="acc-section" data-acc="weather" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="weather">🌤️ おてんき<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
@@ -1207,22 +1250,25 @@ body.viewing-other-day #date-big { color: var(--accent); }
         <button class="btn btn-secondary" id="weather-clear" style="font-size:0.8rem;margin-top:4px">地域を削除してランダムに戻す</button>
       </div>
     </div>
+
+    <!-- バックアップ -->
     <div class="acc-section" data-acc="backup" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="backup">💾 データのバックアップ<span id="backup-badge" style="display:none;margin-left:6px;background:var(--accent);color:#fff;font-size:0.62rem;font-weight:900;padding:2px 7px;border-radius:10px">！</span><span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-      <div id="backup-reminder" style="display:none;background:var(--on-light);border:1.5px solid var(--on-color);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:0.8rem;font-weight:700;color:var(--accent);line-height:1.5"></div>
-      <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:10px;line-height:1.5">設定や予定をファイルに保存できます。機種変更やブラウザのデータ消去に備えて、ときどき書き出しておくと安心です。</p>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-secondary" id="export-btn" style="flex:1;font-size:0.82rem">⬇️ ぜんいん書き出す</button>
-        <button class="btn btn-secondary" id="import-btn" style="flex:1;font-size:0.82rem">⬆️ 読み込む</button>
-      </div>
-      <div style="margin-top:12px;padding-top:12px;border-top:1.5px dashed var(--border)">
-        <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">📱 子ども用タブレットに渡すとき：いま選んでいる子だけを書き出せます。タブレット側で読み込むと、その子だけが表示されます。</p>
-        <button class="btn btn-secondary" id="export-child-btn" style="width:100%;font-size:0.82rem">⬇️ この子だけ書き出す（タブレット用）</button>
-      </div>
-      <input type="file" id="import-file" accept="application/json" style="display:none"/>
+        <div id="backup-reminder" style="display:none;background:var(--on-light);border:1.5px solid var(--on-color);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:0.8rem;font-weight:700;color:var(--accent);line-height:1.5"></div>
+        <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:10px;line-height:1.5">設定や予定をファイルに保存できます。機種変更やブラウザのデータ消去に備えて、ときどき書き出しておくと安心です。</p>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary" id="export-btn" style="flex:1;font-size:0.82rem">⬇️ ぜんいん書き出す</button>
+          <button class="btn btn-secondary" id="import-btn" style="flex:1;font-size:0.82rem">⬆️ 読み込む</button>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1.5px dashed var(--border)">
+          <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">📱 子ども用タブレットに渡すとき：いま選んでいる子だけを書き出せます。タブレット側で読み込むと、その子だけが表示されます。</p>
+          <button class="btn btn-secondary" id="export-child-btn" style="width:100%;font-size:0.82rem">⬇️ この子だけ書き出す（タブレット用）</button>
+        </div>
+        <input type="file" id="import-file" accept="application/json" style="display:none"/>
       </div>
     </div>
+
     <div style="text-align:center;font-size:0.68rem;color:var(--text-dim);margin-top:2px">v5・2026-06-30</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
@@ -2085,8 +2131,8 @@ function renderTimeline(){
   if(splitMode){
     rightArea=document.createElement('div');
     rightArea.id='now-right-panel';
-    // 左レール(8〜38%)の右に余白をとり、右カードは 42%〜95% に広く置く
-    rightArea.style.cssText=`position:absolute;left:${SIDE+RAIL_W_PCT+4}%;right:${Math.max(2,SIDE-3)}%;top:50%;transform:translateY(-50%);z-index:6;`;
+    // 左レール右端(SIDE+RAIL_W_PCT)から始め、右余白(SIDE)手前で終わる
+    rightArea.style.cssText=`position:absolute;left:${SIDE+RAIL_W_PCT+1}%;right:${Math.max(1,SIDE-2)}%;top:50%;transform:translateY(-50%);z-index:6;`;
     col.appendChild(rightArea);
   }
 
@@ -2336,7 +2382,10 @@ function renderTimeline(){
   }
   lg.appendChild(nowBadge);
 
-  if(nowEvId && !editMode) bindNowCardEl(scroll, sorted.find(x=>x.id===nowEvId));
+  // 通常モード：nowEvIdのカードにクリックハンドラを登録
+  // 分割モード：右パネルに出ているsplitEvIdのカードに登録（nowEvIdとは違う場合がある）
+  const bindTargetId = splitMode ? splitEvId : nowEvId;
+  if(bindTargetId && !editMode) bindNowCardEl(scroll, sorted.find(x=>x.id===bindTargetId));
 
   // 自動スクロール：現在地を画面の上から25%へ（編集モード中は止める）
   if(!userScrolledAway && !editMode){
@@ -2695,7 +2744,8 @@ document.getElementById('undo-complete').addEventListener('click',()=>{
 
 // ═══ ヘッダー ═══
 function updateClock(){
-  document.getElementById('topbar').style.background = (getChild()&&getChild().headerColor) || '';
+  const hTheme=HEADER_THEMES.find(t=>t.id===(getChild()&&getChild().headerColor))||HEADER_THEMES[0];
+  document.getElementById('topbar').style.background = hTheme.bg.startsWith('var(') ? '' : hTheme.bg;
   const kanji=!!(getChild()&&getChild().kanjiMode);
   const days = kanji ? ['日','月','火','水','木','金','土'] : ['にち','げつ','か','すい','もく','きん','ど'];
   const dd=getDisplayDate();
@@ -2804,6 +2854,14 @@ document.getElementById('stamp-close').addEventListener('click',()=>document.get
 
 // ── 📖 ずかん ──
 function renderZukan(){
+  renderZukanCreature();
+  // なかまタブをデフォルト表示
+  document.getElementById('zukan-creature-panel').style.display='';
+  document.getElementById('zukan-color-panel').style.display='none';
+  document.getElementById('zukan-tab-creature').className='type-btn active-on';
+  document.getElementById('zukan-tab-color').className='type-btn';
+}
+function renderZukanCreature(){
   const child=getChild();
   const owned=child.creatures||{};
   const kanji=!!(child&&child.kanjiMode);
@@ -2818,14 +2876,12 @@ function renderZukan(){
     const cell=document.createElement('div');
     cell.className='zukan-cell'+(isOwned?' owned':' locked');
     if(isOwned){
-      // フルカラーSVG ＋ 匹数バッジ
       cell.innerHTML=`
         ${count>1?`<div class="zukan-count">×${count}</div>`:''}
         ${creatureSvg(c.key,48)}
         <div class="zukan-name">${kanji?c.name.kanji:c.name.hira}</div>
       `;
     } else {
-      // グレーシルエット ＋ ？
       cell.innerHTML=`
         <div style="position:relative;width:48px;height:48px">
           <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:grayscale(1) opacity(0.22)">${creatureSvg(c.key,48)}</div>
@@ -2837,6 +2893,53 @@ function renderZukan(){
     grid.appendChild(cell);
   });
 }
+function renderZukanColor(){
+  const child=getChild();
+  const kanji=!!(child&&child.kanjiMode);
+  const totalMin=child.totalBonusMin||0;
+  const currentId=child.headerColor||'default';
+  const unlockedCount=HEADER_THEMES.filter(t=>totalMin>=t.unlockMin).length;
+  document.getElementById('zukan-color-progress').textContent=`${unlockedCount} / ${HEADER_THEMES.length} いろ つかえるよ`;
+  const grid=document.getElementById('zukan-color-grid');
+  grid.innerHTML='';
+  HEADER_THEMES.forEach(t=>{
+    const isUnlocked=totalMin>=t.unlockMin;
+    const isSelected=t.id===currentId;
+    const cell=document.createElement('div');
+    cell.className='zukan-color-cell'+(isSelected?' selected':'')+(isUnlocked?'':' locked');
+    const previewBg=t.bg.startsWith('var(')?'var(--surface)':t.bg;
+    cell.style.background=previewBg;
+    cell.innerHTML=`
+      ${!isUnlocked?`<div class="zukan-color-lock">🔒</div>`:''}
+      ${isSelected?`<div style="font-size:1.1rem">✔️</div>`:''}
+      <div class="zukan-color-name">${kanji?t.name.kanji:t.name.hira}</div>
+      ${!isUnlocked?`<div class="zukan-color-unlock-need">あと ${t.unlockMin-totalMin}ふん</div>`:''}
+    `;
+    if(isUnlocked){
+      cell.addEventListener('click',()=>{
+        child.headerColor=t.id; save();
+        const bg=t.bg.startsWith('var(')?'':t.bg;
+        document.getElementById('topbar').style.background=bg;
+        renderZukanColor();
+      });
+    }
+    grid.appendChild(cell);
+  });
+}
+document.getElementById('zukan-tab-creature').addEventListener('click',()=>{
+  renderZukanCreature();
+  document.getElementById('zukan-creature-panel').style.display='';
+  document.getElementById('zukan-color-panel').style.display='none';
+  document.getElementById('zukan-tab-creature').className='type-btn active-on';
+  document.getElementById('zukan-tab-color').className='type-btn';
+});
+document.getElementById('zukan-tab-color').addEventListener('click',()=>{
+  renderZukanColor();
+  document.getElementById('zukan-creature-panel').style.display='none';
+  document.getElementById('zukan-color-panel').style.display='';
+  document.getElementById('zukan-tab-creature').className='type-btn';
+  document.getElementById('zukan-tab-color').className='type-btn active-on';
+});
 document.getElementById('zukan-btn').addEventListener('click',()=>{
   renderZukan();
   document.getElementById('zukan-modal').classList.add('open');
@@ -2877,35 +2980,72 @@ function addBonusMinAndCheckMilestone(child, addMin){
 // ═══ ごほうび演出（予定より早く終わった＝じかんを いっぱい つくれた おいわい） ═══
 // 仕組みは1種類（いいものが降ってくる）。テーマ・色・段階・メッセージで毎回ちがって見せる。
 const REWARD_THEMES=[
-  // 既存12種
+  // 自然・植物系
   {emoji:'⭐', motion:'spin',    name:{kanji:'ほし',    hira:'おほしさま'}},
   {emoji:'🌸', motion:'flutter', name:{kanji:'はなびら', hira:'おはな'}},
-  {emoji:'🪙', motion:'spin',    name:{kanji:'コイン',  hira:'コイン'}},
-  {emoji:'🎈', motion:'sway',    name:{kanji:'ふうせん', hira:'ふうせん'}},
   {emoji:'🍃', motion:'flutter', name:{kanji:'はっぱ',  hira:'はっぱ'}},
   {emoji:'❄️', motion:'drift',   name:{kanji:'ゆき',   hira:'ゆき'}},
-  {emoji:'🫧', motion:'sway',    name:{kanji:'シャボン', hira:'しゃぼんだま'}},
   {emoji:'🌰', motion:'bounce',  name:{kanji:'どんぐり', hira:'どんぐり'}},
-  {emoji:'💗', motion:'sway',    name:{kanji:'ハート',  hira:'はーと'}},
-  {emoji:'🎵', motion:'bounce',  name:{kanji:'おんぷ',  hira:'おんぷ'}},
-  {emoji:'🍬', motion:'spin',    name:{kanji:'あめ',   hira:'あめ'}},
   {emoji:'🌟', motion:'flutter', name:{kanji:'きらきら', hira:'きらきら'}},
-  // 追加12種
-  {emoji:'🍓', motion:'bounce',  name:{kanji:'いちご',  hira:'いちご'}},
   {emoji:'🌺', motion:'flutter', name:{kanji:'はな',   hira:'おはな'}},
-  {emoji:'🔮', motion:'spin',    name:{kanji:'ほうぎょく',hira:'まほうのたま'}},
-  {emoji:'🎠', motion:'sway',    name:{kanji:'メリーゴーランド',hira:'くるくる'}},
-  {emoji:'⚡', motion:'spin',    name:{kanji:'かみなり', hira:'ぴかぴか'}},
   {emoji:'🍀', motion:'flutter', name:{kanji:'よつば',  hira:'よつばのクローバー'}},
-  {emoji:'🎀', motion:'sway',    name:{kanji:'リボン',  hira:'りぼん'}},
   {emoji:'🌙', motion:'drift',   name:{kanji:'つき',   hira:'おつきさま'}},
-  {emoji:'🦋', motion:'flutter', name:{kanji:'ちょうちょ',hira:'ちょうちょ'}},
+  {emoji:'🌊', motion:'drift',   name:{kanji:'なみ',   hira:'なみ'}},
+  // お菓子・食べ物系
+  {emoji:'🍬', motion:'spin',    name:{kanji:'あめ',   hira:'あめ'}},
+  {emoji:'🍓', motion:'bounce',  name:{kanji:'いちご',  hira:'いちご'}},
   {emoji:'🍭', motion:'spin',    name:{kanji:'ペロペロキャンディ',hira:'ぺろぺろ'}},
-  {emoji:'🎪', motion:'bounce',  name:{kanji:'テント',  hira:'テント'}},
+  {emoji:'🍩', motion:'bounce',  name:{kanji:'ドーナツ', hira:'どーなつ'}},
+  {emoji:'🍰', motion:'bounce',  name:{kanji:'ケーキ',  hira:'けーき'}},
+  {emoji:'🧁', motion:'bounce',  name:{kanji:'カップケーキ',hira:'かっぷけーき'}},
+  {emoji:'🍊', motion:'bounce',  name:{kanji:'みかん',  hira:'みかん'}},
+  // 動物系
+  {emoji:'🦋', motion:'flutter', name:{kanji:'ちょうちょ',hira:'ちょうちょ'}},
+  {emoji:'🐝', motion:'flutter', name:{kanji:'みつばち', hira:'みつばち'}},
+  {emoji:'🐠', motion:'drift',   name:{kanji:'さかな',  hira:'おさかな'}},
+  {emoji:'🐸', motion:'bounce',  name:{kanji:'かえる',  hira:'かえる'}},
+  {emoji:'🦊', motion:'bounce',  name:{kanji:'きつね',  hira:'きつね'}},
+  {emoji:'🐣', motion:'sway',    name:{kanji:'ひよこ',  hira:'ひよこ'}},
+  // キラキラ・魔法系
+  {emoji:'🪙', motion:'spin',    name:{kanji:'コイン',  hira:'コイン'}},
+  {emoji:'💗', motion:'sway',    name:{kanji:'ハート',  hira:'はーと'}},
+  {emoji:'🔮', motion:'spin',    name:{kanji:'ほうぎょく',hira:'まほうのたま'}},
   {emoji:'💎', motion:'spin',    name:{kanji:'ダイヤ',  hira:'ダイヤモンド'}},
+  {emoji:'⚡', motion:'spin',    name:{kanji:'かみなり', hira:'ぴかぴか'}},
+  // 道具・乗り物系
+  {emoji:'🎈', motion:'sway',    name:{kanji:'ふうせん', hira:'ふうせん'}},
+  {emoji:'🫧', motion:'sway',    name:{kanji:'シャボン', hira:'しゃぼんだま'}},
+  {emoji:'🎵', motion:'bounce',  name:{kanji:'おんぷ',  hira:'おんぷ'}},
+  {emoji:'🎀', motion:'sway',    name:{kanji:'リボン',  hira:'りぼん'}},
+  {emoji:'🚀', motion:'drift',   name:{kanji:'ロケット', hira:'ろけっと'}},
+  {emoji:'✈️', motion:'drift',   name:{kanji:'ひこうき', hira:'ひこうき'}},
+  {emoji:'🎠', motion:'sway',    name:{kanji:'メリーゴーランド',hira:'くるくる'}},
+  {emoji:'🎪', motion:'bounce',  name:{kanji:'テント',  hira:'テント'}},
 ];
 // レア：虹色テーマ（10%で出る）
 const RARE_THEME={emoji:'🌈', motion:'spin', name:{kanji:'にじ',hira:'にじ'}};
+// 次のアンロック（なかま・いろどちらか近い方）までの残り分数と種別を返す
+function getNextUnlock(child){
+  const total=child.totalBonusMin||0;
+  const kanji=!!(child&&child.kanjiMode);
+
+  // 次の生き物までの残り分数
+  const owned=creatureTotalOwned(child);
+  let need=0;
+  for(let k=0;k<=owned;k++) need+=30*(k+1);
+  const creatureRemain=Math.max(0, need-total);
+
+  // 次のヘッダーカラーまでの残り分数
+  const nextColor=HEADER_THEMES.find(t=>total<t.unlockMin);
+  const colorRemain=nextColor ? Math.max(0,nextColor.unlockMin-total) : null;
+
+  // 近い方を選ぶ（同点なら生き物優先）
+  if(colorRemain!==null && colorRemain < creatureRemain){
+    return {type:'color', name:kanji?nextColor.name.kanji:nextColor.name.hira, remain:colorRemain};
+  }
+  if(creatureRemain===0) return null; // すでに今回でゲットしてる
+  return {type:'creature', remain:creatureRemain};
+}
 // 段階：ギリギリ(0-2)/ちょっと(3-9)/たくさん(10-29)/どっさり(30〜=とくべつ)
 function rewardTier(min){
   if(min<=2) return 0;
@@ -2913,7 +3053,6 @@ function rewardTier(min){
   if(min<=29) return 2;
   return 3;
 }
-// C: コンボ管理（その日何回目の完了か）
 function getTodayCombo(){
   if(!data.todayCombo) return 0;
   if(data.todayCombo.date!==dateKey(new Date())) return 0;
@@ -3073,6 +3212,23 @@ function showRewardAnimation(reward){
   setTimeout(()=>{
     document.getElementById('blockfall-result').textContent = rewardMessage(savedMin, tier, kanji, name, combo, isRare);
     document.getElementById('blockfall-close').style.display='';
+
+    // A: 演出中に「次まで○ふん」を表示
+    const child2=getChild();
+    const nextUp=getNextUnlock(child2);
+    const existingHint=document.getElementById('blockfall-next-hint');
+    if(existingHint) existingHint.remove();
+    if(nextUp && nextUp.remain>0){
+      const hint=document.createElement('div');
+      hint.id='blockfall-next-hint';
+      const label=nextUp.type==='color'
+        ? (kanji?`🎨 つぎのいろ「${nextUp.name}」まで あと ${nextUp.remain}ふん`:`🎨 つぎのいろ まで あと ${nextUp.remain}ふん！`)
+        : (kanji?`🦋 つぎのなかままで あと ${nextUp.remain}ふん`:`🦋 なかま まで あと ${nextUp.remain}ふん！`);
+      hint.textContent=label;
+      hint.style.cssText='font-size:0.8rem;font-weight:800;color:var(--purple);margin-top:8px;text-align:center;opacity:0.85;';
+      document.getElementById('blockfall-stage').appendChild(hint);
+    }
+
     // あたらしいなかま（生き物ゲット）を見せる
     if(pendingNewCreatures.length){
       const uniq=[...new Set(pendingNewCreatures)];
@@ -3094,7 +3250,19 @@ let pendingReward=null;
 document.getElementById('blockfall-close').addEventListener('click',()=>{
   document.getElementById('blockfall-overlay').classList.remove('show');
   document.getElementById('blockfall-stage').querySelectorAll('.bf-newfriend').forEach(x=>x.remove());
+  const hint=document.getElementById('blockfall-next-hint'); if(hint) hint.remove();
   pendingNewCreatures=[];
+
+  // B: 閉じた直後にもトーストで次のアンロックを通知
+  const nextUp=getNextUnlock(getChild());
+  if(nextUp && nextUp.remain>0){
+    const kanji2=!!(getChild()&&getChild().kanjiMode);
+    const msg=nextUp.type==='color'
+      ? (kanji2?`🎨 つぎのいろまで あと ${nextUp.remain}ふん！`:`🎨 いろ まで あと ${nextUp.remain}ふん！`)
+      : (kanji2?`🦋 つぎのなかままで あと ${nextUp.remain}ふん！`:`🦋 なかま まで あと ${nextUp.remain}ふん！`);
+    setTimeout(()=>showToast(msg), 400);
+  }
+
   if(pendingMilestoneText){
     document.getElementById('milestone-text').textContent=pendingMilestoneText;
     document.getElementById('milestone-overlay').classList.add('show');
@@ -3476,18 +3644,44 @@ function faceSVG(face,size){
   if(!inner) return `<span style="font-size:${size}px;line-height:1">${face||'🧒'}</span>`;
   return `<svg viewBox="0 0 48 48" width="${size}" height="${size}" style="display:block">${inner}</svg>`;
 }
-const HEADER_COLORS = ['#ffffff','#fde2e2','#fde8cc','#fdf3c7','#dcf3df','#d7ecf7','#e3dcf7','#f3dcef'];
+// ヘッダーの色テーマ（子どもがためた時間でアンロックしていく）
+// unlockMin: この累計分数でアンロック（0=最初から使える）
+const HEADER_THEMES = [
+  // 無彩色・デフォルト（unlockMin:0〜30）
+  {id:'default', name:{kanji:'そら',    hira:'そら'},     bg:'var(--surface)',                                                       unlockMin:0},
+  {id:'sakura',  name:{kanji:'さくら',  hira:'さくら'},   bg:'linear-gradient(135deg,#fde8f0,#fdf0cc)',                             unlockMin:30},
+  // 寒色系（unlockMin:60〜130）
+  {id:'sora',    name:{kanji:'あおぞら',hira:'あおぞら'}, bg:'linear-gradient(135deg,#d7ecf7,#e8f4ff)',                             unlockMin:60},
+  {id:'midori',  name:{kanji:'みどり',  hira:'みどり'},   bg:'linear-gradient(135deg,#dcf3df,#d7f0e8)',                             unlockMin:100},
+  {id:'umi',     name:{kanji:'うみ',    hira:'うみ'},     bg:'linear-gradient(135deg,#c8eaf7,#d4f0e8)',                             unlockMin:130},
+  // 暖色系（unlockMin:160〜250）
+  {id:'yuuhi',   name:{kanji:'ゆうやけ',hira:'ゆうやけ'}, bg:'linear-gradient(135deg,#fde8cc,#fdd8cc)',                             unlockMin:160},
+  {id:'himawari',name:{kanji:'ひまわり',hira:'ひまわり'}, bg:'linear-gradient(135deg,#fff3c0,#fde8a0)',                             unlockMin:190},
+  {id:'tomato',  name:{kanji:'あか',    hira:'あか'},     bg:'linear-gradient(135deg,#fde0e0,#fcd4d4)',                             unlockMin:220},
+  {id:'aki',     name:{kanji:'あき',    hira:'あき'},     bg:'linear-gradient(135deg,#fde4cc,#fdd8a8)',                             unlockMin:250},
+  // 紫・夜系（unlockMin:290〜370）
+  {id:'yoru',    name:{kanji:'よる',    hira:'よる'},     bg:'linear-gradient(135deg,#d8d4f0,#c8d8f0)',                             unlockMin:290},
+  {id:'momo',    name:{kanji:'もも',    hira:'もも'},     bg:'linear-gradient(135deg,#f7d7e8,#f0d4f7)',                             unlockMin:330},
+  {id:'hoshi',   name:{kanji:'ほしぞら',hira:'ほしぞら'}, bg:'linear-gradient(135deg,#c0c8e8,#b8c0e0)',                             unlockMin:370},
+  // 季節スペシャル（unlockMin:410〜480）
+  {id:'fuyu',    name:{kanji:'ふゆ',    hira:'ふゆ'},     bg:'linear-gradient(135deg,#e8f0f8,#f0f4fc)',                             unlockMin:410},
+  {id:'natsu',   name:{kanji:'なつ',    hira:'なつ'},     bg:'linear-gradient(135deg,#c8f0d8,#d0f0f8)',                             unlockMin:450},
+  {id:'kouyo',   name:{kanji:'こうよう',hira:'こうよう'}, bg:'linear-gradient(135deg,#fdd8b0,#fce0c0)',                             unlockMin:490},
+  // レア（unlockMin:540）
+  {id:'niji',    name:{kanji:'にじ',    hira:'にじ'},     bg:'linear-gradient(135deg,#fde8cc,#dcf3df,#d7ecf7,#e3dcf7)',            unlockMin:540},
+];
+const HEADER_COLORS = HEADER_THEMES.map(t=>t.id); // 後方互換用
 function buildHeaderColorGrid(current){
   const g=document.getElementById('header-color-grid'); g.innerHTML='';
-  HEADER_COLORS.forEach(c=>{
+  HEADER_THEMES.forEach(t=>{
     const d=document.createElement('div');
-    d.className='emoji-opt'+(c===(current||'#ffffff')?' selected':'');
-    d.style.cssText=`display:flex;align-items:center;justify-content:center;background:${c}`;
-    d.innerHTML=`<div style="width:26px;height:26px;border-radius:50%;background:${c};border:2px solid rgba(0,0,0,0.15)"></div>`;
+    d.className='emoji-opt'+(t.id===(current||'default')?' selected':'');
+    d.style.cssText=`display:flex;align-items:center;justify-content:center;background:${t.bg};min-height:40px;border-radius:8px;`;
+    d.innerHTML=`<div style="font-size:0.72rem;font-weight:800;color:var(--text-mid)">${t.name.kanji}</div>`;
     d.addEventListener('click',()=>{
       g.querySelectorAll('.emoji-opt').forEach(x=>x.classList.remove('selected'));
       d.classList.add('selected');
-      if(editChildIdx!==null){ data.children[editChildIdx].headerColor=c; save(); tick(); }
+      if(editChildIdx!==null){ data.children[editChildIdx].headerColor=t.id; save(); tick(); }
     });
     g.appendChild(d);
   });
