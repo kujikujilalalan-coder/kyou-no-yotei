@@ -859,7 +859,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
   #main.panels-collapsed #right-panel { border-top-width: 0; }
   #right-panel {
     border-left: none; border-top: 3px solid var(--border);
-    max-height: 32vh;
+    max-height: 22vh;
   }
   /* 縦向き：上境目の中央に配置 */
   #panels-collapse-btn { left: 50%; top: -16px; transform: translateX(-50%); }
@@ -1163,8 +1163,8 @@ body.viewing-other-day #date-big { color: var(--accent); }
       <button class="acc-head" type="button" data-acc-toggle="bag">🎒 やることカバン<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
         <p style="font-size:0.76rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">「学校の宿題」などのカバンを作り、中身（やること）を入れます。オンにして曜日を決めると、その日に出ます。時刻はあとから決められます。</p>
+        <button class="btn btn-primary" id="add-bag-btn" style="width:100%;margin-bottom:10px;font-size:0.82rem">＋ カバンを作る</button>
         <div id="bag-list"></div>
-        <button class="btn btn-primary" id="add-bag-btn" style="width:100%;margin-top:8px;font-size:0.82rem">＋ カバンを作る</button>
         <button class="btn btn-purple" id="drag-mode-btn" style="width:100%;margin-top:8px;font-size:0.82rem">✋ タイムラインで 予定を動かす</button>
       </div>
     </div>
@@ -3080,54 +3080,62 @@ function renderZukanColor(){
   const currentHeaderId=child.headerColor||'default';
   const currentMarkerId=data.nowMarkerColor||'marker-indigo';
 
-  // ヘッダー色（持っているもの＋default）
-  const ownedHeaders=[{id:'default',name:{kanji:'そら',hira:'そら'},bg:'var(--surface)'},...HEADER_THEMES.filter(t=>t.id!=='default'&&won.includes(t.id))];
-  // マーカー色（持っているもの＋default）
-  const ownedMarkers=[MARKER_COLORS[0],...MARKER_COLORS.filter(m=>!m.default&&won.includes(m.id))];
-
-  const total=buildGachaPool().length;
-  const owned=won.length;
-  document.getElementById('zukan-color-progress').textContent=`${owned} / ${total} しゅるい ゲットしたよ`;
+  const totalPool=buildGachaPool().length;
+  const ownedCount=won.length;
+  document.getElementById('zukan-color-progress').textContent=`${ownedCount} / ${totalPool} しゅるい ゲットしたよ`;
 
   const grid=document.getElementById('zukan-color-grid'); grid.innerHTML='';
 
-  // ヘッダー色セクション
+  // ── ヘッダー色：全件表示。デフォルト=最初から可、それ以外=ガチャ待ち ──
   const hLabel=document.createElement('div');
   hLabel.style.cssText='grid-column:1/-1;font-size:0.78rem;font-weight:800;color:var(--text-mid);margin-top:4px';
   hLabel.textContent='🎨 ヘッダーの色';
   grid.appendChild(hLabel);
-  ownedHeaders.forEach(t=>{
-    const isSelected=t.id===currentHeaderId;
+
+  // defaultは常に所持扱い
+  const allHeaders=[{id:'default',name:{kanji:'そら',hira:'そら'},bg:'var(--surface)'},...HEADER_THEMES.filter(t=>t.id!=='default')];
+  allHeaders.forEach(t=>{
+    const isOwned = t.id==='default' || won.includes(t.id);
+    const isSelected = t.id===currentHeaderId;
     const cell=document.createElement('div');
-    cell.className='zukan-color-cell'+(isSelected?' selected':'');
-    const previewBg=t.bg.startsWith('var(')?'var(--surface)':t.bg;
+    cell.className='zukan-color-cell'+(isSelected?' selected':'')+(isOwned?'':' locked');
+    const previewBg=isOwned?(t.bg.startsWith('var(')?'var(--surface)':t.bg):'var(--surface2)';
     cell.style.background=previewBg;
-    cell.innerHTML=`${isSelected?`<div style="font-size:1.1rem">✔️</div>`:''}<div class="zukan-color-name">${kanji?t.name.kanji:t.name.hira}</div>`;
-    cell.addEventListener('click',()=>{
-      child.headerColor=t.id; save();
-      const bg=t.bg.startsWith('var(')?'':t.bg;
-      document.getElementById('topbar').style.background=bg;
-      renderZukanColor();
-    });
+    if(isOwned){
+      cell.innerHTML=`${isSelected?`<div style="font-size:1.1rem">✔️</div>`:''}<div class="zukan-color-name">${kanji?t.name.kanji:t.name.hira}</div>`;
+      cell.addEventListener('click',()=>{
+        child.headerColor=t.id; save();
+        document.getElementById('topbar').style.background=t.bg.startsWith('var(')?'':t.bg;
+        renderZukanColor();
+      });
+    } else {
+      cell.innerHTML=`<div class="zukan-color-lock">🔒</div><div class="zukan-color-name">？？？</div>`;
+    }
     grid.appendChild(cell);
   });
 
-  // マーカー色セクション
+  // ── マーカー色：全件表示。デフォルト=最初から可、それ以外=ガチャ待ち ──
   const mLabel=document.createElement('div');
   mLabel.style.cssText='grid-column:1/-1;font-size:0.78rem;font-weight:800;color:var(--text-mid);margin-top:12px';
   mLabel.textContent='⏰ いまの じこく マーカーの色';
   grid.appendChild(mLabel);
-  ownedMarkers.forEach(mc=>{
-    const isSelected=mc.id===currentMarkerId;
+
+  MARKER_COLORS.forEach(mc=>{
+    const isOwned = mc.default || won.includes(mc.id);
+    const isSelected = mc.id===currentMarkerId;
     const cell=document.createElement('div');
-    cell.className='zukan-color-cell'+(isSelected?' selected':'');
-    cell.style.background=`${mc.color}22`;
+    cell.className='zukan-color-cell'+(isSelected?' selected':'')+(isOwned?'':' locked');
+    cell.style.background=isOwned?`${mc.color}22`:'var(--surface2)';
     cell.style.borderColor=isSelected?mc.color:'var(--border)';
-    cell.innerHTML=`<div class="gacha-marker-preview" style="background:${mc.color}"></div>${isSelected?`<div style="font-size:1.1rem">✔️</div>`:''}<div class="zukan-color-name">${kanji?mc.name.kanji:mc.name.hira}</div>`;
-    cell.addEventListener('click',()=>{
-      data.nowMarkerColor=mc.id; save();
-      applyNowMarkerColor(); renderTimeline(); renderZukanColor();
-    });
+    if(isOwned){
+      cell.innerHTML=`<div class="gacha-marker-preview" style="background:${mc.color}"></div>${isSelected?`<div style="font-size:1.1rem">✔️</div>`:''}<div class="zukan-color-name">${kanji?mc.name.kanji:mc.name.hira}</div>`;
+      cell.addEventListener('click',()=>{
+        data.nowMarkerColor=mc.id; save();
+        applyNowMarkerColor(); renderTimeline(); renderZukanColor();
+      });
+    } else {
+      cell.innerHTML=`<div class="zukan-color-lock">🔒</div><div class="zukan-color-name">？？？</div>`;
+    }
     grid.appendChild(cell);
   });
 }
@@ -3459,12 +3467,7 @@ function showRewardAnimation(reward){
     setTimeout(()=>stage.classList.remove('bf-rare-flash'), 1800);
   }
 
-  // C: コンボバッジ（2回目以上）
-  if(combo>=2){
-    const badge=document.createElement('div'); badge.className='bf-combo';
-    badge.textContent = combo>=3 ? `🔥 ${combo}かい れんぞく！` : '✨ 2かいめ！';
-    stage.appendChild(badge);
-  }
+  // コンボバッジ非表示（意味が伝わりにくいため削除）
 
   const stageH=stage.clientHeight||380;
   // C: コンボ＋Dレアでアイテム数を増やす（上限28）
@@ -4514,20 +4517,30 @@ function renderBagList(){
   const bags=getBags();
   if(!bags.length){ wrap.innerHTML='<div style="color:var(--text-dim);font-size:0.82rem">まだカバンがありません。「＋カバンを作る」から作りましょう。</div>'; return; }
   bags.forEach(bag=>{
-    const dowText=(bag.dow||[]).length===7?'毎日':(bag.dow||[]).length?bag.dow.slice().sort().map(d=>DOW_LABELS[d]).join('・'):'曜日みせってい';
-    const timeText=bag.defaultTime?(bag.defaultEndTime?`きほん ${bag.defaultTime}〜${bag.defaultEndTime}`:`きほん ${bag.defaultTime}〜`):'時刻はそのつど';
-    const taskText=(bag.tasks||[]).length?`${bag.tasks.length}こ`:'なし';
+    const dowText=(bag.dow||[]).length===7?'毎日':(bag.dow||[]).length?bag.dow.slice().sort().map(d=>DOW_LABELS[d]).join('・'):'曜日未設定';
+    const timeText=bag.defaultTime?(bag.defaultEndTime?`${bag.defaultTime}〜${bag.defaultEndTime}`:`${bag.defaultTime}〜`):'時刻はそのつど';
+    const taskText=(bag.tasks||[]).length?`なかみ ${bag.tasks.length}こ`:'なかみなし';
+    const freeText=bag.allowFree===false?'終わってもオフタイムにならない':'終わったら自由時間';
+    const accentColor=bag.type==='on'?'var(--on-color)':'var(--off-color)';
     const row=document.createElement('div');
-    row.style.cssText=`border:2px solid ${bag.enabled?'var(--border)':'#ddd'};border-radius:12px;padding:11px 13px;margin-bottom:8px;background:${bag.enabled?'var(--surface)':'#f3f3f3'};opacity:${bag.enabled?1:0.6};cursor:pointer`;
+    row.style.cssText=`
+      border:2px solid ${bag.enabled?'var(--border)':'#ddd'};
+      border-left:4px solid ${bag.enabled?accentColor:'#ccc'};
+      border-radius:12px;padding:12px 13px;margin-bottom:8px;
+      background:${bag.enabled?'var(--surface)':'var(--surface2)'};
+      opacity:${bag.enabled?1:0.55};cursor:pointer;
+    `;
     row.innerHTML=`
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="width:14px;height:14px;border-radius:50%;flex-shrink:0;background:${bag.type==='on'?'var(--on-color)':'var(--off-color)'}"></span>
+      <div style="display:flex;align-items:flex-start;gap:10px">
         <div style="flex:1;min-width:0">
-          <div style="font-size:1rem;font-weight:800">${bag.name}</div>
-          <div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px">${bag.type==='on'?'オンタイム':'オフタイム'} ／ ${dowText} ／ ${timeText} ／ なかみ${taskText}</div>
+          <div style="font-size:1rem;font-weight:800;margin-bottom:4px">${bag.name}</div>
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-mid)">${timeText} &nbsp;／&nbsp; ${dowText}</div>
+          <div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px">${taskText} &nbsp;・&nbsp; ${freeText}</div>
         </div>
-        <button class="bag-toggle" style="flex-shrink:0;background:${bag.enabled?'var(--off-color)':'var(--surface2)'};color:${bag.enabled?'#fff':'var(--text-dim)'};border:none;border-radius:14px;padding:9px 14px;font-size:0.78rem;font-weight:800;cursor:pointer;font-family:inherit">${bag.enabled?'オン':'オフ'}</button>
-        <span style="flex-shrink:0;color:var(--text-dim);font-size:0.85rem;padding:6px 4px">✎</span>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-top:2px">
+          <button class="bag-toggle" style="background:${bag.enabled?accentColor:'var(--surface2)'};color:${bag.enabled?'#fff':'var(--text-dim)'};border:none;border-radius:14px;padding:8px 14px;font-size:0.78rem;font-weight:800;cursor:pointer;font-family:inherit">${bag.enabled?'オン':'オフ'}</button>
+          <span style="color:var(--text-dim);font-size:0.85rem;padding:6px 4px">✎</span>
+        </div>
       </div>`;
     row.addEventListener('click',()=>{ document.getElementById('parent-modal').classList.remove('open'); openBagModal(bag.id); });
     row.querySelector('.bag-toggle').addEventListener('click',e=>{ e.stopPropagation(); bag.enabled=!bag.enabled; save(); renderBagList(); tick(); });
@@ -4665,15 +4678,15 @@ document.getElementById('bag-save').addEventListener('click',()=>{
   } else {
     c.bags.push({id:Date.now().toString(),name,type:bagType,tasks:bagTasks,enabled:true,dow:bagDow,defaultTime:dtime,defaultEndTime:dend,timeByDate:{},endByDate:{},completedByDate:{},showInLabel,labelOrder,allowFree});
   }
-  save(); tick(); document.getElementById('bag-modal').classList.remove('open'); openParent();
+  save(); tick(); document.getElementById('bag-modal').classList.remove('open'); openParent(); showParentTab('bag');
 });
 document.getElementById('bag-delete').addEventListener('click',()=>{
   if(!editBagId||!confirm('このカバンを削除しますか？'))return;
   const c=getChild(); c.bags=c.bags.filter(b=>b.id!==editBagId);
-  save(); tick(); document.getElementById('bag-modal').classList.remove('open'); openParent();
+  save(); tick(); document.getElementById('bag-modal').classList.remove('open'); openParent(); showParentTab('bag');
 });
-document.getElementById('bag-cancel').addEventListener('click',()=>{document.getElementById('bag-modal').classList.remove('open');openParent();});
-document.getElementById('bag-modal').addEventListener('click',e=>{if(e.target===e.currentTarget){document.getElementById('bag-modal').classList.remove('open');openParent();}});
+document.getElementById('bag-cancel').addEventListener('click',()=>{document.getElementById('bag-modal').classList.remove('open');openParent();showParentTab('bag');});
+document.getElementById('bag-modal').addEventListener('click',e=>{if(e.target===e.currentTarget){document.getElementById('bag-modal').classList.remove('open');openParent();showParentTab('bag');}});
 
 
 // ═══ 予定編集 ═══
