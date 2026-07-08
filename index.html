@@ -1508,6 +1508,15 @@ body.viewing-other-day #date-big { color: var(--accent); }
   </div>
 </div>
 
+<!-- 時間が過ぎたのに完了ボタンを押していないカバンを、あとから完了させるポップアップ -->
+<div class="modal-overlay" id="overtime-modal">
+  <div class="modal" style="max-width:400px;padding:14px;">
+    <div id="overtime-task-body"></div>
+    <button class="btn" id="overtime-close" style="width:100%;margin-top:10px;">とじる</button>
+  </div>
+</div>
+
+
 <!-- コピー元カバン選択モーダル -->
 <div class="modal-overlay" id="bag-copy-modal">
   <div class="modal">
@@ -2157,16 +2166,52 @@ function renderTimeline(){
   const wake=toMin(getChild().wakeTime||'07:00');
   const sleep=toMin(getChild().sleepTime||'21:00');
 
+  // 「カバン由来のオンタイム予定」が「今・進行中」かつ「やること(tasks)を持ち」かつ「まだ完了していない」時だけ分割する。
+  // オフタイムや、やること無し・完了済みでは分割しない（＝普段の全幅タイムライン）。
+  // 同時刻に複数のオンタイムが重なっていたら、全部を候補として集める（やり終える順番は子どもが決められる）。
+  // ※ lg/rg（左右の余白グラデーション）の幅がsplitModeで変わるため、余白を作る前にここで判定する。
+  const curForSplit=nowMin();
+  let splitMode=false, splitEvId=null, nowCandidateIds=[];
+  {
+    function evEndTmp(i){const ev=sorted[i];if(ev.end)return toMin(ev.end);return i<sorted.length-1?toMin(sorted[i+1].time):sleep;}
+    if(isViewingToday() && !editMode){
+      for(let i=0;i<sorted.length;i++){
+        const ev=sorted[i];
+        const s=toMin(ev.time), e=evEndTmp(i);
+        if(curForSplit>=s && curForSplit<e){
+          if(ev._completedAt!=null) continue; // 完了済みは候補にしない
+          const isOnWithTasks = ev.type==='on' && !ev._free && ev.tasks && ev.tasks.length>0;
+          if(isOnWithTasks) nowCandidateIds.push(ev.id);
+        }
+      }
+    }
+    if(nowCandidateIds.length>0){
+      splitMode=true;
+      // 前回選んだものがまだ候補にあればそれを継続。無ければ一番開始が早いもの（先頭）にする
+      splitEvId = nowCandidateIds.includes(selectedNowTaskId) ? selectedNowTaskId : nowCandidateIds[0];
+      selectedNowTaskId = splitEvId;
+    } else {
+      selectedNowTaskId = null;
+    }
+  }
+
   // ステージ（左右の余白＋中央の本体）
   const SIDE=TL_SIDE; // 左右余白の割合(%)
+  const RAIL_W_PCT = 26;           // 分割時の本体（細い帯）の幅(%)
   const stage=document.createElement('div');
   stage.style.cssText=`position:relative;width:100%;height:${24*60*PX_PER_MIN}px;`;
   scroll.appendChild(stage);
   // 左右の余白に 時間帯グラデーション（朝昼夕夜）
+  // 分割モード時：右の余白は「レール（本体）の右端 〜 画面右端」まで広げる。
+  // オンタイムカードはこの広いグラデーションの上にレイヤーされる（＝右側は全部「空」の背景になる）
+  const rgLeftPct = SIDE + RAIL_W_PCT; // 分割時：レール右端(%)
+  const rgWidthPct = 100 - rgLeftPct;  // 分割時：そこから画面右端までの幅(%)
   const lg=document.createElement('div');
   lg.style.cssText=`position:absolute;left:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;pointer-events:none;`;
   const rg=document.createElement('div');
-  rg.style.cssText=`position:absolute;right:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;pointer-events:none;`;
+  rg.style.cssText = splitMode
+    ? `position:absolute;left:${rgLeftPct}%;top:0;width:${rgWidthPct}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;pointer-events:none;`
+    : `position:absolute;right:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;pointer-events:none;`;
   stage.appendChild(lg); stage.appendChild(rg);
   // 左右の余白に 時間帯のアイコンを散りばめる（不規則配置・片側ごと・縦横ともにばらつき）
   TIMEBAND_ICONS.forEach(ic=>{
@@ -2229,32 +2274,7 @@ function renderTimeline(){
   // 「カバン由来のオンタイム予定」が「今・進行中」かつ「やること(tasks)を持ち」かつ「まだ完了していない」時だけ分割する。
   // オフタイムや、やること無し・完了済みでは分割しない（＝普段の全幅タイムライン）。
   // 同時刻に複数のオンタイムが重なっていたら、全部を候補として集める（やり終える順番は子どもが決められる）。
-  const curForSplit=nowMin();
-  let splitMode=false, splitEvId=null, nowCandidateIds=[];
-  {
-    function evEndTmp(i){const ev=sorted[i];if(ev.end)return toMin(ev.end);return i<sorted.length-1?toMin(sorted[i+1].time):sleep;}
-    if(isViewingToday() && !editMode){
-      for(let i=0;i<sorted.length;i++){
-        const ev=sorted[i];
-        const s=toMin(ev.time), e=evEndTmp(i);
-        if(curForSplit>=s && curForSplit<e){
-          if(ev._completedAt!=null) continue; // 完了済みは候補にしない
-          const isOnWithTasks = ev.type==='on' && !ev._free && ev.tasks && ev.tasks.length>0;
-          if(isOnWithTasks) nowCandidateIds.push(ev.id);
-        }
-      }
-    }
-    if(nowCandidateIds.length>0){
-      splitMode=true;
-      // 前回選んだものがまだ候補にあればそれを継続。無ければ一番開始が早いもの（先頭）にする
-      splitEvId = nowCandidateIds.includes(selectedNowTaskId) ? selectedNowTaskId : nowCandidateIds[0];
-      selectedNowTaskId = splitEvId;
-    } else {
-      selectedNowTaskId = null;
-    }
-  }
-  // 分割時：本体（タイムライン一式）を左の細い列に圧縮。右はグラデーションの上に「いまのやること」カードを大きく出す
-  const RAIL_W_PCT = 26;           // 分割時の本体（細い帯）の幅(%)
+  // ※ splitMode判定はlg/rg作成前（上部）に移動済み。ここでは幅の計算だけ行う。RAIL_W_PCTも上部で定義済み。
   const LEFT_RAIL_RIGHT = splitMode ? (100-SIDE-RAIL_W_PCT) : SIDE; // 本体の右端(%)
 
   // 内側の絶対配置コンテナ（本体・中央寄せで狭める）
@@ -2267,8 +2287,8 @@ function renderTimeline(){
   if(splitMode){
     rightArea=document.createElement('div');
     rightArea.id='now-right-panel';
-    // 左レール右端(SIDE+RAIL_W_PCT)から始め、右余白(SIDE)手前で終わる
-    rightArea.style.cssText=`position:absolute;left:${SIDE+RAIL_W_PCT+1}%;right:${Math.max(1,SIDE-2)}%;top:50%;transform:translateY(-50%);z-index:10;`;
+    // 左レール右端(SIDE+RAIL_W_PCT)から始め、画面右端ぎりぎりまで（＝広げた余白グラデーションの上に重ねる）
+    rightArea.style.cssText=`position:absolute;left:${SIDE+RAIL_W_PCT+1}%;right:2%;top:50%;transform:translateY(-50%);z-index:10;`;
     col.appendChild(rightArea);
   }
 
@@ -2576,7 +2596,10 @@ function renderUntimedTray(){
     card.className='tray-card'+(isOvertime?' tray-card-overtime':'');
     const hint=isOvertime?'⏰ じかんが すぎたよ　タップで あとで やる':'タップで じかんを きめる ⏰';
     card.innerHTML=`<div class="tray-card-body"><div class="tray-card-name">${bag.name}</div><div class="tray-card-hint">${hint}</div></div>`;
-    card.addEventListener('click',()=>openTimeModal(bag.id));
+    card.addEventListener('click',()=>{
+      if(isOvertime) openOvertimeTaskModal(bag.id);
+      else openTimeModal(bag.id);
+    });
     list.appendChild(card);
   });
 }
@@ -2701,6 +2724,41 @@ function onNowComplete(ev){
   document.getElementById('complete-overlay').classList.add('show');
 }
 
+// 時間が過ぎたのに完了ボタン未押下のカバンを、トレイからタップした時に開く完了用ポップアップ。
+// 通常の「いまのやること」カード(buildTaskCard)をそのまま流用し、チェック操作と完了操作を効かせる。
+function openOvertimeTaskModal(bagId){
+  const ev=getTodayEvents().find(e=>e._bagId===bagId);
+  if(!ev){ openTimeModal(bagId); return; } // 万一evが見つからない時は従来どおり時刻編集にフォールバック
+  renderOvertimeTaskModal(bagId);
+  document.getElementById('overtime-modal').classList.add('open');
+}
+function renderOvertimeTaskModal(bagId){
+  const bag=getBags().find(b=>b.id===bagId);
+  const ev=getTodayEvents().find(e=>e._bagId===bagId);
+  if(!bag||!ev){ document.getElementById('overtime-modal').classList.remove('open'); return; }
+  const body=document.getElementById('overtime-task-body');
+  body.innerHTML=buildTaskCard(ev);
+  body.querySelectorAll('.now-task-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      const ti=Number(item.dataset.ti);
+      if(!bag.taskDoneByDate) bag.taskDoneByDate={};
+      const dk=dateKey(getDisplayDate());
+      if(!bag.taskDoneByDate[dk]) bag.taskDoneByDate[dk]=(bag.tasks||[]).map(()=>false);
+      bag.taskDoneByDate[dk][ti]=!bag.taskDoneByDate[dk][ti];
+      save();
+      renderOvertimeTaskModal(bagId); // チェック状態を反映して描き直す
+    });
+  });
+  const cb=body.querySelector('#now-complete');
+  if(cb) cb.addEventListener('click',()=>{
+    onNowComplete(ev);
+    document.getElementById('overtime-modal').classList.remove('open');
+    tick(); // タイムライン＋トレイを再描画（完了済みなのでトレイから消える）
+  });
+}
+document.getElementById('overtime-close').addEventListener('click',()=>document.getElementById('overtime-modal').classList.remove('open'));
+document.getElementById('overtime-modal').addEventListener('click',e=>{ if(e.target.id==='overtime-modal') document.getElementById('overtime-modal').classList.remove('open'); });
+
 // 分割モード：右に大きく出す「いまのやること」カード。
 // 時間表現（残り・経過・色変化・大きさ）は一切しない＝左の帯に任せる。固定サイズでテキストとチェックだけ見せる。
 // 先の予定の中身を見るポップアップ（チェックは表示のみ・押せない）
@@ -2739,10 +2797,13 @@ function buildTaskCard(ev){
   // 色：残り多い(hue=217:青)→残り少ない(hue=360:赤) ※buildNowCardと同じ式
   const hue=217+(1-remainFrac)*143;
   const borderColor=`hsl(${hue}, 68%, 48%)`;
-  const bgColor=`hsl(${hue}, 62%, 96%)`;
   const textColor=`hsl(${hue}, 70%, 30%)`;
-  // 進捗バー：経過割合だけ左から埋まる（上部固定の横バー）
-  const barPct=Math.round(elapsedFrac*100);
+  // 細いバーではなく、カード自体を「経過ぶんだけ上から下に」塗る。
+  // 時間が経つほど色が濃く（青→赤・明度も少し下がる）なるので、子どもにも一目で残り具合が分かる。
+  const fillPct=Math.round(elapsedFrac*100);
+  const fillLight=Math.round(85 - elapsedFrac*15); // 経過が進むほど少し濃くなる
+  const fillColor=`hsl(${hue}, 60%, ${fillLight}%)`;
+  const bgFill=`linear-gradient(to bottom, ${fillColor} 0%, ${fillColor} ${fillPct}%, #ffffff ${fillPct}%, #ffffff 100%)`;
 
   const tasks=(ev.tasks||[]);
   let tasksHtml='<div class="now-tasks" style="padding:4px 0">';
@@ -2762,11 +2823,7 @@ function buildTaskCard(ev){
       : `<div class="now-complete-wrap"><button class="now-complete-btn not-ready">${done} / ${total} おわった</button></div>`;
   }
 
-  return `<div style="background:${bgColor};border:3px solid ${borderColor};border-radius:22px;box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:78vh;overflow:hidden">
-      <!-- 残り時間の進捗バー（上部固定、経過分だけ灰色で埋まる） -->
-      <div style="height:6px;background:rgba(0,0,0,0.08);border-radius:22px 22px 0 0;overflow:hidden;flex-shrink:0">
-        <div style="height:100%;width:${barPct}%;background:${borderColor};opacity:0.5;transition:width 0.8s linear;border-radius:inherit"></div>
-      </div>
+  return `<div style="background:${bgFill};border:3px solid ${borderColor};border-radius:22px;box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:78vh;overflow:hidden;transition:background 0.8s linear">
       <div style="padding:14px 18px 0;flex-shrink:0">
         <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px">
           <div class="now-card-name" style="font-size:1.5rem">${ev.name}</div>
@@ -3469,12 +3526,16 @@ function showRewardAnimation(reward){
   // コンボバッジ非表示（意味が伝わりにくいため削除）
 
   const stageH=stage.clientHeight||380;
-  // C: コンボ＋Dレアでアイテム数を増やす（上限28）
-  const countByTier=[4, 9, 16, 26];
-  let n = countByTier[tier];
-  if(combo===2) n = Math.min(28, Math.round(n*1.3));
-  if(combo>=3)  n = Math.min(28, Math.round(n*1.6));
-  if(isRare)    n = Math.min(28, Math.round(n*1.5));
+  // C: コンボ＋Dレアでアイテム数を増やす（上限26）
+  // 個数は savedMin(かせいだ時間)から累乗カーブで計算。直線だと1分など少ない時間でも
+  // 下限のかさ上げで個数が目立ってしまうため、指数1.5で低い方の伸びを抑え、後半でしっかり増やす。
+  // tier(段階)はメッセージの語調・積み上がり/爆発演出の切り替えにのみ使い、個数はここで分離する。
+  // 1分=2個 〜 30分=20個。
+  let n = Math.round(1 + Math.pow(Math.min(savedMin,30)/30, 1.5) * 19);
+  n = Math.max(2, Math.min(20, n));
+  if(combo===2) n = Math.min(26, Math.round(n*1.3));
+  if(combo>=3)  n = Math.min(26, Math.round(n*1.6));
+  if(isRare)    n = Math.min(26, Math.round(n*1.5));
   const pile = tier>=2 || combo>=2;
   const blast = tier===3 || (combo>=3 && tier>=2);
 
@@ -3521,28 +3582,6 @@ function showRewardAnimation(reward){
   }
 
   const totalDelay = 60+n*55+(blast?1100:900);
-
-  // B: 集めた生き物が画面を横切る（アイテムが落ち着いた後）
-  const child=getChild();
-  if(child&&creatureTotalOwned(child)>0){
-    const candidates=pickSkyCreatures(child);
-    if(candidates.length>0){
-      const pick=candidates[Math.floor(Math.random()*candidates.length)];
-      const goRight=Math.random()<0.5;
-      const fly=document.createElement('div');
-      fly.className='bf-creature-fly';
-      const flyTop=15+Math.random()*55; // 画面の15〜70%の高さ
-      const flyDur=1.6+Math.random()*0.8;
-      fly.style.cssText=`top:${flyTop}%;animation:${goRight?'bf-fly-right':'bf-fly-left'} ${flyDur}s ease-in-out forwards;`;
-      fly.style.left='0'; fly.style.width='100%';
-      const svgWrap=document.createElement('div');
-      svgWrap.style.cssText='position:absolute;top:0;left:0;';
-      svgWrap.innerHTML=creatureSvg(pick.key, 40);
-      fly.appendChild(svgWrap);
-      stage.appendChild(fly);
-      setTimeout(()=>fly.remove(), totalDelay+(flyDur*1000)+200);
-    }
-  }
 
   setTimeout(()=>{
     document.getElementById('blockfall-result').textContent = '';
@@ -4369,18 +4408,18 @@ document.getElementById('awake-on').addEventListener('click',()=>{ data.keepAwak
 document.getElementById('awake-off').addEventListener('click',()=>{ data.keepAwake=false; save(); updateAwakeUI(); applyKeepAwake(); });
 function updateZoomUI(){
   const z=data.timelineZoom||1.4;
-  document.getElementById('zoom-narrow').className='type-btn'+(z===1.0?' active-on':'');
+  document.getElementById('zoom-narrow').className='type-btn'+(z===0.75?' active-on':'');
   document.getElementById('zoom-normal').className='type-btn'+(z===1.4?' active-on':'');
-  document.getElementById('zoom-wide').className='type-btn'+(z===2.0?' active-on':'');
+  document.getElementById('zoom-wide').className='type-btn'+(z===2.6?' active-on':'');
 }
 function setZoom(z){
   data.timelineZoom=z; PX_PER_MIN=z; save(); updateZoomUI();
   userScrolledAway=false; // ズーム変更後は今の位置に自動で戻す
   tick();
 }
-document.getElementById('zoom-narrow').addEventListener('click',()=>setZoom(1.0));
+document.getElementById('zoom-narrow').addEventListener('click',()=>setZoom(0.75));
 document.getElementById('zoom-normal').addEventListener('click',()=>setZoom(1.4));
-document.getElementById('zoom-wide').addEventListener('click',()=>setZoom(2.0));
+document.getElementById('zoom-wide').addEventListener('click',()=>setZoom(2.6));
 function updateNowMarkerUI(){
   const a=data.nowMarkerStyle==='analog';
   document.getElementById('nowmarker-digital').className='type-btn'+(!a?' active-on':'');
