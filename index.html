@@ -1355,7 +1355,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size:0.68rem;color:var(--text-dim);margin-top:2px">v7・2026-07-08</div>
+    <div style="text-align:center;font-size:0.68rem;color:var(--text-dim);margin-top:2px">v9・2026-07-08</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -1880,6 +1880,20 @@ function getTopLabels(){
 }
 
 // ═══ タイムライン描画 ═══
+// 残り時間を「へっていく円グラフ」で見せる時計（数字だけより一目で分かるように）。
+// 12時の位置から時計回りに、残りぶんだけ色がついた扇形が減っていく。中心の数字は小さめの補助。
+function remainPieHTML(remainFrac, remainMin, color, size){
+  size = size||44;
+  const pct = Math.max(0, Math.min(100, Math.round(remainFrac*100)));
+  const trackColor = 'rgba(0,0,0,0.10)';
+  const numPx = Math.max(11, Math.round(size*0.30));
+  return `<div style="position:relative;width:${size}px;height:${size}px;flex-shrink:0">
+      <div style="width:100%;height:100%;border-radius:50%;background:conic-gradient(${color} 0% ${pct}%, ${trackColor} ${pct}% 100%);transform:rotate(-90deg);box-shadow:0 2px 6px rgba(0,0,0,0.12)"></div>
+      <div style="position:absolute;inset:${Math.round(size*0.14)}px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center">
+        <span style="font-size:${numPx}px;font-weight:900;color:${color};font-variant-numeric:tabular-nums;line-height:1">${remainMin}</span>
+      </div>
+    </div>`;
+}
 // 指定の「時」を指す小さなアナログ時計（時計学習の補助）
 // 現在地マーカー用：分まで正確なアナログ時計（時計学習の補助・歩くキャラの代わり）
 function analogNowClockSVG(totalMin, size){
@@ -2148,6 +2162,7 @@ let currentNowEvId = null;
 let selectedNowTaskId = null; // 同時刻に複数のオンタイムがある時、どれを右に出すか（子どもが選ぶ）
 
 let userScrolledAway = false;
+let focusedOverlapId = null; // 重なった予定をタップした時、一時的にどれを前面にするか
 let scrollTimer = null;
 
 let PX_PER_MIN = data.timelineZoom||1.4;  // 1分の高さ（保護者設定の「タイムラインの間隔」で変更可）
@@ -2490,24 +2505,29 @@ function renderTimeline(){
       block.appendChild(card);
     } else {
       // 後ろの予定：狭め・中央寄せ
-      block.style.cssText=`position:absolute;left:6px;right:14px;top:${y+2}px;z-index:3;display:flex;justify-content:center;overflow:hidden;`;
+      // z-indexは通常どれも同じ(3)。重なった時は「先にappendした方が下」＝開始が早い方が下に来る（DOM描画順によるもの）。
+      // タップした予定だけ一時的に最前面(60)に来るようにして、隠れがちな⏰アイコンも必ず押せるようにする。
+      const isFocused = ev.id===focusedOverlapId;
+      block.style.cssText=`position:absolute;left:6px;right:14px;top:${y+2}px;z-index:${isFocused?60:3};display:flex;justify-content:center;overflow:hidden;`;
       block.style.height=h+'px';
       const routineTag=ev.isRoutine?' ・ ルーティン':'';
       const tappable = ev._bagId && !editMode && !isPast; // ⏰時刻編集アイコンの表示条件
       const hasTasks = !!(ev.tasks && ev.tasks.length>0); // 覗く(peek)の表示条件＝やることがあるかどうか
       const pastStyle = isPast ? 'border-color:rgba(100,105,115,0.45);background:rgba(100,105,115,0.12)' : '';
       const soonClass = (ev.id===soonEvId) ? ' tl-band-soon' : '';
-      block.innerHTML=`<div class="tl-band ${ev.type}${soonClass}" style="height:100%;width:100%;position:relative;min-height:0;${pastStyle}">
+      const focusRing = isFocused ? 'box-shadow:0 0 0 3px var(--accent);' : '';
+      block.innerHTML=`<div class="tl-band ${ev.type}${soonClass}" style="height:100%;width:100%;position:relative;min-height:0;${pastStyle}${focusRing}">
         <div style="min-width:0;${isPast?'opacity:0.75':''}"><div class="tl-band-name">${ev.name}</div><div class="tl-band-tag" style="${isPast?'color:var(--text-dim)':''}">${fmtTimeDisp(ev.time)}〜${ev.end?fmtTimeDisp(ev.end):''}${routineTag}</div></div>
         ${tappable?'<button class="tl-time-edit-icon" type="button" title="じかんへんこう">⏰</button>':''}
       </div>`;
       if(editMode){ setupDragForBlock(block, ev); }
       else {
-        // カード本体タップ → 中身を覗く（やることがある時だけ。チェックは表示のみ）
-        if(hasTasks){
-          block.style.cursor='pointer';
-          block.addEventListener('click',()=>{ openPeekModal(ev); });
-        }
+        // カード本体タップ → 重なっていれば前面化しつつ、（やることがあれば）中身も覗く
+        block.style.cursor='pointer';
+        block.addEventListener('click',()=>{
+          if(focusedOverlapId!==ev.id){ focusedOverlapId=ev.id; renderTimeline(); }
+          if(hasTasks) openPeekModal(ev);
+        });
         // ⏰アイコン → 時刻編集（本体タップとは別。伝播を止める）
         if(tappable){
           const icon=block.querySelector('.tl-time-edit-icon');
@@ -2636,9 +2656,10 @@ function buildNowCard(ev, cur, cardH){
       <div style="opacity:0.75;min-width:0"><div class="tl-band-name">${ev.name}</div><div class="tl-band-tag" style="color:var(--text-dim)">${ev.type==='on'?'オンタイム':'オフタイム'} ・ ${fmtTimeDisp(ev.time)}〜</div></div>
     </div>` : '';
   // いまの情報（タイトル＋残り時間）：カード下寄りに固定バッジで表示。経過ぶんが大きくなっても重なってOK・常に読める
+  const pieSize = Math.max(34, Math.min(56, Math.round(remainFontPx*2.2)));
   const badge = `<div style="position:absolute;left:8px;right:8px;bottom:8px;text-align:center;background:rgba(255,255,255,0.92);border-radius:14px;padding:6px 10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);z-index:4">
-      ${showTitle?`<div style="font-weight:900;font-size:${titleFontPx}px;color:${remainText};line-height:1.25">${ev.name}</div>`:''}
-      <div style="font-weight:900;font-size:${remainFontPx}px;color:${remainText};font-variant-numeric:tabular-nums">あと ${remainMin} ふん</div>
+      ${showTitle?`<div style="font-weight:900;font-size:${titleFontPx}px;color:${remainText};line-height:1.25;margin-bottom:4px">${ev.name}</div>`:''}
+      <div style="display:flex;align-items:center;justify-content:center">${remainPieHTML(remainFrac, remainMin, remainBorder, pieSize)}</div>
     </div>`;
 
   const tinyCard = ch<100;
@@ -2825,9 +2846,9 @@ function buildTaskCard(ev){
 
   return `<div style="background:${bgFill};border:3px solid ${borderColor};border-radius:22px;box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:78vh;overflow:hidden;transition:background 0.8s linear">
       <div style="padding:14px 18px 0;flex-shrink:0">
-        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px">
           <div class="now-card-name" style="font-size:1.5rem">${ev.name}</div>
-          <div style="font-size:0.9rem;font-weight:900;color:${textColor};font-variant-numeric:tabular-nums;white-space:nowrap;margin-left:8px">あと ${remainMin}ふん</div>
+          ${remainPieHTML(remainFrac, remainMin, borderColor, 48)}
         </div>
       </div>
       <div style="flex:1;min-height:0;overflow-y:auto;padding:0 18px">${tasksHtml}</div>
