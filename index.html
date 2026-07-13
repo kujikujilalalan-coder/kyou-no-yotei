@@ -1142,6 +1142,26 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
 #quick-sheet .qs-btn:active { transform: scale(0.98); }
 #quick-sheet .qs-cancel { justify-content: center; color: var(--text-dim); background: #fff; }
 #quick-sheet .qs-sub { font-size: var(--fs-xs); font-weight: 700; color: var(--text-dim); margin-left: auto; }
+/* ホーム画面追加バー：画面下部＝親指の届く場所に出す */
+#install-bar {
+  position: fixed; left: 8px; right: 8px; bottom: 78px; z-index: 115;
+  background: var(--purple); color: #fff; border-radius: var(--r-lg);
+  padding: var(--sp-3); box-shadow: 0 6px 24px rgba(79,70,229,0.45);
+  display: flex; align-items: center; gap: var(--sp-2);
+}
+#install-bar .ib-text { flex: 1; min-width: 0; }
+#install-bar .ib-title { font-size: var(--fs-sm); font-weight: 900; }
+#install-bar .ib-sub { font-size: var(--fs-xs); opacity: 0.9; }
+#install-bar .ib-btn {
+  min-height: var(--btn-sm); padding: var(--sp-2) var(--sp-4); flex-shrink: 0;
+  background: #fff; color: var(--purple); border: none; border-radius: var(--r-md);
+  font-family: inherit; font-size: var(--fs-sm); font-weight: 900; cursor: pointer;
+}
+#install-bar .ib-close {
+  min-width: var(--btn-sm); min-height: var(--btn-sm); flex-shrink: 0;
+  background: transparent; color: #fff; border: none; border-radius: var(--r-full);
+  font-family: inherit; font-size: var(--fs-md); font-weight: 900; cursor: pointer;
+}
 /* スクリーンリーダー専用（見た目には出ないが読み上げられる） */
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -1152,6 +1172,17 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
 <body>
 
 <h1 class="sr-only">きょうのよてい</h1>
+
+<!-- ホーム画面への追加を促す。manifestは前からあったのに促すUIが無く、
+     ブラウザのタブに埋もれていた。ホーム画面にあること自体が最も強い「きっかけ」になる。 -->
+<div id="install-bar" style="display:none">
+  <div class="ib-text">
+    <div class="ib-title">📲 ホームがめんに ついか</div>
+    <div class="ib-sub">アプリみたいに すぐ ひらけます</div>
+  </div>
+  <button class="ib-btn" id="install-yes">ついか</button>
+  <button class="ib-close" id="install-no" aria-label="とじる">✕</button>
+</div>
 
 <div id="topbar">
   <div id="topbar-row1">
@@ -1631,6 +1662,34 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
     </div>
 
     <!-- ナイトモード -->
+    <!-- 通知：習慣化に唯一欠けていた「きっかけ」を作る -->
+    <div class="acc-section" data-acc="notify" data-tab-group="settings">
+      <button class="acc-head" type="button" data-acc-toggle="notify">🔔 おしらせ（通知）<span class="acc-chevron">▶</span></button>
+      <div class="acc-body">
+        <p style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">
+          予定の5分前と、終わりの時刻に おしらせを出します。<br>
+          <b>アプリを開いている間、またはホーム画面に追加してバックグラウンドにある間だけ届きます。</b>
+          完全に閉じている時は届きません（サーバーを使わないアプリのため）。
+        </p>
+        <div class="type-toggle" id="notify-toggle">
+          <button class="type-btn" id="notify-on" style="flex:1">つかう</button>
+          <button class="type-btn" id="notify-off" style="flex:1">つかわない</button>
+        </div>
+        <div id="notify-freq" style="margin-top:12px;display:none">
+          <label style="font-size: var(--fs-xs);color:var(--text-dim);font-weight:800">どれくらい しらせる？</label>
+          <div class="type-toggle" id="notify-mode-toggle" style="margin-top:6px">
+            <button class="type-btn" id="notify-mode-morning" style="flex:1">あさ 1回</button>
+            <button class="type-btn" id="notify-mode-key" style="flex:1">だいじな分</button>
+            <button class="type-btn" id="notify-mode-all" style="flex:1">ぜんぶ</button>
+          </div>
+          <p style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;line-height:1.5">
+            通知が多いと「うるさい」と感じて切られ、切られると二度と戻りません。<br>
+            <b>まずは「あさ 1回」から始めるのをおすすめします。</b>
+          </p>
+        </div>
+        <div id="notify-status" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:8px;line-height:1.5"></div>
+      </div>
+    </div>
     <div class="acc-section" data-acc="night" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="night">🌃 ナイトモード<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
@@ -1677,7 +1736,17 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       <button class="acc-head" type="button" data-acc-toggle="backup">💾 データのバックアップ<span id="backup-badge" style="display:none;margin-left:6px;background:var(--accent);color:#fff;font-size: var(--fs-xs);font-weight:900;padding:2px 7px;border-radius: var(--r-sm)">！</span><span class="acc-chevron">▶</span></button>
       <div class="acc-body">
         <div id="backup-reminder" style="display:none;background:var(--on-light);border:1.5px solid var(--on-color);border-radius: var(--r-sm);padding:10px 12px;margin-bottom:12px;font-size: var(--fs-xs);font-weight:700;color:var(--accent);line-height:1.5"></div>
-        <p style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">設定や予定をファイルに保存できます。機種変更やブラウザのデータ消去に備えて、ときどき書き出しておくと安心です。</p>
+        <!-- 自動バックアップ：手動では誰も続けられない。
+             最大の危険は「保存しているつもりで権限切れで止まっている」ことなので、
+             最後に保存できた日時を必ず表示する。 -->
+        <div id="auto-backup-box" style="border:2px solid var(--border);border-radius: var(--r-md);padding:12px;margin-bottom:12px">
+          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px">🔄 自動バックアップ</div>
+          <div id="auto-backup-desc" style="font-size: var(--fs-xs);color:var(--text-dim);line-height:1.5;margin-bottom:8px"></div>
+          <div id="auto-backup-status" style="font-size: var(--fs-xs);font-weight:800;line-height:1.5;margin-bottom:8px"></div>
+          <button class="btn btn-primary" id="auto-backup-btn" style="width:100%;font-size: var(--fs-sm)"></button>
+          <button class="btn btn-secondary" id="auto-backup-off" style="width:100%;margin-top:6px;font-size: var(--fs-sm);display:none">じどう保存を やめる</button>
+        </div>
+        <p style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">手動でも書き出せます。機種変更やブラウザのデータ消去に備えて、ときどき書き出しておくと安心です。</p>
         <div style="display:flex;gap:8px">
           <button class="btn btn-secondary" id="export-btn" style="flex:1;font-size: var(--fs-sm)">⬇️ ぜんいん書き出す</button>
           <button class="btn btn-secondary" id="import-btn" style="flex:1;font-size: var(--fs-sm)">⬆️ 読み込む</button>
@@ -1690,7 +1759,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v39・2026-07-12</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v41・2026-07-12</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2113,7 +2182,186 @@ if(!data._oldLabelsCleared){ data._oldLabelsCleared=true; try{ save(); }catch(e)
 let pending = JSON.parse(localStorage.getItem('kodomo_pending')||'[]');
 let wantList = JSON.parse(localStorage.getItem('kodomo_want')||'[]');
 
-function save(){ localStorage.setItem('kodomoV6', JSON.stringify(data)); }
+// ═══════════════════════════════════════════════════════════════
+// 自動バックアップ
+// ═══════════════════════════════════════════════════════════════
+// 離脱理由の上位に「データが消える恐怖」がある。localStorageは
+// ブラウザのデータ消去で一瞬で消え、手動バックアップは誰も続けられない。
+//
+// 手段は2段構え：
+//   ① navigator.storage.persist() … どの端末でも効く。容量不足での自動削除を防ぐ
+//   ② File System Access API   … ブラウザの外(端末のファイル)に自動で書き出す。
+//                                 ブラウザのデータを全部消してもファイルは残る。
+//                                 ※Chrome/Edge(PC・Android)のみ。iOS Safariでは使えない
+//
+// 最大の危険は「バックアップしているつもりで、実は権限切れで止まっている」こと。
+// そのため「最後に保存できた日時」を必ず記録し、画面に出す。
+// ═══════════════════════════════════════════════════════════════
+
+const FS_SUPPORTED = typeof window.showDirectoryPicker === 'function';
+let backupDirHandle = null;
+
+// ── ファイルハンドルの保管（localStorageには入らないのでIndexedDBを使う）──
+function idbOpen(){
+  return new Promise((res,rej)=>{
+    const r = indexedDB.open('kyou-no-yotei-backup', 1);
+    r.onupgradeneeded = ()=>{ r.result.createObjectStore('handles'); };
+    r.onsuccess = ()=>res(r.result);
+    r.onerror = ()=>rej(r.error);
+  });
+}
+async function idbPut(key, val){
+  const db = await idbOpen();
+  return new Promise((res,rej)=>{
+    const tx = db.transaction('handles','readwrite');
+    tx.objectStore('handles').put(val, key);
+    tx.oncomplete = ()=>res();
+    tx.onerror = ()=>rej(tx.error);
+  });
+}
+async function idbGet(key){
+  const db = await idbOpen();
+  return new Promise((res,rej)=>{
+    const tx = db.transaction('handles','readonly');
+    const rq = tx.objectStore('handles').get(key);
+    rq.onsuccess = ()=>res(rq.result || null);
+    rq.onerror = ()=>rej(rq.error);
+  });
+}
+async function idbDel(key){
+  const db = await idbOpen();
+  return new Promise(res=>{
+    const tx = db.transaction('handles','readwrite');
+    tx.objectStore('handles').delete(key);
+    tx.oncomplete = ()=>res();
+  });
+}
+
+// ── ① データを勝手に消させない（どの端末でも効く）──
+async function ensurePersistentStorage(){
+  try{
+    if(navigator.storage && navigator.storage.persist){
+      const already = await navigator.storage.persisted();
+      if(already){ data.storagePersisted = true; save(); return true; }
+      const ok = await navigator.storage.persist();
+      data.storagePersisted = !!ok; save();
+      return !!ok;
+    }
+  }catch(e){}
+  return false;
+}
+
+// ── ② 保存先フォルダを選ぶ（初回のみ）──
+async function chooseBackupFolder(){
+  if(!FS_SUPPORTED){
+    showToast('この ブラウザでは 自動保存が つかえません');
+    return false;
+  }
+  try{
+    const dir = await window.showDirectoryPicker({ mode:'readwrite' });
+    await idbPut('backupDir', dir);
+    backupDirHandle = dir;
+    data.autoBackup = true; save();
+    const ok = await runAutoBackup(true);
+    updateBackupUI();
+    if(ok) showToast('自動保存を オンに しました');
+    return ok;
+  }catch(e){
+    return false;   // ユーザーがキャンセルした
+  }
+}
+
+// ── 保存先の権限を確認する（ブラウザ再起動で切れることがある）──
+async function backupPermissionOK(){
+  if(!backupDirHandle) return false;
+  try{
+    const q = await backupDirHandle.queryPermission({ mode:'readwrite' });
+    if(q === 'granted') return true;
+    const r = await backupDirHandle.requestPermission({ mode:'readwrite' });
+    return r === 'granted';
+  }catch(e){ return false; }
+}
+
+// ── 実際に書き出す ──
+let _backupTimer = null;
+async function runAutoBackup(force){
+  if(!data.autoBackup || !backupDirHandle) return false;
+  if(!(await backupPermissionOK())){
+    data.backupError = 'permission';   // 無音で失敗し続けないよう、状態を残す
+    save(); updateBackupUI();
+    return false;
+  }
+  try{
+    const payload = JSON.stringify({
+      kodomoV6: data,
+      kodomo_pending: pending,
+      kodomo_want: wantList,
+      savedAt: new Date().toISOString(),
+    });
+    const fh = await backupDirHandle.getFileHandle('kyou-no-yotei-backup.json', { create:true });
+    const w = await fh.createWritable();
+    await w.write(payload);
+    await w.close();
+    data.lastBackupAt = new Date().toISOString();
+    data.backupError = null;
+    save();
+    updateBackupUI();
+    return true;
+  }catch(e){
+    data.backupError = 'write';
+    save(); updateBackupUI();
+    return false;
+  }
+}
+// 変更のたびに書くと重いので、まとめて数秒後に1回だけ書く
+function scheduleAutoBackup(){
+  if(!data.autoBackup) return;
+  if(_backupTimer) clearTimeout(_backupTimer);
+  _backupTimer = setTimeout(()=>runAutoBackup(false), 4000);
+}
+
+// ── 起動時：前に選んだフォルダを復元する ──
+async function initAutoBackup(){
+  await ensurePersistentStorage();
+  if(!FS_SUPPORTED || !data.autoBackup){ updateBackupUI(); return; }
+  try{
+    backupDirHandle = await idbGet('backupDir');
+    if(backupDirHandle) await runAutoBackup(false);   // 起動時に1回書いておく
+  }catch(e){}
+  updateBackupUI();
+}
+async function stopAutoBackup(){
+  data.autoBackup = false; data.backupError = null; save();
+  backupDirHandle = null;
+  await idbDel('backupDir');
+  updateBackupUI();
+  showToast('自動保存を オフに しました');
+}
+
+// ── 久しぶりに開いた時、責めずに迎える ──
+// 根拠：一度途切れると「もうどうでもいい」となって完全に離脱する(what-the-hell effect)。
+//       「3日 あいてます」と突きつけたら、そこで終わる。何日空いたかは言わない。
+function welcomeBackIfNeeded(){
+  const last = data.lastOpenedAt ? new Date(data.lastOpenedAt) : null;
+  const now = new Date();
+  data.lastOpenedAt = now.toISOString();
+  save();
+  if(!last) return;
+  const days = Math.floor((now - last) / 86400000);
+  if(days < 3) return;   // 数日ならふつうに始める（わざわざ言わない）
+  // 空いた日数は言わない。責めない。ただ迎える。
+  const c = getChild();
+  const best = c.bestStreak || 0;
+  const msg = best > 0
+    ? `おかえり！ きょうから また やろう（さいちょう きろく ${best}にち）`
+    : 'おかえり！ きょうから また やろう';
+  setTimeout(()=>showToast(msg), 900);
+}
+
+function save(){
+  localStorage.setItem('kodomoV6', JSON.stringify(data));
+  scheduleAutoBackup();   // 変更のたびに、まとめて数秒後にファイルへ書き出す
+}
 function savePending(){ localStorage.setItem('kodomo_pending', JSON.stringify(pending)); }
 function saveWant(){ localStorage.setItem('kodomo_want', JSON.stringify(wantList)); }
 function markBackup(){ try{ localStorage.setItem('kodomo_last_backup', new Date().toISOString()); }catch(e){} }
@@ -3724,6 +3972,27 @@ function bagsOnDate(date){
 let stampSelectedKey=null; // カレンダーで選択中の日（詳細表示用）
 let stampMode='record';    // 'record'=🌟がんばった記録 / 'plan'=📅よてい
 
+// スタンプの全履歴から、いちばん長く続いた日数を求める。
+// 「いまの連続」だけを見ていると、途切れた過去の最長記録が失われてしまう。
+function longestStreak(stamps){
+  const keys = Object.keys(stamps||{});
+  if(!keys.length) return 0;
+  // dateKey は "YYYY-M-D" 形式。日付に直して並べる
+  const days = keys.map(k=>{
+    const [y,m,d] = k.split('-').map(Number);
+    return new Date(y, m-1, d).getTime();
+  }).sort((a,b)=>a-b);
+  const DAY = 86400000;
+  let best = 1, run = 1;
+  for(let i=1;i<days.length;i++){
+    const gap = Math.round((days[i] - days[i-1]) / DAY);
+    if(gap === 1){ run++; best = Math.max(best, run); }
+    else if(gap > 1){ run = 1; }
+    // gap===0（同じ日）は無視
+  }
+  return best;
+}
+
 function renderStampCalendar(){
   const c=getChild(); const stamps=(c&&c.stamps)||{};
   const planMode = stampMode==='plan';
@@ -3806,11 +4075,30 @@ function renderStampCalendar(){
   }
 
   // 連続スタンプ日数（きょう/きのうから遡って数える）
-  let streak=0;
+  // 連続記録は「いまの連続」ではなく「自己最長」を出す。
+  // 根拠：習慣化の最大の失敗要因は「一度途切れたら全部どうでもよくなる」(what-the-hell effect)。
+  //       いまの連続を出すと、途切れた瞬間に0に戻って積み上げが消えたように見える。
+  //       自己最長なら絶対に減らないので、途切れても戻ってこられる。
+  let curStreak=0;
   let cur=new Date();
   if(!stamps[dateKey(cur)]) cur.setDate(cur.getDate()-1); // 今日まだなら昨日から数える
-  while(stamps[dateKey(cur)]){ streak++; cur.setDate(cur.getDate()-1); }
-  document.getElementById('stamp-streak').textContent = (!planMode && streak>0) ? `🔥 ${streak}にち れんぞく！` : '';
+  while(stamps[dateKey(cur)]){ curStreak++; cur.setDate(cur.getDate()-1); }
+
+  // 自己最長は「全履歴」から計算する。
+  // （いまの連続からしか更新しないと、途切れた過去の記録が失われてしまう）
+  const best = Math.max(c.bestStreak||0, longestStreak(stamps), curStreak);
+  if(best !== (c.bestStreak||0)){ c.bestStreak = best; save(); }
+
+  const streakEl = document.getElementById('stamp-streak');
+  if(planMode || best === 0){
+    streakEl.textContent = '';
+  } else if(curStreak >= best && curStreak > 0){
+    // いま最長を更新中：燃えている
+    streakEl.textContent = `🔥 ${curStreak}にち れんぞく！（じぶんの さいちょう きろく）`;
+  } else {
+    // 途切れていても「途切れた」とは言わない。最長だけを見せる。
+    streakEl.textContent = `🏅 じぶんの さいちょう きろく：${best}にち`;
+  }
 
   // 【15】今週やり終えた数、【16】毎日つづいていること（記録モードのときだけ）
   // ごほうびは使えば減るが、「やってきた事実」は減らない。それを見せる。
@@ -4760,7 +5048,19 @@ document.getElementById('quick-sheet-close').addEventListener('click', closeQuic
 })();
 applyFabSide();
 
-function tick(){ updateClock(); renderTimeline(); renderWantList(); updateNightMode(); checkTodayStamp(); renderBehindBar(); }
+let _lastNotifyKey = '';
+function tick(){
+  updateClock(); renderTimeline(); renderWantList(); updateNightMode(); checkTodayStamp(); renderBehindBar();
+  // 予定の内容が変わった時だけ、通知を予約し直す（毎分やり直すと同じ通知が積み上がる）
+  if(data.notifyEnabled && swReg){
+    const key = getTodayEvents().filter(e=>e._bagId && e._completedAt==null)
+      .map(e=>`${e._bagId}:${e.time}:${e.end||''}`).join('|') + '@' + dateKey(getDisplayDate());
+    if(key !== _lastNotifyKey){
+      _lastNotifyKey = key;
+      scheduleTodayNotifications();
+    }
+  }
+}
 
 // ═══ 画面を消さない（Wake Lock） ═══
 let _wakeLock=null;
@@ -6357,10 +6657,262 @@ document.getElementById('panels-collapse-btn').addEventListener('click',()=>{
   applyPanelsCollapsed();
 });
 
+// ═══════════════════════════════════════════════════════════════
+// 習慣化：きっかけ(Cue)を作る
+// ═══════════════════════════════════════════════════════════════
+// 根拠：習慣のループは「きっかけ→行動→報酬」(Duhigg/Fogg)。
+//   このアプリは報酬が過剰なほど揃っている(コイン/ガチャ/生き物/スタンプ/演出/達成感)一方、
+//   きっかけが存在しなかった。開いてもらえなければ、中身がどれだけ良くても届かない。
+//
+// 制約：サーバーが無いのでWeb Push(完全に閉じている時の通知)は原理的に使えない。
+//   ここで実現できるのは「アプリが開いている/バックグラウンドにある間」の通知まで。
+//   PWAとしてホーム画面に追加すると、その生存時間が延びる。
+// ═══════════════════════════════════════════════════════════════
+
+let swReg = null;
+
+// ── Service Worker：オフラインでも開けるようにする ──
+// 「圏外で開けなかった」経験は、それだけで習慣を壊す。
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg=>{ swReg=reg; scheduleTodayNotifications(); })
+      .catch(()=>{ /* file:// で開いている等。通知以外の機能は問題なく動く */ });
+  });
+}
+
+// ── 通知の許可 ──
+function notifyState(){
+  if(!('Notification' in window)) return 'unsupported';
+  return Notification.permission;   // 'default' | 'granted' | 'denied'
+}
+async function requestNotifyPermission(){
+  if(!('Notification' in window)){
+    showToast('この ブラウザでは おしらせ が つかえません');
+    return false;
+  }
+  const p = await Notification.requestPermission();
+  if(p === 'granted'){
+    data.notifyEnabled = true; save();
+    scheduleTodayNotifications();
+    showToast('おしらせを オンに しました');
+  } else {
+    data.notifyEnabled = false; save();
+    showToast('おしらせは オフの ままです');
+  }
+  updateNotifyUI();
+  return p === 'granted';
+}
+
+// ── 今日ぶんの通知を予約する ──
+// 通知は「うるさい」と感じた瞬間に切られ、切られたら二度と戻らない。
+// 予定ごとに2回だと3予定で6回になり、数日でオフにされる。
+// そこで①1日の上限を設ける ②頻度を選べるようにする（既定はいちばん少ない「朝1回だけ」）。
+const NOTIFY_MODES = {
+  morning: { label:'あさ 1回だけ',      max: 1 },   // 既定。いちばん切られにくい
+  key:     { label:'だいじな よていだけ', max: 3 },   // 朝1回 + 最初の予定の5分前 + 最後の予定の終わり
+  all:     { label:'ぜんぶ',            max: 8 },   // 予定ごとに5分前
+};
+const NOTIFY_DAILY_HARD_CAP = 8;   // どのモードでもこれを超えない
+
+function scheduleTodayNotifications(){
+  if(!swReg || !data.notifyEnabled || notifyState()!=='granted') return;
+  if(!isViewingToday()) return;
+  const mode = data.notifyMode || 'morning';
+  const cur = nowMin();
+  const evs = getTodayEvents()
+    .filter(e=>e._bagId && !e._free && e._completedAt==null && e.type==='on')
+    .sort((a,b)=>toMin(a.time)-toMin(b.time));
+  if(!evs.length) return;
+
+  let sent = 0;
+  const cap = Math.min(NOTIFY_MODES[mode]?.max ?? 1, NOTIFY_DAILY_HARD_CAP);
+  const push = (delayMin, title, body, tag)=>{
+    if(sent >= cap) return;
+    if(delayMin <= 0) return;
+    postSchedule(delayMin*60000, title, body, tag);
+    sent++;
+  };
+
+  // ① 朝の1通：今日やることの全体像を1回だけ伝える（どのモードでも必ず出す）
+  //    これが「開く理由」になる。行動のたびに急かすのではなく、1日の始まりに1度だけ。
+  const first = evs[0];
+  const morningAt = Math.max(toMin(first.time) - 30, cur + 1);   // 最初の予定の30分前、または今すぐ
+  if(morningAt > cur){
+    push(morningAt - cur, '☀️ きょうの よてい', `きょうは ${evs.length}つ あるよ`, 'morning');
+  }
+
+  if(mode === 'morning') return;   // 朝1回だけならここで終わり
+
+  if(mode === 'key'){
+    // ② だいじな予定だけ：最初の予定の5分前と、最後の予定の終わり
+    const s = toMin(first.time) - 5;
+    push(s - cur, `⏰ もうすぐ「${first.name}」`, 'あと 5ふん で はじまるよ', 'soon-'+first._bagId);
+    const last = evs[evs.length-1];
+    const e = last.end ? toMin(last.end) : toMin(last.time)+30;
+    push(e - cur, `⏳ 「${last.name}」の じかん`, 'そろそろ おわりの じかんだよ', 'end-'+last._bagId);
+    return;
+  }
+
+  // ③ ぜんぶ：予定ごとに「5分前」だけ（終了時の通知は出さない。倍になって うるさいため）
+  evs.forEach(ev=>{
+    const s = toMin(ev.time) - 5;
+    push(s - cur, `⏰ もうすぐ「${ev.name}」`, 'あと 5ふん で はじまるよ', 'soon-'+ev._bagId);
+  });
+}
+function postSchedule(delayMs, title, body, tag){
+  if(delayMs < 0 || delayMs > 12*60*60*1000) return;   // 12時間より先は予約しない（アプリが生きていない）
+  if(!swReg || !swReg.active) return;
+  swReg.active.postMessage({ type:'schedule', delayMs, title, body, tag });
+}
+
+// ── ホーム画面への追加を促す ──
+// manifest は前からあったのに、追加を促すUIが無くブラウザのタブに埋もれていた。
+// ホーム画面にあること自体が、いちばん強い「きっかけ」になる。
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredInstall = e;
+  maybeShowInstallBar();
+});
+function isInstalled(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function maybeShowInstallBar(){
+  const bar=document.getElementById('install-bar');
+  if(!bar) return;
+  if(isInstalled() || data.installDismissed || !deferredInstall){ bar.style.display='none'; return; }
+  bar.style.display='';
+}
+async function doInstall(){
+  if(!deferredInstall) return;
+  deferredInstall.prompt();
+  const { outcome } = await deferredInstall.userChoice;
+  deferredInstall = null;
+  document.getElementById('install-bar').style.display='none';
+  if(outcome === 'accepted') showToast('ホームがめんに ついかしました！');
+}
+
+// ── 通知の設定UI ──
+function updateNotifyUI(){
+  const st = notifyState();
+  const on = !!data.notifyEnabled && st==='granted';
+  const onBtn = document.getElementById('notify-on');
+  const offBtn = document.getElementById('notify-off');
+  if(!onBtn) return;
+  onBtn.className = 'type-btn' + (on ? ' active-on' : '');
+  offBtn.className = 'type-btn' + (!on ? ' active-on' : '');
+  // 頻度の選択は、通知がオンの時だけ出す
+  const freq = document.getElementById('notify-freq');
+  if(freq){
+    freq.style.display = on ? '' : 'none';
+    const mode = data.notifyMode || 'morning';
+    ['morning','key','all'].forEach(m=>{
+      const btn=document.getElementById('notify-mode-'+m);
+      if(btn) btn.className = 'type-btn' + (mode===m ? ' active-on' : '');
+    });
+  }
+  const el = document.getElementById('notify-status');
+  if(st==='unsupported')   el.textContent = 'この ブラウザは おしらせに 対応していません。';
+  else if(st==='denied')   el.textContent = '⚠️ ブラウザの設定で おしらせが ブロックされています。設定から許可してください。';
+  else if(!swReg)          el.textContent = '⚠️ sw.js が見つかりません。index.html と同じ場所に置いてください。';
+  else if(on)              el.textContent = '✅ おしらせは オンです。';
+  else                     el.textContent = '';
+}
+document.getElementById('notify-on').addEventListener('click', async ()=>{
+  if(notifyState()==='granted'){
+    data.notifyEnabled = true; save();
+    scheduleTodayNotifications();
+    updateNotifyUI();
+    showToast('おしらせを オンに しました');
+  } else {
+    await requestNotifyPermission();
+  }
+});
+document.getElementById('notify-off').addEventListener('click', ()=>{
+  data.notifyEnabled = false; save();
+  updateNotifyUI();
+  showToast('おしらせを オフに しました');
+});
+['morning','key','all'].forEach(m=>{
+  document.getElementById('notify-mode-'+m).addEventListener('click',()=>{
+    data.notifyMode = m; save();
+    updateNotifyUI();
+    scheduleTodayNotifications();
+    showToast(`おしらせを「${NOTIFY_MODES[m].label}」に しました`);
+  });
+});
+
+// ── ホーム画面追加バーの操作 ──
+document.getElementById('install-yes').addEventListener('click', doInstall);
+document.getElementById('install-no').addEventListener('click', ()=>{
+  data.installDismissed = true; save();
+  document.getElementById('install-bar').style.display='none';
+});
+
+// ── 自動バックアップの表示 ──
+// 「保存しているつもりで止まっている」が最悪の事故なので、状態を必ず出す。
+function updateBackupUI(){
+  const desc = document.getElementById('auto-backup-desc');
+  const st   = document.getElementById('auto-backup-status');
+  const btn  = document.getElementById('auto-backup-btn');
+  const off  = document.getElementById('auto-backup-off');
+  if(!desc) return;
+
+  if(!FS_SUPPORTED){
+    desc.innerHTML = 'この ブラウザでは 自動保存が つかえません（Chromeなら つかえます）。<br>下の「⬇️ ぜんいん書き出す」で、ときどき手動で保存してください。';
+    btn.style.display='none'; off.style.display='none';
+    st.style.color='var(--text-dim)';
+    st.textContent = data.storagePersisted ? '✅ データが 勝手に消されないよう 設定してあります。' : '';
+    return;
+  }
+
+  desc.innerHTML = 'えらんだ フォルダに、データが 変わるたび じどうで 保存します。<br>ブラウザのデータを 消しても、ファイルは のこります。';
+
+  if(!data.autoBackup){
+    btn.textContent = '📁 保存先フォルダを えらぶ';
+    btn.style.display = ''; off.style.display='none';
+    st.style.color = 'var(--warn-text)';
+    st.textContent = '⚠️ じどう保存は オフです。データが 消えるおそれがあります。';
+    return;
+  }
+
+  off.style.display = '';
+  if(data.backupError === 'permission'){
+    btn.textContent = '📁 もういちど フォルダを えらぶ';
+    btn.style.display = '';
+    st.style.color = 'var(--warn-text)';
+    st.textContent = '⚠️ 保存できていません（フォルダの きょかが きれました）。えらび直してください。';
+  } else if(data.backupError === 'write'){
+    btn.textContent = '📁 もういちど フォルダを えらぶ';
+    btn.style.display = '';
+    st.style.color = 'var(--warn-text)';
+    st.textContent = '⚠️ 保存に しっぱいしました。フォルダを えらび直してください。';
+  } else if(data.lastBackupAt){
+    btn.style.display = 'none';
+    const d = new Date(data.lastBackupAt);
+    const ago = Math.floor((Date.now() - d.getTime()) / 60000);
+    const agoTxt = ago < 1 ? 'たったいま' : ago < 60 ? `${ago}分前` : ago < 1440 ? `${Math.floor(ago/60)}時間前` : `${Math.floor(ago/1440)}日前`;
+    st.style.color = 'var(--off-color)';
+    st.textContent = `✅ さいご に 保存できたのは ${agoTxt}（${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}）`;
+  } else {
+    btn.textContent = '📁 保存先フォルダを えらぶ';
+    btn.style.display = '';
+    st.style.color = 'var(--text-dim)';
+    st.textContent = 'まだ 一度も 保存できていません。';
+  }
+}
+document.getElementById('auto-backup-btn').addEventListener('click', chooseBackupFolder);
+document.getElementById('auto-backup-off').addEventListener('click', stopAutoBackup);
+
 // ═══ 初期化 ═══
 applyNowMarkerColor(); updateCoinBadge();
 updatePendingBadge(); tick(); applyKeepAwake(); refreshWeatherIfNeeded();
 maybeShowIntro(); // カバンが1つも無い＝初回なら「カバンとは何か」を説明する
+updateNotifyUI();
+maybeShowInstallBar();
+initAutoBackup();   // データが勝手に消されないようにし、前に選んだ保存先を復元する
+welcomeBackIfNeeded();  // 久しぶりでも責めずに迎える（何日空いたかは言わない）
 (function scheduleMinute(){
   const now=new Date(); const ms=(60-now.getSeconds())*1000-now.getMilliseconds();
   setTimeout(()=>{tick();setInterval(tick,60000);},ms);
