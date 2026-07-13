@@ -1162,6 +1162,59 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
   background: transparent; color: #fff; border: none; border-radius: var(--r-full);
   font-family: inherit; font-size: var(--fs-md); font-weight: 900; cursor: pointer;
 }
+/* 【17】空の生き物の動き。3種類をランダムに割り当て、開くたびに違う位相から始まる。
+   静止した「絵」ではなく、そこに「いる」感じにする。 */
+@keyframes sky-drift {
+  0%,100% { transform: translate(-50%,-50%) translateX(0) rotate(0deg); }
+  50%     { transform: translate(-50%,-50%) translateX(10px) rotate(4deg); }
+}
+@keyframes sky-bob {
+  0%,100% { transform: translate(-50%,-50%) translateY(0); }
+  50%     { transform: translate(-50%,-50%) translateY(-7px); }
+}
+@keyframes sky-sway {
+  0%,100% { transform: translate(-50%,-50%) rotate(-6deg); }
+  50%     { transform: translate(-50%,-50%) rotate(6deg); }
+}
+/* オン/オフのトグルスイッチ。文字ボタンより、状態が形で分かる */
+.bag-switch {
+  position: relative; width: 52px; height: 30px; flex-shrink: 0;
+  border-radius: var(--r-full); border: none; cursor: pointer; padding: 0;
+  transition: background 0.22s;
+  /* 見た目は30pxだが、押せる範囲は44px確保する */
+  outline: none;
+}
+.bag-switch::before {
+  content: ''; position: absolute; top: -7px; bottom: -7px; left: -7px; right: -7px;  /* 当たり判定を44pxに広げる */
+}
+.bag-switch .sw-knob {
+  position: absolute; top: 3px; left: 3px; width: 24px; height: 24px;
+  border-radius: 50%; background: #fff; transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+}
+.bag-switch[aria-checked="true"] .sw-knob { transform: translateX(22px); }
+/* ドラッグ並び替え：≡を持ち上げて、行と行の間に落とす */
+.sort-handle {
+  min-width: 44px; min-height: 44px;   /* 見た目は小さくても、押せる範囲は44px確保する */
+  display: flex; align-items: center; justify-content: center;
+  cursor: grab; touch-action: none;    /* 指でドラッグ中に画面がスクロールしないように */
+  color: var(--text-dim); font-size: var(--fs-md); font-weight: 900;
+  background: none; border: none; flex-shrink: 0; padding: 0;
+  user-select: none;
+}
+.sort-handle:active { cursor: grabbing; }
+.sorting {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.28) !important;
+  opacity: 0.94; pointer-events: none;
+  transform: scale(1.02);
+}
+.sort-placeholder {
+  border: 2px dashed var(--purple);
+  border-radius: var(--r-md);
+  background: rgba(79,70,229,0.07);
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
 /* スクリーンリーダー専用（見た目には出ないが読み上げられる） */
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -1509,6 +1562,42 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
         <div id="pending-list"></div>
       </div>
     </div>
+    <!-- 【20】保護者から子どもへ一言。誰かが見てくれている実感が、いちばん続く理由になる。 -->
+    <div class="acc-section open" data-acc="message" data-tab-group="pending">
+      <button class="acc-head" type="button" data-acc-toggle="message">💬 こどもに ひとこと おくる<span class="acc-chevron">▶</span></button>
+      <div class="acc-body">
+        <p style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">つぎに「ぜんぶおわった！」を おしたとき、こどもの がめんに 出ます。</p>
+        <div id="msg-presets" style="margin-bottom:8px"></div>
+        <div class="task-add-row">
+          <input type="text" id="msg-input" placeholder="例：きのうより はやかったね！" maxlength="24"/>
+          <button class="btn btn-primary" id="msg-send" style="padding:7px 11px;font-size: var(--fs-xs)">おくる</button>
+        </div>
+        <div id="msg-current" style="margin-top:8px;font-size: var(--fs-xs);line-height:1.5"></div>
+
+        <!-- 条件つきメッセージ：節目に自動で届く。毎回書かなくてよくなる。 -->
+        <div style="margin-top:14px;padding-top:12px;border-top:1.5px dashed var(--border)">
+          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px">⏳ 条件を きめて おくる</div>
+          <p style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">「このカバンを5日つづけたら」など、条件を満たした時に じどうで 届きます。毎回 書かなくて すみます。</p>
+          <select id="cond-type" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-md);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:10px;outline:none;font-family:inherit;margin-bottom:6px">
+            <option value="bagStreak">カバンを ◯日 つづけたら</option>
+            <option value="totalDays">ぜんぶ おわった日が ◯日に なったら</option>
+            <option value="bestStreak">さいちょう きろくを こえたら</option>
+          </select>
+          <div id="cond-bag-row" style="margin-bottom:6px">
+            <select id="cond-bag" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-md);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:10px;outline:none;font-family:inherit"></select>
+          </div>
+          <div id="cond-n-row" style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <input type="number" id="cond-n" min="1" max="365" value="5" style="width:90px;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-md);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:10px;outline:none;font-family:inherit"/>
+            <span style="font-size: var(--fs-sm);font-weight:700;color:var(--text-mid)">日</span>
+          </div>
+          <div class="task-add-row">
+            <input type="text" id="cond-text" placeholder="例：5日つづいたね、すごい！" maxlength="24"/>
+            <button class="btn btn-primary" id="cond-add" style="padding:7px 11px;font-size: var(--fs-xs)">よやく</button>
+          </div>
+          <div id="cond-list" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
 
     <!-- ── カバンタブ ── -->
     <div class="acc-section open" data-acc="bag" data-tab-group="bag">
@@ -1759,7 +1848,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v41・2026-07-12</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v46・2026-07-12</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2994,7 +3083,14 @@ function renderTimeline(){
       const leftPct = isLeft ? Math.round(8+r2*22) : Math.round(25+r2*45);
       const el=document.createElement('div');
       el.innerHTML=creatureSvg(c.key, 22+Math.round(r3*8));
-      el.style.cssText=`position:absolute;left:${leftPct}%;top:${y}px;transform:translate(-50%,-50%);z-index:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.22));pointer-events:none;`;
+      // 【17】生き物に動きを付ける。静止していると「絵」だが、動いていると「いる」ことになる。
+      //       開くたびに違う揺れ方をするので、開くこと自体に小さな発見が生まれる。
+      const r4=seed(c.key+'_'+idx+'_m');
+      const motions=['sky-drift','sky-bob','sky-sway'];
+      const motion=motions[Math.floor(r4*motions.length)];
+      const dur=(5 + r4*7).toFixed(1);          // 5〜12秒。ゆっくりバラバラに動く
+      const delay=(-r2*8).toFixed(1);           // 開くたびに違う位相から始まる
+      el.style.cssText=`position:absolute;left:${leftPct}%;top:${y}px;transform:translate(-50%,-50%);z-index:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.22));pointer-events:none;animation:${motion} ${dur}s ease-in-out ${delay}s infinite;`;
       col.appendChild(el);
     });
   }
@@ -3948,13 +4044,24 @@ function openStampModal(){
   renderStampCalendar();
   document.getElementById('stamp-modal').classList.add('open');
 }
-// カバンごとの識別色。データにcolorを持たせず、カバンの並び順から自動で決める
-// （既存データをそのまま使え、保護者に色を選ばせる手間もない）
+// カバンごとの識別色。
+// 【重要】配列の位置から決めてはいけない。並び替えたら色が変わってしまい、
+//   子どもが「青い日はじゅくだい」と覚えたのに、保護者が並び替えた瞬間に赤になる。
+//   そこでカバン自体に colorIndex を固定して持たせる。
 const BAG_PALETTE = ['#3b82f6','#ef4444','#10b981','var(--gold)','#8b5cf6','#ec4899','#14b8a6','#f97316','#6366f1','#84cc16'];
 function bagColor(bagId){
   const bags=getBags();
-  const idx=bags.findIndex(b=>b.id===bagId);
-  return BAG_PALETTE[(idx<0?0:idx) % BAG_PALETTE.length];
+  const bag=bags.find(b=>b.id===bagId);
+  if(!bag) return BAG_PALETTE[0];
+  if(bag.colorIndex==null){
+    // まだ色が決まっていないカバン：いま使われていない色から順に割り当てる
+    const used=new Set(bags.filter(b=>b.colorIndex!=null).map(b=>b.colorIndex));
+    let idx=0;
+    while(used.has(idx) && idx < BAG_PALETTE.length) idx++;
+    bag.colorIndex = idx % BAG_PALETTE.length;
+    save();
+  }
+  return BAG_PALETTE[bag.colorIndex % BAG_PALETTE.length];
 }
 
 // その日に該当するカバンを、時刻順に返す（カレンダー用。bagActiveOnをそのまま流用）
@@ -3991,6 +4098,55 @@ function longestStreak(stamps){
     // gap===0（同じ日）は無視
   }
   return best;
+}
+
+// ═══ 明日ひらく理由 / 今日ひらく理由 ═══
+// 【15】連続記録は「失う」枠組みで語らない。
+//   ❌「やらないと 12にち れんぞくが とまるよ」→ 損失の恐怖 → 回避 → 離脱
+//   ✅「きょう やれば 13にち！」            → 未来の獲得 → 前進
+//   同じ情報でも、枠組みを変えるだけで働きが逆になる。途切れている人にも
+//   「きょう やれば 1にちめ！」と、ゼロからの再開すら前向きに見せられる。
+function todayStreakPrompt(){
+  const c=getChild();
+  const stamps=c.stamps||{};
+  const todayKey=dateKey(new Date());
+  if(stamps[todayKey]) return null;   // 今日はもう達成済み
+
+  // 昨日までの連続日数
+  let run=0;
+  const d=new Date(); d.setDate(d.getDate()-1);
+  while(stamps[dateKey(d)]){ run++; d.setDate(d.getDate()-1); }
+
+  const next = run + 1;
+  // 「やれば」だと条件を突きつける圧が残る（やらなければ、という含みが出る）。
+  // 「できたら」なら、単に未来を差し出すだけになる。
+  return { next, text: `きょう できたら ${next}にち！` };
+}
+
+// 【12】明日の予告。「明日ひらく理由」を今日のうちに作る。
+// ただし毎回出すと薄れるので、その日の最後の完了のときだけ出す。
+// 内容は「見出しに登録したカバン」に絞る（保護者が"これは伝えたい"と選んだものだけ）。
+function isLastCompletionOfDay(){
+  // 今日ぶんの、まだ終わっていない「やること」があるか
+  const remaining = getTodayEvents().filter(e=>
+    e._bagId && !e._free && e.type==='on' && e._completedAt==null
+  );
+  return remaining.length === 0;
+}
+function tomorrowPreview(){
+  const t=new Date(); t.setDate(t.getDate()+1);
+  // 見出しに登録されたカバン＝保護者が「これは伝えたい」と選んだもの
+  const labeled = getBags()
+    .filter(b=>b.showInLabel && bagActiveOn(b,t))
+    .sort((a,b)=>(a.labelOrder||1)-(b.labelOrder||1));
+  if(!labeled.length) return null;
+
+  const names = labeled.map(b=>b.name);
+  const dowLabel=['にち','げつ','か','すい','もく','きん','ど'][t.getDay()];
+  const text = names.length===1
+    ? `あしたは「${names[0]}」だよ`
+    : `あしたは「${names.join('」「')}」だよ`;
+  return { text, names, dowLabel };
 }
 
 function renderStampCalendar(){
@@ -4761,6 +4917,23 @@ function showRewardAnimation(reward){
     const summary=document.getElementById('blockfall-summary');
     summary.innerHTML='';
 
+    // ⓪ 【20】保護者からの一言。どんな報酬よりも先に出す。
+    //     「誰かが見てくれている」は、ガチャや演出と違って飽きない。相手が生きているから。
+    // すぐ届く一言 が無ければ、条件を満たした「予約メッセージ」を探す
+    const pm = child.parentMessage || pickConditionalMessage();
+    if(pm){
+      const el=document.createElement('div');
+      el.innerHTML = `<div style="font-size: var(--fs-xs);font-weight:800;opacity:0.85;margin-bottom:3px">おうちの人から</div>
+        <div style="font-size: var(--fs-lg);font-weight:900;line-height:1.4">💬 ${pm.text}</div>`;
+      el.style.cssText='background:#fff;color:var(--warn-text);border:3px solid var(--warn);border-radius: var(--r-lg);padding:12px 16px;text-align:center;width:100%;max-width:340px;box-sizing:border-box;box-shadow:0 6px 20px rgba(180,83,9,0.3);';
+      summary.appendChild(el);
+      // 一度見せたら消す（同じ言葉が何度も出ると価値が下がる）
+      // ※条件つきの方は pickConditionalMessage() の中で既に fired 済み
+      if(child.parentMessage){ delete child.parentMessage; }
+      save();
+      renderParentMessage();
+    }
+
     // ① あたらしいなかま（最も稀・最優先）
     if(pendingNewCreatures.length){
       const uniq=[...new Set(pendingNewCreatures)];
@@ -4784,6 +4957,28 @@ function showRewardAnimation(reward){
       hint.textContent=label;
       hint.style.cssText='font-size: var(--fs-xs);font-weight:800;color:var(--purple);text-align:center;opacity:0.85;';
       summary.appendChild(hint);
+    }
+
+    // ③ 【15】連続記録を「獲得」の枠組みで見せる（失うものには一切触れない）
+    const sp = todayStreakPrompt();
+    if(sp){
+      const el=document.createElement('div');
+      el.textContent = `🔥 ${sp.text}`;
+      el.style.cssText='font-size: var(--fs-sm);font-weight:900;color:var(--warn-text);background:var(--warn-light);border-radius: var(--r-full);padding:6px 14px;text-align:center;';
+      summary.appendChild(el);
+    }
+
+    // ④ 【12】明日の予告 ＝「明日ひらく理由」を今日のうちに作る。
+    //     その日の最後の完了のときだけ出す。毎回出すと薄れるため。
+    if(isLastCompletionOfDay()){
+      const tp = tomorrowPreview();
+      if(tp){
+        const el=document.createElement('div');
+        el.innerHTML = `<div style="font-size: var(--fs-xs);opacity:0.8;margin-bottom:2px">きょうは ぜんぶ おわり！</div>
+          <div style="font-size: var(--fs-sm);font-weight:900">🌙 ${tp.text}</div>`;
+        el.style.cssText='color:var(--text-mid);background:var(--surface2);border:1.5px solid var(--border);border-radius: var(--r-md);padding:8px 14px;text-align:center;';
+        summary.appendChild(el);
+      }
     }
   }
   const finishTimer=setTimeout(finishReward, totalDelay);
@@ -5570,8 +5765,16 @@ function showParentTab(tab){
   document.querySelectorAll('#parent-tab-bar .ptab-btn').forEach(b=>{
     b.classList.toggle('active', b.dataset.tab===tab);
   });
-  document.querySelectorAll('#parent-modal .acc-section[data-tab-group]').forEach(sec=>{
-    sec.classList.toggle('tab-active', sec.dataset.tabGroup===tab);
+  // data-tab-group を持つ要素すべてを切り替える。
+  // （.acc-section だけを対象にしていたため、グループ見出し（ただのdiv）が
+  //   どのタブにも表示され続け、タップできない文字が浮いていた）
+  document.querySelectorAll('#parent-modal [data-tab-group]').forEach(sec=>{
+    const active = sec.dataset.tabGroup===tab;
+    if(sec.classList.contains('acc-section')){
+      sec.classList.toggle('tab-active', active);      // アコーディオンは既存のCSSに任せる
+    } else {
+      sec.style.display = active ? '' : 'none';        // 見出しなどはそのまま出し入れする
+    }
   });
 }
 document.querySelectorAll('#parent-tab-bar .ptab-btn').forEach(btn=>{
@@ -5652,6 +5855,9 @@ function migrateChild(c){
     });
     delete c.daySets; delete c.setOverrides;
   }
+  // 既存カバンの色を、いま見えている色のまま固定する（並び替えで色が変わらないように）。
+  // 移行は一度だけ。以降は colorIndex が正となる。
+  c.bags.forEach((b,i)=>{ if(b.colorIndex==null) b.colorIndex = i % 10; });
   c.bags.forEach(b=>{ if(!b.tasks)b.tasks=[]; if(!b.dow)b.dow=[]; if(b.enabled===undefined)b.enabled=true; if(b.showInLabel===undefined)b.showInLabel=false; if(b.labelOrder===undefined)b.labelOrder=1; if(b.allowFree===undefined)b.allowFree=true; if(b.defaultTime===undefined)b.defaultTime=''; if(!b.timeByDate)b.timeByDate={}; if(!b.completedByDate)b.completedByDate={}; if(b.defaultEndTime===undefined)b.defaultEndTime=''; if(!b.endByDate)b.endByDate={}; if(b.onlyDate===undefined)b.onlyDate='';
     // taskDoneByDateがなければ初期化（日付ごとにdone状態を管理）
     if(!b.taskDoneByDate) b.taskDoneByDate={};
@@ -6141,19 +6347,158 @@ function renderBagHeadingSummary(){
   }
   wrap.innerHTML = `<div style="border:1.5px dashed var(--border);border-radius: var(--r-md);padding:10px 12px">${group('📅 習慣（毎週）', weekly)}${group('🗓️ 月ごと', monthly)}</div>`;
 }
+// ═══ ドラッグで並び替え ═══
+// ▲▼を何度も押すのは苦痛。≡を持ち上げて「行と行の間」に落とせるようにする。
+// カバン一覧と、やること一覧の両方で使い回す。
+//
+// 実装方針：Pointer Events（マウス・指の両方を1つのコードで扱える）。
+//   HTML5のdrag&dropはタブレットで動かないため使わない。
+function makeSortable(container, opts){
+  // 再描画のたびに呼ばれるため、同じ要素への二重登録を防ぐ。
+  // （二重登録すると1回のドラッグで複数のハンドラが動き、落とし先の計算が壊れる）
+  if(container.dataset._sortable === '1') return;
+  container.dataset._sortable = '1';
+
+  const { itemSelector, handleSelector, onReorder } = opts;
+  let dragging = null;      // 掴んでいる行
+  let placeholder = null;   // 落とす場所を示す隙間
+  let startY = 0, offsetY = 0;
+  let items = [];
+
+  function cleanup(){
+    if(dragging){
+      dragging.classList.remove('sorting');
+      dragging.style.cssText = dragging.dataset._origStyle || '';
+      delete dragging.dataset._origStyle;
+    }
+    if(placeholder && placeholder.parentNode) placeholder.remove();
+    dragging = null; placeholder = null;
+    document.body.style.userSelect = '';
+  }
+
+  container.addEventListener('pointerdown', (e)=>{
+    const handle = e.target.closest(handleSelector);
+    if(!handle) return;
+    const item = handle.closest(itemSelector);
+    if(!item) return;
+    e.preventDefault();
+
+    dragging = item;
+    items = [...container.querySelectorAll(itemSelector)];
+    const r = item.getBoundingClientRect();
+    startY = e.clientY;
+    offsetY = e.clientY - r.top;
+
+    // 落とす場所を示す隙間（掴んだ行と同じ高さ）
+    placeholder = document.createElement('div');
+    placeholder.className = 'sort-placeholder';
+    placeholder.style.height = r.height + 'px';
+    item.parentNode.insertBefore(placeholder, item);
+
+    // 掴んだ行を浮かせる
+    dragging.dataset._origStyle = item.style.cssText;
+    item.style.position = 'fixed';
+    item.style.left = r.left + 'px';
+    item.style.width = r.width + 'px';
+    item.style.top = (e.clientY - offsetY) + 'px';
+    item.style.zIndex = '9999';
+    item.classList.add('sorting');
+    document.body.style.userSelect = 'none';
+    handle.setPointerCapture(e.pointerId);
+  });
+
+  container.addEventListener('pointermove', (e)=>{
+    if(!dragging) return;
+    e.preventDefault();
+    dragging.style.top = (e.clientY - offsetY) + 'px';
+
+    // いま指がある位置に、隙間を移動させる
+    const others = items.filter(x=>x!==dragging);
+    let inserted = false;
+    for(const other of others){
+      const r = other.getBoundingClientRect();
+      if(e.clientY < r.top + r.height/2){
+        other.parentNode.insertBefore(placeholder, other);
+        inserted = true;
+        break;
+      }
+    }
+    if(!inserted && others.length){
+      const last = others[others.length-1];
+      last.parentNode.insertBefore(placeholder, last.nextSibling);
+    }
+  });
+
+  const finish = (e)=>{
+    if(!dragging) return;
+    if(!placeholder || !placeholder.parentNode){ cleanup(); return; }   // 念のための防御
+    // 隙間の位置＝落とし先。掴んだ行を除いたリストの中で、何番目かを数える
+    const parent = placeholder.parentNode;
+    const siblings = [...parent.children].filter(x=>
+      x===placeholder || (x.matches?.(itemSelector) && x!==dragging)
+    );
+    const newIndex = siblings.indexOf(placeholder);
+    const oldIndex = items.indexOf(dragging);
+    cleanup();
+    if(newIndex >= 0 && oldIndex >= 0) onReorder(oldIndex, newIndex);
+  };
+  container.addEventListener('pointerup', finish);
+  container.addEventListener('pointercancel', finish);
+}
+
+// 配列の from 番目を取り出し、「取り出した後のリスト」の to 番目に入れる。
+// （落とし先の位置は、掴んだ行を除いたリストの中で数えているため、補正は不要）
+function arrayMoveTo(arr, from, to){
+  if(from<0 || from>=arr.length) return arr;
+  const [x] = arr.splice(from, 1);
+  arr.splice(Math.max(0, Math.min(to, arr.length)), 0, x);
+  return arr;
+}
+
+let bagListOpen = {};   // カバン一覧で、中身を開いているカバンのid
+
+// ═══ カバンの並び替え ═══
+// 一覧の順番＝タイムラインでの優先度ではなく、保護者が管理しやすい順。
+// 将来のプリセット化（「朝のセット」「夜のセット」など）を見据え、順番をデータに持たせる。
+function moveBag(bagId, dir){
+  const c=getChild();
+  const bags=c.bags||[];
+  const i=bags.findIndex(b=>b.id===bagId);
+  if(i<0) return false;
+  const j=i+dir;
+  if(j<0 || j>=bags.length) return false;
+  [bags[i], bags[j]] = [bags[j], bags[i]];   // 入れ替え
+  save();
+  return true;
+}
+
 function renderBagList(){
   renderBagHeadingSummary();
   const wrap=document.getElementById('bag-list'); wrap.innerHTML='';
   const bags=getBags();
   if(!bags.length){ wrap.innerHTML='<div style="color:var(--text-dim);font-size: var(--fs-sm)">まだカバンがありません。「＋カバンを作る」から作りましょう。</div>'; return; }
-  bags.forEach(bag=>{
+  bags.forEach((bag, idx)=>{
     const dowText = bag.repeatType==='monthly_nth'
       ? `月ごと・第${bag.nthWeek||1} ${DOW_LABELS[bag.nthDow||0]}曜日`
       : ((bag.dow||[]).length===7?'毎日':(bag.dow||[]).length?bag.dow.slice().sort().map(d=>DOW_LABELS[d]).join('・'):'曜日未設定');
     const timeText=bag.defaultTime?(bag.defaultEndTime?`${bag.defaultTime}〜${bag.defaultEndTime}`:`${bag.defaultTime}〜`):'時刻はそのつど';
-    const taskText=(bag.tasks||[]).length?`やること ${bag.tasks.length}こ`:'やることなし';
     const freeText=bag.allowFree===false?'終わってもオフタイムにならない':'終わったら自由時間';
     const accentColor=bag.type==='on'?'var(--on-color)':'var(--off-color)';
+
+    // 中身（やること）を一覧から見えるようにする。今までは「やること 3こ」としか
+    // 出ておらず、開かないと中身が分からなかった。
+    const tasks=(bag.tasks||[]);
+    const MAX_SHOW=4;
+    const taskChips = tasks.length
+      ? tasks.slice(0,MAX_SHOW).map(t=>
+          `<span style="display:inline-block;background:var(--surface2);border:1.5px solid var(--border);border-radius: var(--r-sm);padding:2px 8px;margin:2px 4px 2px 0;font-size: var(--fs-xs);font-weight:700;color:var(--text-mid)">${t.name}</span>`
+        ).join('') + (tasks.length>MAX_SHOW ? `<span style="font-size: var(--fs-xs);font-weight:800;color:var(--text-dim)">＋${tasks.length-MAX_SHOW}</span>` : '')
+      : `<span style="font-size: var(--fs-xs);color:var(--text-dim)">やること なし</span>`;
+
+    // 見出しに出すカバンには印を付ける。一覧からは分からなかった。
+    const labelMark = bag.showInLabel
+      ? `<span title="見出しに出します" style="display:inline-flex;align-items:center;gap:3px;background:var(--warn-light);border:1.5px solid var(--warn);color:var(--warn-text);border-radius: var(--r-full);padding:1px 8px;font-size: var(--fs-xs);font-weight:800;margin-left:6px">📌 見出し${bag.labelOrder?`${bag.labelOrder}`:''}</span>`
+      : '';
     // 完了ログから学習：予定と実際の所要時間がズレていたら提案する
     const sug=analyzeBagDuration(bag.id);
     const suggestHtml = sug ? `
@@ -6169,24 +6514,53 @@ function renderBagList(){
     row.style.cssText=`
       border:2px solid ${bag.enabled?'var(--border)':'#ddd'};
       border-left:4px solid ${bag.enabled?accentColor:'#ccc'};
-      border-radius: var(--r-md);padding:12px 13px;margin-bottom:8px;
+      border-radius: var(--r-md);padding:6px 8px;margin-bottom:6px;
       background:${bag.enabled?'var(--surface)':'var(--surface2)'};
       opacity:${bag.enabled?1:0.55};cursor:pointer;
     `;
+    const open = !!bagListOpen[bag.id];   // 中身を開いているか
     row.innerHTML=`
-      <div style="display:flex;align-items:flex-start;gap:10px">
-        <div style="flex:1;min-width:0">
-          <div style="font-size: var(--fs-md);font-weight:800;margin-bottom:4px">${bag.name}</div>
-          <div style="font-size: var(--fs-xs);font-weight:700;color:var(--text-mid)">${timeText} &nbsp;／&nbsp; ${dowText}</div>
-          <div style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">${taskText} &nbsp;・&nbsp; ${freeText}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <!-- ≡ を持ち上げて、行と行の間に落とす -->
+        <div class="sort-handle" aria-label="ならびかえ">≡</div>
+        <button class="bag-expand" aria-expanded="${open}" aria-label="なかみを ${open?'とじる':'ひらく'}"
+          style="min-width:44px;min-height:44px;background:none;border:none;cursor:pointer;color:var(--text-dim);font-size: var(--fs-sm);flex-shrink:0;transition:transform 0.2s;transform:rotate(${open?90:0}deg)">▶</button>
+        <div class="bag-main" style="flex:1;min-width:0;cursor:pointer">
+          <div style="display:flex;align-items:center;gap:5px;min-width:0">
+            <span style="width:9px;height:9px;border-radius:50%;background:${bagColor(bag.id)};flex-shrink:0"></span>
+            <span style="font-size: var(--fs-sm);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${bag.name}</span>${labelMark}
+          </div>
+          <div style="font-size: var(--fs-xs);font-weight:700;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${timeText} ／ ${dowText}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-top:2px">
-          <button class="bag-toggle" style="background:${bag.enabled?accentColor:'var(--surface2)'};color:${bag.enabled?'#fff':'var(--text-dim)'};border:none;border-radius: var(--r-md);padding:8px 14px;font-size: var(--fs-xs);font-weight:800;cursor:pointer;font-family:inherit">${bag.enabled?'オン':'オフ'}</button>
-          <span style="color:var(--text-dim);font-size: var(--fs-sm);padding:6px 4px">✎</span>
-        </div>
+        <button class="bag-switch" role="switch" aria-checked="${bag.enabled}"
+          aria-label="${bag.name} を ${bag.enabled?'オフ':'オン'}にする"
+          style="background:${bag.enabled?accentColor:'#c7ccd6'}"><span class="sw-knob"></span></button>
+      </div>
+      <div class="bag-detail" style="display:${open?'':'none'};padding:8px 0 2px 50px">
+        <div style="margin-bottom:5px">${taskChips}</div>
+        <div style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px">${freeText}</div>
+        <button class="bag-edit-btn" style="min-height:44px;padding:6px 14px;border-radius: var(--r-md);border:2px solid var(--border);background:var(--surface2);color:var(--text-mid);font-family:inherit;font-size: var(--fs-xs);font-weight:800;cursor:pointer">✎ へんしゅう</button>
       </div>${suggestHtml}`;
-    row.addEventListener('click',()=>{ document.getElementById('parent-modal').classList.remove('open'); openBagModal(bag.id); });
-    row.querySelector('.bag-toggle').addEventListener('click',e=>{ e.stopPropagation(); bag.enabled=!bag.enabled; save(); renderBagList(); tick(); });
+    // 名前の部分／▶ を押すと、中身を開閉する（普段は1行のまま）
+    const toggleOpen = ()=>{
+      bagListOpen[bag.id] = !bagListOpen[bag.id];
+      renderBagList();
+    };
+    row.querySelector('.bag-main').addEventListener('click', toggleOpen);
+    row.querySelector('.bag-expand').addEventListener('click', e=>{ e.stopPropagation(); toggleOpen(); });
+    // 編集は、開いた中の「へんしゅう」から
+    const editBtn = row.querySelector('.bag-edit-btn');
+    if(editBtn) editBtn.addEventListener('click', e=>{
+      e.stopPropagation();
+      document.getElementById('parent-modal').classList.remove('open');
+      openBagModal(bag.id);
+    });
+    // オン/オフのトグルスイッチ
+    row.querySelector('.bag-switch').addEventListener('click', e=>{
+      e.stopPropagation();
+      bag.enabled = !bag.enabled;
+      save(); renderBagList(); tick();
+    });
     // 完了ログから学習した「実際の所要時間」の提案。1タップで反映できる。
     const applyBtn=row.querySelector('.dur-apply');
     if(applyBtn) applyBtn.addEventListener('click',e=>{
@@ -6196,7 +6570,20 @@ function renderBagList(){
         renderBagList(); tick();
       }
     });
+    row.dataset.bagId = bag.id;
     wrap.appendChild(row);
+  });
+
+  // ≡ を持ち上げて、行と行の間に落とす
+  makeSortable(wrap, {
+    itemSelector: '[data-bag-id]',
+    handleSelector: '.sort-handle',
+    onReorder: (from, to)=>{
+      arrayMoveTo(getChild().bags, from, to);
+      save();
+      renderBagList();
+      tick();
+    }
   });
 }
 document.getElementById('add-bag-btn').addEventListener('click',()=>{ document.getElementById('parent-modal').classList.remove('open'); document.getElementById('bag-new-choice-modal').classList.add('open'); });
@@ -6290,11 +6677,12 @@ function renderBagTaskList(){
   const list=document.getElementById('bag-task-list'); list.innerHTML='';
   bagTasks.forEach((t,i)=>{
     const row=document.createElement('div'); row.className='task-mini';
+    row.dataset.taskIdx = i;
+    // ▲▼を何度も押すのは苦痛なので、≡を持ち上げて間に落とす方式にする
     row.innerHTML=`
+      <div class="sort-handle" aria-label="ならびかえ">≡</div>
       <span class="task-mini-name" style="flex:1">${t.name}</span>
-      <button class="task-edit" data-i="${i}" style="background:none;border:none;cursor:pointer;font-size: var(--fs-md);padding:2px 5px">✎</button>
-      <button class="task-up" data-i="${i}" style="background:none;border:none;cursor:pointer;font-size: var(--fs-md);padding:2px 5px;${i===0?'opacity:0.25':''}">▲</button>
-      <button class="task-down" data-i="${i}" style="background:none;border:none;cursor:pointer;font-size: var(--fs-md);padding:2px 5px;${i===bagTasks.length-1?'opacity:0.25':''}">▼</button>
+      <button class="task-edit" data-i="${i}" style="background:none;border:none;cursor:pointer;font-size: var(--fs-md);min-width:44px;min-height:44px">✎</button>
       <button class="task-mini-del" data-i="${i}">✕</button>`;
     function startEdit(){
       const cur=bagTasks[i].name;
@@ -6314,9 +6702,16 @@ function renderBagTaskList(){
     row.querySelector('.task-mini-name').addEventListener('click',startEdit);
     row.querySelector('.task-edit').addEventListener('click',startEdit);
     row.querySelector('.task-mini-del').addEventListener('click',()=>{bagTasks.splice(i,1);renderBagTaskList();});
-    row.querySelector('.task-up').addEventListener('click',()=>{ if(i>0){ [bagTasks[i-1],bagTasks[i]]=[bagTasks[i],bagTasks[i-1]]; renderBagTaskList(); } });
-    row.querySelector('.task-down').addEventListener('click',()=>{ if(i<bagTasks.length-1){ [bagTasks[i+1],bagTasks[i]]=[bagTasks[i],bagTasks[i+1]]; renderBagTaskList(); } });
     list.appendChild(row);
+  });
+  // ≡ を持ち上げて、行と行の間に落とす（▲▼を何度も押さなくて済む）
+  makeSortable(list, {
+    itemSelector: '[data-task-idx]',
+    handleSelector: '.sort-handle',
+    onReorder: (from, to)=>{
+      arrayMoveTo(bagTasks, from, to);
+      renderBagTaskList();
+    }
   });
   renderBagTaskSuggest(); // 追加済みのものを候補から外して出し直す
 }
@@ -6905,6 +7300,186 @@ function updateBackupUI(){
 document.getElementById('auto-backup-btn').addEventListener('click', chooseBackupFolder);
 document.getElementById('auto-backup-off').addEventListener('click', stopAutoBackup);
 
+// ═══ 【20】保護者から子どもへの一言 ═══
+// 「誰かが見てくれている」実感は、どんな報酬よりも続く理由になる。
+// ガチャや演出と違い、これは飽きない。相手が生きているから。
+//
+// 2種類ある：
+//   ①すぐ届く …… 次の「ぜんぶおわった！」で1回だけ出る
+//   ②条件つき …… 「このカバンを5日つづけたら」など、条件を満たした時に自動で届く
+//                 → 保護者が毎回書かなくても、節目に必ず言葉が届く
+const MSG_PRESETS = ['がんばったね！','はやかったね！','みてたよ、すごい','きょうも えらい','あしたも たのしみ'];
+
+// 条件つきメッセージの条件の種類
+const MSG_CONDITIONS = {
+  bagStreak:  { label:'このカバンを ◯日 つづけたら' },   // 指定カバンの連続完了日数
+  totalDays:  { label:'ぜんぶ おわった日が ◯日に なったら' }, // スタンプの累計
+  bestStreak: { label:'さいちょう きろくを こえたら' },   // 自己最長の更新
+};
+
+function setParentMessage(text){
+  const t=(text||'').trim();
+  const c=getChild();
+  if(!t){ delete c.parentMessage; }
+  else { c.parentMessage = { text:t, at:new Date().toISOString() }; }
+  save();
+  renderParentMessage();
+}
+
+// 条件つきメッセージを1件追加する
+function addConditionalMessage(cond, bagId, n, text){
+  const c=getChild();
+  if(!c.condMessages) c.condMessages=[];
+  c.condMessages.push({
+    id: Date.now().toString(),
+    cond, bagId: bagId||null, n: Number(n)||0,
+    text: (text||'').trim(),
+    fired: false,
+  });
+  save();
+  renderParentMessage();
+}
+function removeConditionalMessage(id){
+  const c=getChild();
+  c.condMessages = (c.condMessages||[]).filter(m=>m.id!==id);
+  save();
+  renderParentMessage();
+}
+
+// 指定カバンが、今日まで何日つづけて完了しているか
+function bagStreakDays(bagId){
+  const bag=getBags().find(b=>b.id===bagId);
+  if(!bag) return 0;
+  let run=0;
+  const d=new Date();
+  for(let i=0;i<400;i++){
+    if(bagActiveOn(bag,d)){
+      const dk=dateKey(d);
+      if(bag.completedByDate && bag.completedByDate[dk]!=null) run++;
+      else break;                    // 出る日なのにやっていない → そこで途切れ
+    }
+    d.setDate(d.getDate()-1);        // 出ない日は飛ばす（休みの日で途切れない）
+  }
+  return run;
+}
+
+// 条件を満たしたメッセージがあれば1件返して、届いたことにする
+function pickConditionalMessage(){
+  const c=getChild();
+  const list=(c.condMessages||[]).filter(m=>!m.fired && m.text);
+  if(!list.length) return null;
+  const stamps=Object.keys(c.stamps||{}).length;
+
+  for(const m of list){
+    let hit=false;
+    if(m.cond==='bagStreak' && m.bagId){
+      hit = bagStreakDays(m.bagId) >= m.n;
+    } else if(m.cond==='totalDays'){
+      hit = stamps >= m.n;
+    } else if(m.cond==='bestStreak'){
+      // 自己最長を更新した瞬間
+      const best=c.bestStreak||0;
+      let run=0; const d=new Date();
+      while((c.stamps||{})[dateKey(d)]){ run++; d.setDate(d.getDate()-1); }
+      hit = run > 0 && run >= best && best > 0;
+    }
+    if(hit){
+      m.fired = true;               // 一度届いたら二度と出さない
+      m.firedAt = new Date().toISOString();
+      save();
+      return m;
+    }
+  }
+  return null;
+}
+
+function renderParentMessage(){
+  const wrap=document.getElementById('msg-presets');
+  const cur=document.getElementById('msg-current');
+  if(!wrap) return;
+  wrap.innerHTML = MSG_PRESETS.map(m=>
+    `<button type="button" class="msg-preset" data-msg="${m}" style="min-height:44px;margin:0 5px 5px 0;padding:8px 12px;border-radius: var(--r-md);border:2px solid var(--border);background:var(--surface2);color:var(--text-mid);font-family:inherit;font-size: var(--fs-xs);font-weight:700;cursor:pointer">${m}</button>`
+  ).join('');
+  wrap.querySelectorAll('[data-msg]').forEach(b=>{
+    b.addEventListener('click',()=>{ setParentMessage(b.dataset.msg); showToast('ひとことを おくりました'); });
+  });
+
+  const c=getChild();
+  if(c.parentMessage){
+    cur.innerHTML = `<div style="background:var(--warn-light);border:1.5px solid var(--warn);border-radius: var(--r-md);padding:8px 10px;display:flex;align-items:center;gap:8px">
+      <span style="flex:1;color:var(--warn-text);font-weight:800">💬「${c.parentMessage.text}」を おくりました（まだ 見ていません）</span>
+      <button type="button" id="msg-cancel" style="min-height:44px;padding:6px 10px;border-radius: var(--r-sm);border:none;background:#fff;color:var(--text-dim);font-family:inherit;font-size: var(--fs-xs);font-weight:800;cursor:pointer">とりけす</button>
+    </div>`;
+    document.getElementById('msg-cancel').addEventListener('click',()=>{ setParentMessage(''); showToast('とりけしました'); });
+  } else {
+    cur.innerHTML = '';
+  }
+  renderCondMessages();
+}
+document.getElementById('msg-send').addEventListener('click',()=>{
+  const inp=document.getElementById('msg-input');
+  const t=inp.value.trim();
+  if(!t) return;
+  setParentMessage(t);
+  inp.value='';
+  showToast('ひとことを おくりました');
+});
+document.getElementById('msg-input').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('msg-send').click(); });
+
+// ── 条件つきメッセージのUI ──
+function renderCondMessages(){
+  // カバンの選択肢を埋める
+  const bagSel=document.getElementById('cond-bag');
+  if(!bagSel) return;
+  const bags=getBags().filter(b=>b.enabled);
+  bagSel.innerHTML = bags.length
+    ? bags.map(b=>`<option value="${b.id}">${b.name}</option>`).join('')
+    : '<option value="">（カバンが ありません）</option>';
+
+  // 条件の種類によって、入力欄の出し分け
+  const type=document.getElementById('cond-type').value;
+  document.getElementById('cond-bag-row').style.display = (type==='bagStreak') ? '' : 'none';
+  document.getElementById('cond-n-row').style.display   = (type==='bestStreak') ? 'none' : '';
+
+  // 予約済みの一覧
+  const c=getChild();
+  const list=(c.condMessages||[]);
+  const wrap=document.getElementById('cond-list');
+  if(!list.length){ wrap.innerHTML=''; return; }
+  wrap.innerHTML = list.map(m=>{
+    const bag=getBags().find(b=>b.id===m.bagId);
+    let condTxt='';
+    if(m.cond==='bagStreak')  condTxt = `「${bag?bag.name:'?'}」を ${m.n}日 つづけたら`;
+    if(m.cond==='totalDays')  condTxt = `ぜんぶ おわった日が ${m.n}日に なったら`;
+    if(m.cond==='bestStreak') condTxt = `さいちょう きろくを こえたら`;
+    const done = m.fired ? '✅ とどきました' : '⏳ まちのこり';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px;border:1.5px solid var(--border);border-radius: var(--r-md);margin-bottom:6px;${m.fired?'opacity:0.55':''}">
+      <div style="flex:1;min-width:0">
+        <div style="font-size: var(--fs-xs);color:var(--text-dim);font-weight:700">${condTxt}</div>
+        <div style="font-size: var(--fs-sm);font-weight:800">💬 ${m.text}</div>
+        <div style="font-size: var(--fs-xs);color:var(--text-dim)">${done}</div>
+      </div>
+      <button type="button" class="cond-del" data-id="${m.id}" style="min-height:44px;min-width:44px;border-radius: var(--r-sm);border:none;background:var(--surface2);color:var(--text-dim);font-family:inherit;font-weight:900;cursor:pointer" aria-label="けす">✕</button>
+    </div>`;
+  }).join('');
+  wrap.querySelectorAll('.cond-del').forEach(b=>{
+    b.addEventListener('click',()=>removeConditionalMessage(b.dataset.id));
+  });
+}
+document.getElementById('cond-type').addEventListener('change', renderCondMessages);
+document.getElementById('cond-add').addEventListener('click',()=>{
+  const type=document.getElementById('cond-type').value;
+  const bagId=document.getElementById('cond-bag').value;
+  const n=Number(document.getElementById('cond-n').value)||0;
+  const text=document.getElementById('cond-text').value.trim();
+  if(!text){ showToast('ことばを 入れてください'); return; }
+  if(type==='bagStreak' && !bagId){ showToast('カバンを えらんでください'); return; }
+  if(type!=='bestStreak' && n<1){ showToast('日数を 入れてください'); return; }
+  addConditionalMessage(type, bagId, n, text);
+  document.getElementById('cond-text').value='';
+  showToast('よやく しました');
+});
+
 // ═══ 初期化 ═══
 applyNowMarkerColor(); updateCoinBadge();
 updatePendingBadge(); tick(); applyKeepAwake(); refreshWeatherIfNeeded();
@@ -6913,6 +7488,7 @@ updateNotifyUI();
 maybeShowInstallBar();
 initAutoBackup();   // データが勝手に消されないようにし、前に選んだ保存先を復元する
 welcomeBackIfNeeded();  // 久しぶりでも責めずに迎える（何日空いたかは言わない）
+renderParentMessage();
 (function scheduleMinute(){
   const now=new Date(); const ms=(60-now.getSeconds())*1000-now.getMilliseconds();
   setTimeout(()=>{tick();setInterval(tick,60000);},ms);
