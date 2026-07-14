@@ -1094,21 +1094,6 @@ body.viewing-other-day #date-big { color: var(--accent); }
   .tl-band-name { font-size: var(--fs-xl); }
   .tl-band-tag  { font-size: var(--fs-md); }
 }
-/* 遅れているときの支援バー（急かすのではなく、判断を助ける）
-   position:fixed で「画面の底」に固定する。absoluteだと親要素(タイムライン列)の底が
-   基準になってしまい、片手で親指が届かない中途半端な高さに浮いてしまうため。 */
-#behind-bar {
-  position: fixed; left: 8px; right: 8px; bottom: 12px; z-index: 120;
-  background: #fff; border: 2px solid var(--warn); border-radius: var(--r-md);
-  padding: 10px 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-}
-#behind-bar .bb-title { font-size: var(--fs-sm); font-weight: 900; color: var(--warn-text); margin-bottom: 6px; }
-#behind-bar .bb-sub { font-size: var(--fs-xs); color: var(--text-mid); margin-bottom: 8px; line-height: 1.4; }
-#behind-bar .bb-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-#behind-bar button {
-  min-height: 44px; border-radius: var(--r-sm); font-family: inherit;
-  font-size: var(--fs-xs); font-weight: 800; cursor: pointer; padding: 6px 12px;
-}
 /* ── 片手操作用（保護者）：親指が自然に届く右下に置く ──
    根拠：保護者の操作(時刻変更・日付移動・設定)は全て画面上部にあり、
    抱っこ中は持ち替えないと届かない。ここから同じ操作に到達できるようにする。 */
@@ -1277,8 +1262,6 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       <div id="fade-top"></div>
       <div id="fade-bottom"></div>
       <button id="back-to-now" aria-label="いまの じかんへ うごかす">⏰ いまの じかんへ</button>
-      <!-- 遅れているときの支援：何分遅れか＋どれを休みにすれば間に合うかを提案 -->
-      <div id="behind-bar" style="display:none"></div>
       <!-- 片手（親指）でよく使う操作に届くための、画面右下のボタン。
            抱っこ・料理・洗濯をしながらでも、持ち替えずに操作できるようにする。 -->
       <button id="quick-fab" aria-label="きょうの よていを すぐ なおす" title="きょうの予定をすぐ直す">⚡</button>
@@ -1848,7 +1831,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v46・2026-07-12</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v48・2026-07-13</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2599,23 +2582,14 @@ function getTodayEvents(){
   // 開始順にソート
   timed=timed.filter(e=>e.time&&/^\d{1,2}:\d{2}$/.test(e.time)).sort((a,b)=>a._s-b._s);
 
-  // すきまをオフタイム（じゆうじかん）で埋める。起床〜就寝の範囲で。
-  const result=[];
-  let cursor=wake;
-  timed.forEach(ev=>{
-    if(ev._s>cursor){
-      // すきま → じゆうじかん
-      const gs=cursor, ge=ev._s;
-      result.push({id:'free-'+gs, time:fmtMin(gs), end:fmtMin(ge), name:freeLabel, emoji:'🎈', type:'off', tasks:[], _free:true});
-    }
-    result.push(ev);
-    if(!isNaN(ev._e)) cursor=Math.max(cursor, ev._e);
-  });
-  // 最後の予定〜就寝までもオフタイム
-  if(cursor<sleep){
-    result.push({id:'free-end', time:fmtMin(cursor), end:fmtMin(sleep), name:freeLabel, emoji:'🎈', type:'off', tasks:[], _free:true});
-  }
-  return result;
+  // 【重要】すきまを「じゆうじかん」カードで埋めるのは、やめた。
+  //   理由：このカードは何もすることが無いのに「やることが残っている」ように見え、
+  //         しかもコード上は6箇所で「!e._free」と除外され続けていた。
+  //         ＝存在させた後、あらゆる場所で打ち消し続ける構造だった。
+  //         新機能を作るたびに除外を書く必要があり、書き忘れがそのままバグになっていた。
+  //   予定と予定の間は「空白」のままにする。空白＝何もない＝自由、で伝わる。
+  //   （保護者が意図的に作った type:'off' のカバンは、今まで通りカードとして出る）
+  return timed;
 }
 // 入力プルダウンの「時」ラベル。値は0-23のまま、12時間設定なら ごぜん/ごご 表記にする
 function hourLabel(h, c){
@@ -2996,7 +2970,7 @@ function renderTimeline(){
         const s=toMin(ev.time), e=evEndTmp(i);
         if(curForSplit>=s && curForSplit<e){
           if(ev._completedAt!=null) continue; // 完了済みは候補にしない
-          const isOnWithTasks = ev.type==='on' && !ev._free && ev.tasks && ev.tasks.length>0;
+          const isOnWithTasks = ev.type==='on' && ev.tasks && ev.tasks.length>0;
           if(isOnWithTasks) nowCandidateIds.push(ev.id);
         }
       }
@@ -3176,7 +3150,6 @@ function renderTimeline(){
   let soonEvId=null;
   if(isViewingToday()){
     for(let i=0;i<sorted.length;i++){
-      if(sorted[i]._free) continue;
       const s=toMin(sorted[i].time);
       if(s>cur && s-cur<=5){ soonEvId=sorted[i].id; break; }
     }
@@ -3244,7 +3217,7 @@ function renderTimeline(){
           : `<button class="tl-time-edit-icon" type="button" title="じかんへんこう" aria-label="じかんを へんこうする">⏰</button>`)
         : '';
       const useVertical = multiCandidate && data.verticalBandText;
-      const nameHtml = ev._free&&!ev.name ? '' :
+      const nameHtml =
         useVertical
           ? `<div class="tl-band-name-vertical">${ev.name}</div>`
           : `<div class="tl-band-name">${ev.fromChild?'⭐ ':''}${ev.name}</div>`;
@@ -3351,6 +3324,33 @@ function renderTimeline(){
     inner.appendChild(block);
     if(isNow) nowEl=block;
   });
+
+  // ── 予定と予定の「すきま」に、薄くテキストだけ置く ──
+  // カードは作らない（作ると「やることが残っている」ように見え、コード上も除外だらけになる）。
+  // タップもできない。ただ「ここは自由」と分かるだけの文字を、背景に溶かして置く。
+  {
+    const freeLabel = getChild().freeLabel || 'じゆうじかん';
+    const MIN_GAP = 40;   // これより短い隙間には出さない（うるさくなるため）
+    const gaps = [];
+    let cursor = wake;
+    sorted.forEach(ev=>{
+      const s = toMin(ev.time);
+      const e = ev.end ? toMin(ev.end) : s+30;
+      if(s > cursor) gaps.push([cursor, s]);
+      cursor = Math.max(cursor, e);
+    });
+    if(cursor < sleep) gaps.push([cursor, sleep]);
+
+    gaps.forEach(([gs, ge])=>{
+      if(ge - gs < MIN_GAP) return;
+      const el = document.createElement('div');
+      el.textContent = freeLabel;
+      el.style.cssText = `position:absolute;left:0;right:0;top:${((gs+ge)/2)*PX_PER_MIN}px;
+        transform:translateY(-50%);text-align:center;pointer-events:none;z-index:1;
+        font-size: var(--fs-md);font-weight:800;color:var(--text-dim);opacity:0.42;letter-spacing:0.08em;`;
+      inner.appendChild(el);
+    });
+  }
 
   // ── 現在地マーカー：横線はタイムライン全幅に、時刻表示は左余白（目盛りのそば）に出す ──
   const nowLine=document.createElement('div');
@@ -4129,7 +4129,7 @@ function todayStreakPrompt(){
 function isLastCompletionOfDay(){
   // 今日ぶんの、まだ終わっていない「やること」があるか
   const remaining = getTodayEvents().filter(e=>
-    e._bagId && !e._free && e.type==='on' && e._completedAt==null
+    e._bagId && e.type==='on' && e._completedAt==null
   );
   return remaining.length === 0;
 }
@@ -5040,69 +5040,6 @@ document.getElementById('child-switch-btn').addEventListener('click',()=>{
 document.getElementById('switch-cancel').addEventListener('click',()=>document.getElementById('switch-modal').classList.remove('open'));
 document.getElementById('switch-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('switch-modal').classList.remove('open');});
 
-// ── 遅れているときの支援 ──
-// 「赤くして急かす」だけでは親が焦り、子どもに当たる。
-// 何分遅れているかを示し、「どれを休みにすれば間に合うか」という判断材料まで出す。
-let _behindDismissedAt=0;
-function renderBehindBar(){
-  const bar=document.getElementById('behind-bar');
-  if(!bar) return;
-  if(!isViewingToday() || editMode){ bar.style.display='none'; return; }
-  // 「とじる」を押したら10分は出さない（何度も出ると逆に急かされてつらいため）
-  if(Date.now() - _behindDismissedAt < 10*60*1000){ bar.style.display='none'; return; }
-
-  const cur=nowMin();
-  const evs=getTodayEvents().filter(e=>e._bagId && !e._free && e.type==='on' && e._completedAt==null);
-  // 「開始時刻を過ぎているのにまだ終わっていない」予定＝遅れの原因
-  const behind=evs.filter(e=>toMin(e.time) < cur);
-  if(!behind.length){ bar.style.display='none'; return; }
-
-  // 一番遅れている予定の、本来の終了時刻からの超過分
-  const worst=behind.reduce((a,b)=>{
-    const ea=a.end?toMin(a.end):toMin(a.time)+30;
-    const eb=b.end?toMin(b.end):toMin(b.time)+30;
-    return eb<ea ? b : a;
-  });
-  const worstEnd=worst.end?toMin(worst.end):toMin(worst.time)+30;
-  const lateMin=Math.round(cur-worstEnd);
-  if(lateMin < 5){ bar.style.display='none'; return; } // 5分未満は急かさない
-
-  // まだ始まっていない後続の予定＝「これを休みにすれば時間を作れる」候補
-  const upcoming=getTodayEvents()
-    .filter(e=>e._bagId && !e._free && e.type==='on' && e._completedAt==null && toMin(e.time) >= cur)
-    .sort((a,b)=>toMin(a.time)-toMin(b.time));
-
-  const cands=upcoming.slice(0,2).map(e=>{
-    const dur=Math.round((e.end?toMin(e.end):toMin(e.time)+30) - toMin(e.time));
-    return `<button data-skip-bag="${e._bagId}" style="background:var(--surface2);border:2px solid var(--border);color:var(--text-mid)">😴 「${e.name}」を おやすみ（${dur}ぷん つくれる）</button>`;
-  }).join('');
-
-  bar.innerHTML=`
-    <div class="bb-title">⏳ ${lateMin}ふん おくれています</div>
-    <div class="bb-sub">${cands ? 'なにかを おやすみにすると、じかんが つくれます。' : 'のこりの よていを いそぎましょう。'}</div>
-    <div class="bb-actions">
-      ${cands}
-      <button id="bb-dismiss" style="background:#fff;border:2px solid var(--border);color:var(--text-dim)">とじる</button>
-    </div>`;
-  bar.style.display='';
-
-  bar.querySelectorAll('[data-skip-bag]').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const bagId=btn.dataset.skipBag;
-      const bag=getBags().find(b=>b.id===bagId);
-      const d=getDisplayDate();
-      setBagSkipped(bagId, d, true);
-      showToast(`「${bag?bag.name:''}」を きょうは おやすみにしました`, ()=>{
-        setBagSkipped(bagId, d, false); tick();   // 誤タップしても戻せる
-      });
-      tick();
-    });
-  });
-  document.getElementById('bb-dismiss').addEventListener('click',()=>{
-    bar.style.display='none';
-    _behindDismissedAt=Date.now();
-  });
-}
 
 // ── 片手操作シート（保護者用）──
 // 保護者の操作(時刻変更・日付移動・設定)は全て画面上部にあり、抱っこ中は持ち替えないと届かない。
@@ -5111,7 +5048,7 @@ function openQuickSheet(){
   const body=document.getElementById('quick-sheet-body');
   const cur=nowMin();
   // いま進行中／次に来る「カバン由来の予定」を対象にする
-  const evs=getTodayEvents().filter(e=>e._bagId && !e._free && e._completedAt==null);
+  const evs=getTodayEvents().filter(e=>e._bagId && e._completedAt==null);
   const target = evs.find(e=>{
     const s=toMin(e.time), en=e.end?toMin(e.end):s+30;
     return cur>=s && cur<en;                       // 今まさに進行中
@@ -5245,7 +5182,7 @@ applyFabSide();
 
 let _lastNotifyKey = '';
 function tick(){
-  updateClock(); renderTimeline(); renderWantList(); updateNightMode(); checkTodayStamp(); renderBehindBar();
+  updateClock(); renderTimeline(); renderWantList(); updateNightMode(); checkTodayStamp();
   // 予定の内容が変わった時だけ、通知を予約し直す（毎分やり直すと同じ通知が積み上がる）
   if(data.notifyEnabled && swReg){
     const key = getTodayEvents().filter(e=>e._bagId && e._completedAt==null)
@@ -5442,18 +5379,25 @@ let wantEmoji='⭐';
 let prevInOff=null; // 初回はnull（演出を出さない）。以降true/false
 let lastSoonPingId=null; // 「もうすぐ」入り判定の重複鳴動防止
 document.getElementById('dismiss-offtime').addEventListener('click',()=>document.getElementById('offtime-overlay').classList.remove('show'));
+// 「いま自由時間か」＝ どのカバンも動いていない、または動いているのが type:'off' のカバン。
+// 自動生成の「じゆうじかん」カードに頼らず、カバンの状態から直接判定する。
+// （カードを作らなくても判定できる。むしろこちらの方が短くて確実）
+function isInFreeTime(){
+  if(!isViewingToday()) return false;
+  const cur=nowMin();
+  const active=getTodayEvents().filter(ev=>{
+    const s=toMin(ev.time);
+    const e=ev.end ? toMin(ev.end) : s+30;
+    return cur>=s && cur<e && ev._completedAt==null;   // 完了済みは動いていない扱い
+  });
+  if(!active.length) return true;                       // 何も動いていない ＝ 自由時間
+  return active.every(ev=>ev.type==='off');             // 動いているのが自由時間カバンだけ
+}
+
 function renderWantList(){
   const list=document.getElementById('want-list');
   const area=document.getElementById('want-list-area');
-  const cur=nowMin();
-  const sorted=getTodayEvents();
-  let inOff=false;
-  if(isViewingToday()){
-    for(let i=0;i<sorted.length;i++){
-      const s=toMin(sorted[i].time), e=i<sorted.length-1?toMin(sorted[i+1].time):24*60;
-      if(cur>=s&&cur<e&&sorted[i].type==='off'){ inOff=true; break; }
-    }
-  }
+  const inOff=isInFreeTime();
   area.classList.toggle('off-active',inOff);
   // オン→オフに切り替わった瞬間だけ演出（初回ロード・モーダル中・他の日表示中は出さない）
   if(!isViewingToday()){
@@ -7116,7 +7060,7 @@ function scheduleTodayNotifications(){
   const mode = data.notifyMode || 'morning';
   const cur = nowMin();
   const evs = getTodayEvents()
-    .filter(e=>e._bagId && !e._free && e._completedAt==null && e.type==='on')
+    .filter(e=>e._bagId && e._completedAt==null && e.type==='on')
     .sort((a,b)=>toMin(a.time)-toMin(b.time));
   if(!evs.length) return;
 
