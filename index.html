@@ -24,6 +24,8 @@
   --off-light: #CFFAFE; /* cyan-50（旧: blue-50 #dceaf3） */
   --off-bg: #A5F3FC;    /* cyan-100（旧: blue-100 #b9d9ec） */
   --accent: #b45309;    /* amber-700 = 警告・CTA。白文字を載せてWCAG AA(5.02:1)を満たす濃さ */
+  --danger: #dc2626;    /* red-600 = 時間切れ。白文字でWCAG AA(4.83:1)を満たす濃さ。remainColorRGBの終端色と揃える */
+  --danger-light: #FEE2E2; /* red-50 */
   --text: #1E1B4B;      /* indigo-950（旧: near-black #111827） */
   --text-dim: #5B4795;  /* muted indigo-purple。白背景でもカード上の色付き背景でもWCAG AA(4.5:1)を満たす濃さ */
   --text-mid: #3730A3;  /* indigo-800（旧: dark-blue #334d6e） */
@@ -203,6 +205,13 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .tl-band.now-task-card { flex-direction: column; align-items: stretch; padding: 0; overflow-y: auto; }
 .tl-band.on  { border-color: var(--on-color);  background: var(--on-light); }
 .tl-band.off { border-color: var(--off-color); background: var(--off-light); }
+/* 時間切れでも「今」に居座り続けるカード：赤のまま脈動する（トレイにしまわず視界に残す） */
+@keyframes overtimePulse { 0%,100% { box-shadow: 0 0 0 3px var(--danger); } 50% { box-shadow: 0 0 0 7px var(--danger); } }
+.tl-band.overtime-pulse { border-color: var(--danger) !important; background: var(--danger-light) !important; animation: overtimePulse 1.8s ease-in-out infinite; }
+.now-card-overtime-pulse { animation: overtimePulse 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .tl-band.overtime-pulse, .now-card-overtime-pulse { animation: none; box-shadow: 0 0 0 4px var(--danger); }
+}
 .tl-band.past { opacity: 0.38; }
 .tl-time-edit-icon {
   position: absolute; right: 4px; bottom: 4px; width: 44px; height: 44px;
@@ -1531,7 +1540,6 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       <button class="parent-header-close" id="parent-close-top" type="button" aria-label="閉じる">✕</button>
     </div>
     <div id="child-switcher-top" style="padding:10px 18px 4px"></div>
-    <div id="today-stats" style="padding:0 18px 10px;font-size: var(--fs-sm);font-weight:800;color:var(--text-mid)"></div>
     <div id="parent-tab-bar" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 18px 12px">
       <button class="ptab-btn" type="button" data-tab="pending">📨 今日<span class="pending-badge" id="pending-count-tab" style="display:none">0</span></button>
       <button class="ptab-btn" type="button" data-tab="bag">🎒 カバン</button>
@@ -1588,7 +1596,6 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       <div class="acc-body">
         <p style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">「学校の宿題」などのカバンを作り、中身（やること）を入れます。オンにして曜日を決めると、その日に出ます。時刻はあとから決められます。</p>
         <button class="btn btn-primary" id="add-bag-btn" style="width:100%;margin-bottom:10px;font-size: var(--fs-sm)">＋ カバンを作る</button>
-        <div id="bag-heading-summary" style="margin-bottom:12px"></div>
         <div id="bag-list"></div>
         <button class="btn btn-purple" id="drag-mode-btn" style="width:100%;margin-top:8px;font-size: var(--fs-sm)">✋ タイムラインで 予定を動かす</button>
       </div>
@@ -1831,7 +1838,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v48・2026-07-13</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v52・2026-07-16</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2492,6 +2499,22 @@ function withTimeEditPin(onOk){
     }
   });
 }
+// ── 子ども切り替えのPIN：保護者ロックがオンの時だけ要求する ──
+// 根拠：子どもが自分で兄弟に切り替えられてしまう問題への対応。
+//       時刻編集と同じ猶予(_pinOkUntil)を共有し、直前にPINを入れていれば聞き直さない。
+function withChildSwitchPin(onOk){
+  const needsPin = data.parentLock && data.parentLock.enabled && data.parentLock.pin;
+  if(!needsPin || Date.now() < _pinOkUntil){ onOk(); return; }
+  openPinPad('暗証番号を入力してください', pin=>{
+    if(pin===data.parentLock.pin){
+      _pinOkUntil = Date.now() + PIN_GRACE_MS;
+      closePinPad();
+      onOk();
+    } else {
+      pinShakeReset('暗証番号が違います。もう一度入力してください');
+    }
+  });
+}
 // カバンのその日の時刻を返す（日付上書き→基本時刻→空）
 function bagTimeOn(bag, date){
   const dk=dateKey(date);
@@ -2524,28 +2547,10 @@ function getEvents(){
 // 時刻未定のカバン（トレイ用）
 function getUntimedBags(){
   const date=getDisplayDate();
-  const dk=dateKey(date);
-  const cur=nowMin();
-  const normal=getBags().filter(bag=>bagActiveOn(bag,date) && !bagTimeOn(bag,date));
-
-  // 時間切れ未完了：今日アクティブで時刻あり、終了時刻を過ぎていて、完了ボタン未押し、かつ未完了タスクが1つ以上ある
-  const overtime=isViewingToday() ? getBags().filter(bag=>{
-    if(!bagActiveOn(bag,date)) return false;
-    const t=bagTimeOn(bag,date); if(!t) return false;          // 時刻なしは通常トレイ担当
-    const endStr=bagEndOn(bag,date)||(function(){              // 終了時刻を取得
-      const evs=getTodayEvents(); const ev=evs.find(e=>e._bagId===bag.id); return ev?.end||null;
-    })();
-    if(!endStr) return false;
-    if(cur<=toMin(endStr)) return false;                       // まだ終わっていない
-    const completed=(bag.completedByDate&&bag.completedByDate[dk]!=null);
-    if(completed) return false;                                // 完了ボタン押し済み
-    const tasks=bag.tasks||[];
-    return tasks.length>0; // 全チェック済み(未完了タスク無し)でも、完了ボタン未押下ならトレイに出す
-  }) : [];
-
-  // 重複除去して結合
-  const normalIds=new Set(normal.map(b=>b.id));
-  return [...normal, ...overtime.filter(b=>!normalIds.has(b.id))];
+  // v49: 時間切れ(オーバータイム)の未完了カバンは、トレイにしまわずタイムライン本体の
+  // 「今」の位置に居座らせる方式に変更した（renderTimelineのoveretimeIds）。
+  // トレイは「そもそも時刻が決まっていない」カバンだけを扱う。
+  return getBags().filter(bag=>bagActiveOn(bag,date) && !bagTimeOn(bag,date));
 }
 
 function toMin(t){ const[h,m]=t.split(':').map(Number); return h*60+m; }
@@ -2962,6 +2967,7 @@ function renderTimeline(){
   // ※ lg/rg（左右の余白グラデーション）の幅がsplitModeで変わるため、余白を作る前にここで判定する。
   const curForSplit=nowMin();
   let splitMode=false, splitEvId=null, nowCandidateIds=[];
+  const overtimeIds=new Set(); // 時間切れでも未完了なら「今」に居座り続けるやること
   {
     function evEndTmp(i){const ev=sorted[i];if(ev.end)return toMin(ev.end);return i<sorted.length-1?toMin(sorted[i+1].time):sleep;}
     if(isViewingToday() && !editMode){
@@ -2974,6 +2980,19 @@ function renderTimeline(){
           if(isOnWithTasks) nowCandidateIds.push(ev.id);
         }
       }
+      // ── 時間切れ（終了時刻を過ぎた）でも、未完了の「やること」はトレイにしまわず「今」に居座らせる ──
+      // 根拠：朝の準備のような「時間が来たらこそやらねばならないもの」を、時間切れの瞬間に
+      //       下段のトレイへ隠してしまうと、子どもの視線が向く場所から消えて一生手を付けなくなる。
+      sorted.forEach(ev=>{
+        if(nowCandidateIds.includes(ev.id)) return;
+        if(ev._completedAt!=null) return;
+        if(ev.type!=='on' || !ev.tasks || ev.tasks.length===0) return;
+        const endMin=toMin(ev.end);
+        if(curForSplit>=endMin){
+          nowCandidateIds.push(ev.id);
+          overtimeIds.add(ev.id);
+        }
+      });
     }
     if(nowCandidateIds.length>0){
       splitMode=true;
@@ -2982,6 +3001,31 @@ function renderTimeline(){
       selectedNowTaskId = splitEvId;
     } else {
       selectedNowTaskId = null;
+    }
+  }
+
+  // ── 時間が決まっていないカバン：本来なら自由時間になる場面で、代わりに「今」へ昇格させる ──
+  // 根拠：時刻未設定のカバンはgetTodayEvents()に含まれず、これまでトレイという
+  //       受動的な置き場所にしか出なかった。子どもの視線が向くタイムライン本体に
+  //       出さない限り、時刻を決めない限り一生手を付けないままになる。
+  // 複数ある場合はカバンの並び順(登録順)で1つだけ。全部並べると「やることが山ほどある」圧になる。
+  let promotedUntimedEv=null;
+  if(nowCandidateIds.length===0 && isViewingToday() && !editMode){
+    const pDate=getDisplayDate(), pDk=dateKey(pDate);
+    const promo = getBags().find(bag=>
+      bagActiveOn(bag,pDate) && !bagTimeOn(bag,pDate) &&
+      bag.type==='on' && bag.tasks && bag.tasks.length>0 &&
+      !(bag.completedByDate && bag.completedByDate[pDk]!=null)
+    );
+    if(promo){
+      const todayDone=(promo.taskDoneByDate && promo.taskDoneByDate[pDk])||[];
+      promotedUntimedEv={
+        id:'untimed-promo-'+promo.id, name:promo.name, type:'on',
+        tasks:(promo.tasks||[]).map((t,i)=>({...t, done:!!todayDone[i]})),
+        _bagId:promo.id, fromChild:!!promo.fromChild, allowFree:promo.allowFree!==false,
+        time:null, end:null
+      };
+      splitMode=true; // 右パネルを出すためだけにsplitMode配線を流用する（レールの内容自体は変わらない）
     }
   }
 
@@ -3190,11 +3234,14 @@ function renderTimeline(){
 
     if(splitMode){
       // ── 分割モード：左の細い列。全予定を実時間どおりの帯で（名前のみ・時刻表記なし） ──
-      const editable = ev._bagId && !isPast; // ⏰アイコンの表示条件
-      const hasTasksSplit = !!(ev.tasks && ev.tasks.length>0); // 本体タップ(覗く)の表示条件
       const isNowCandidate = nowCandidateIds.includes(ev.id); // 今の時間帯にかぶってる「やること」候補か
-      const pastStyle = isPast ? 'border-color:rgba(100,105,115,0.45);background:rgba(100,105,115,0.12)' : '';
-      const nowHi = isSplitNow ? 'box-shadow:0 0 0 3px var(--accent);'
+      const isOvertimeCandidate = overtimeIds.has(ev.id); // 時間切れでも居座っている「やること」か
+      const editable = ev._bagId && (!isPast || isOvertimeCandidate); // 時間切れでも⏰・とばすは押せる
+      const hasTasksSplit = !!(ev.tasks && ev.tasks.length>0); // 本体タップ(覗く)の表示条件
+      const pastStyle = (isPast && !isOvertimeCandidate) ? 'border-color:rgba(100,105,115,0.45);background:rgba(100,105,115,0.12)' : '';
+      const overtimeStyle = isOvertimeCandidate ? ' overtime-pulse' : '';
+      const nowHi = isOvertimeCandidate ? ''
+                  : isSplitNow ? 'box-shadow:0 0 0 3px var(--accent);'
                   : isNowCandidate ? 'box-shadow:0 0 0 2px var(--purple);' : '';
       const tooShort = naturalH < 22; // 細すぎる帯は名前・アイコンを省いて色だけ
 
@@ -3225,7 +3272,7 @@ function renderTimeline(){
         `<div style="min-width:0;${isPast?'opacity:0.75':''};${useVertical?'display:flex;align-items:center;justify-content:center;height:calc(100% - 8px);':''}">
           ${nameHtml}
         </div>`;
-      block.innerHTML=`<div class="tl-band ${ev.type}" style="height:100%;width:100%;position:relative;overflow:visible;${pastStyle}${nowHi}">
+      block.innerHTML=`<div class="tl-band ${ev.type}${overtimeStyle}" style="height:100%;width:100%;position:relative;overflow:visible;${pastStyle}${nowHi}">
         ${nameWrapper}
         ${editIconHtml}
       </div>`;
@@ -3254,8 +3301,19 @@ function renderTimeline(){
         rightArea.innerHTML='';
         const card=document.createElement('div');
         card.style.cssText='position:relative;';
-        card.innerHTML=buildTaskCard(ev);
+        card.innerHTML=buildTaskCard(ev, isOvertimeCandidate);
         rightArea.appendChild(card);
+        if(isOvertimeCandidate){
+          const skipBtn=card.querySelector('#overtime-skip-btn');
+          if(skipBtn) skipBtn.addEventListener('click',e=>{
+            e.stopPropagation();
+            withTimeEditPin(()=>{
+              setBagSkipped(ev._bagId, getDisplayDate(), true);
+              showToast('きょうは とばしました');
+              tick();
+            });
+          });
+        }
         nowEl=block;
       }
       return;
@@ -3325,6 +3383,20 @@ function renderTimeline(){
     if(isNow) nowEl=block;
   });
 
+  // ── 時間未設定カバンの昇格カードを右パネルに出す（自由時間の代わり） ──
+  if(promotedUntimedEv && rightArea){
+    rightArea.innerHTML='';
+    const card=document.createElement('div');
+    card.style.cssText='position:relative;';
+    card.innerHTML=buildUntimedPromoCard(promotedUntimedEv);
+    rightArea.appendChild(card);
+    const editBtn=card.querySelector('#untimed-promo-settime');
+    if(editBtn) editBtn.addEventListener('click',e=>{
+      e.stopPropagation();
+      withTimeEditPin(()=>openTimeModal(promotedUntimedEv._bagId));
+    });
+  }
+
   // ── 予定と予定の「すきま」に、薄くテキストだけ置く ──
   // カードは作らない（作ると「やることが残っている」ように見え、コード上も除外だらけになる）。
   // タップもできない。ただ「ここは自由」と分かるだけの文字を、背景に溶かして置く。
@@ -3372,8 +3444,13 @@ function renderTimeline(){
 
   // 通常モード：nowEvIdのカードにクリックハンドラを登録
   // 分割モード：右パネルに出ているsplitEvIdのカードに登録（nowEvIdとは違う場合がある）
-  const bindTargetId = splitMode ? splitEvId : nowEvId;
-  if(bindTargetId && !editMode) bindNowCardEl(scroll, sorted.find(x=>x.id===bindTargetId));
+  // 昇格した時間未設定カバン：sortedに存在しない仮想evなので、promotedUntimedEvを直接渡す
+  if(promotedUntimedEv && !editMode){
+    bindNowCardEl(scroll, promotedUntimedEv);
+  } else {
+    const bindTargetId = splitMode ? splitEvId : nowEvId;
+    if(bindTargetId && !editMode) bindNowCardEl(scroll, sorted.find(x=>x.id===bindTargetId));
+  }
 
   // 自動スクロール：現在地を画面の上から25%へ（編集モード中は止める）
   if(!userScrolledAway && !editMode){
@@ -3749,7 +3826,7 @@ function openPeekModal(ev){
 document.getElementById('peek-close').addEventListener('click',()=>document.getElementById('peek-modal').classList.remove('open'));
 document.getElementById('peek-modal').addEventListener('click',e=>{ if(e.target.id==='peek-modal') document.getElementById('peek-modal').classList.remove('open'); });
 
-function buildTaskCard(ev){
+function buildTaskCard(ev, isOvertime){
   // 残り時間の計算（buildNowCardと同じ式）
   const cur=nowMin();
   const s=toMin(ev.time||'00:00');
@@ -3761,15 +3838,13 @@ function buildTaskCard(ev){
   const remainMin=Math.max(0,Math.round(e-cur));
 
   // 色：青→オレンジ→赤（ピンク/マゼンタを経由しない2区間補間） ※buildNowCardと同じ式
-  const borderColor=remainColorCss(remainFrac);
-  const textColor=remainColorCss(remainFrac);
-  // 細いバーではなく、カード自体を「経過ぶんだけ上から下に」塗る。
-  // 時間が経つほど色が濃く（青→赤）なるので、子どもにも一目で残り具合が分かる。
+  // 時間切れは常にdangerトークンで固定（remainFracの補間任せにしない）
+  const borderColor = isOvertime ? 'var(--danger)' : remainColorCss(remainFrac);
   const fillPct=Math.round(elapsedFrac*100);
   const fillColor=(()=>{ const c=remainColorRGB(remainFrac); const mix=0.72; // 白との混合率(高いほど淡い)
     const r=Math.round(c.r+(255-c.r)*mix), g=Math.round(c.g+(255-c.g)*mix), b=Math.round(c.b+(255-c.b)*mix);
     return `rgb(${r},${g},${b})`; })();
-  const bgFill=`linear-gradient(to bottom, ${fillColor} 0%, ${fillColor} ${fillPct}%, #ffffff ${fillPct}%, #ffffff 100%)`;
+  const bgFill = isOvertime ? 'var(--danger-light)' : `linear-gradient(to bottom, ${fillColor} 0%, ${fillColor} ${fillPct}%, #ffffff ${fillPct}%, #ffffff 100%)`;
 
   const tasks=(ev.tasks||[]);
   let tasksHtml='<div class="now-tasks" style="padding:4px 0">';
@@ -3791,15 +3866,61 @@ function buildTaskCard(ev){
       : notReadyBarHTML(done, total);
   }
 
-  return `<div style="background:${bgFill};border:10px solid ${borderColor};border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:78vh;overflow:hidden;transition:background 0.8s linear, border-color 0.8s linear">
+  const overtimeTag = isOvertime
+    ? `<div style="font-size: var(--fs-sm);font-weight:900;color:#fff;background:var(--danger);display:inline-block;padding:3px 12px;border-radius: var(--r-md);margin-bottom:6px">⏰ じかんが すぎたよ</div>`
+    : '';
+  const skipBtnHtml = isOvertime
+    ? `<button type="button" id="overtime-skip-btn" style="width:100%;margin-top:8px;padding:12px;min-height:44px;border-radius: var(--r-md);border:2px solid var(--danger);background:#fff;color:var(--danger);font-weight:900;font-size: var(--fs-sm);cursor:pointer">😴 きょうは とばす</button>`
+    : '';
+
+  return `<div class="${isOvertime?'now-card-overtime-pulse':''}" style="background:${bgFill};border:10px solid ${borderColor};border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:78vh;overflow:hidden;transition:background 0.8s linear, border-color 0.8s linear">
       <div style="padding:14px 18px 0;flex-shrink:0">
+        ${overtimeTag}
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px">
           <div class="now-card-name" style="font-size: var(--fs-xl)">${ev.fromChild?'⭐ ':''}${ev.name}</div>
           ${remainPieHTML(remainFrac, remainMin, borderColor, 48)}
         </div>
       </div>
       <div style="flex:1;min-height:0;overflow-y:auto;padding:0 18px">${tasksHtml}</div>
-      <div style="padding:0 18px 14px">${btnHtml}</div>
+      <div style="padding:0 18px 14px">${btnHtml}${skipBtnHtml}</div>
+    </div>`;
+}
+
+// 時間未設定カバンの昇格カード（自由時間の代わりに出す）。
+// 残り時間の概念が無いので、色は控えめな中間色で固定し、チェックリストと
+// 「じかんを きめる」への近道だけを出す。せかす表現(赤・カウントダウン)は使わない。
+function buildUntimedPromoCard(ev){
+  const tasks=(ev.tasks||[]);
+  let tasksHtml='<div class="now-tasks" style="padding:4px 0">';
+  tasks.forEach((t,ti)=>{
+    tasksHtml+=`<div class="now-task-item ${t.done?'done':''}" data-ti="${ti}" style="padding:11px 13px;gap:10px;margin-bottom:8px"><div class="now-task-check" style="width:28px;height:28px">${t.done?'✓':''}</div><div class="now-task-name" style="font-size: var(--fs-lg)">${t.name}</div></div>`;
+  });
+  tasksHtml+='</div>';
+
+  const allDone=tasks.every(t=>t.done) && tasks.length>0;
+  const done=tasks.filter(t=>t.done).length, total=tasks.length;
+  let btnHtml;
+  if(ev.allowFree===false){
+    btnHtml = allDone
+      ? `<div class="now-complete-wrap"><div class="now-complete-btn not-ready" style="cursor:default">🎉 ぜんぶ おわった！</div></div>`
+      : notReadyBarHTML(done, total);
+  } else {
+    btnHtml = allDone
+      ? `<div class="now-complete-wrap"><button class="now-complete-btn ready" id="now-complete">🎉 ぜんぶおわった！</button></div>`
+      : notReadyBarHTML(done, total);
+  }
+
+  return `<div style="background:var(--surface2);border:10px solid var(--purple);border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:78vh;overflow:hidden">
+      <div style="padding:14px 18px 0;flex-shrink:0">
+        <div style="font-size: var(--fs-sm);font-weight:900;color:#fff;background:var(--purple);display:inline-block;padding:3px 12px;border-radius: var(--r-md);margin-bottom:6px">⏳ じかんが きまってないよ</div>
+        <div style="margin-bottom:10px">
+          <div class="now-card-name" style="font-size: var(--fs-xl)">${ev.fromChild?'⭐ ':''}${ev.name}</div>
+        </div>
+      </div>
+      <div style="flex:1;min-height:0;overflow-y:auto;padding:0 18px">${tasksHtml}</div>
+      <div style="padding:0 18px 14px">${btnHtml}
+        <button type="button" id="untimed-promo-settime" style="width:100%;margin-top:8px;padding:12px;min-height:44px;border-radius: var(--r-md);border:2px solid var(--purple);background:#fff;color:var(--purple);font-weight:900;font-size: var(--fs-sm);cursor:pointer">⏰ じかんを きめる</button>
+      </div>
     </div>`;
 }
 
@@ -4017,12 +4138,7 @@ function getTodayStats(){
   });
   return {total, done, bonusMin: Math.round(bonusMin)};
 }
-function renderTodayStats(){
-  const el=document.getElementById('today-stats'); if(!el) return;
-  const {total,done,bonusMin}=getTodayStats();
-  if(total===0){ el.innerHTML='<span style="color:var(--text-dim)">きょうは カバンの よていが ありません</span>'; return; }
-  el.innerHTML = `<span>📋 きょう ${done} / ${total} おわった</span>` + (bonusMin>0?` <span style="margin-left:10px;color:var(--accent)">⏱️ あわせて ${bonusMin}ふん はやくできた</span>`:'');
-}
+// (旧renderTodayStats: 保護者設定トップのひらがな要約は削除。getTodayStats自体はスタンプ判定等で使用中のため残す)
 // きょう、よていを ぜんぶ おわったら 🌟スタンプを記録（今日を見ている時だけ判定・何度呼んでも安全）
 function checkTodayStamp(){
   if(!isViewingToday()) return;
@@ -5032,7 +5148,11 @@ document.getElementById('child-switch-btn').addEventListener('click',()=>{
     const row=document.createElement('button');
     row.style.cssText=`display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border-radius: var(--r-md);border:2.5px solid ${active?'var(--off-color)':'var(--border)'};background:${active?'var(--off-light)':'var(--surface)'};margin-bottom:8px;cursor:pointer;font-family:inherit;text-align:left`;
     row.innerHTML=`<span style="flex:1;font-size: var(--fs-lg);font-weight:800">${c.name}</span>${active?'<span style="color:var(--off-color);font-weight:900">✓</span>':''}`;
-    row.addEventListener('click',()=>{ data.activeChild=i; save(); document.getElementById('switch-modal').classList.remove('open'); tick(); });
+    row.addEventListener('click',()=>{
+      withChildSwitchPin(()=>{
+        data.activeChild=i; save(); document.getElementById('switch-modal').classList.remove('open'); tick();
+      });
+    });
     list.appendChild(row);
   });
   document.getElementById('switch-modal').classList.add('open');
@@ -5065,7 +5185,7 @@ function openQuickSheet(){
   } else {
     html += `<div style="font-size: var(--fs-sm);color:var(--text-dim);padding:4px 2px">いま うごかせる よていは ありません。</div>`;
   }
-  html += `<button class="qs-btn" data-qs="copyday">📋 きのうと おなじに する</button>`;
+  html += `<button class="qs-btn" data-qs="copyday">📋 まえと おなじに する</button>`;
   html += `<button class="qs-btn" data-qs="parent">⚙️ ほごしゃ せってい<span class="qs-sub">ずっと変える</span></button>`;
   html += `<button class="qs-btn" data-qs="hand">${data.fabLeft?'👉 ボタンを みぎに うつす':'👈 ボタンを ひだりに うつす'}</button>`;
   body.innerHTML=html;
@@ -5077,13 +5197,21 @@ function openQuickSheet(){
       if(act==='copyday'){
         withTimeEditPin(()=>{
           const today=getDisplayDate();
-          const yst=new Date(today); yst.setDate(yst.getDate()-1);
-          const res=copyDayAdjustments(yst, today);
+          const src = findLastAdjustedDay(today, 7);
           closeQuickSheet();
+          if(!src){
+            showToast('さいきん7日に へんこうが ありません');
+            tick();
+            return;
+          }
+          const res=copyDayAdjustments(src, today);
+          const isYesterday = dateKey(src)===dateKey((()=>{const y=new Date(today); y.setDate(y.getDate()-1); return y;})());
+          const dowLabel=['にち','げつ','か','すい','もく','きん','ど'][src.getDay()];
+          const label = isYesterday ? 'きのう' : `${dowLabel}ようび`;
           if(res.changed>0){
-            showToast(`きのうと おなじに しました（${res.changed}こ）`, ()=>{ res.undo(); tick(); });
+            showToast(`${label}と おなじに しました（${res.changed}こ）`, ()=>{ res.undo(); tick(); });
           } else {
-            showToast('きのうと おなじ よていでした（かわりません）');
+            showToast(`${label}と おなじ よていでした（かわりません）`);
           }
           tick();
         });
@@ -5887,7 +6015,6 @@ function openParent(){
   updateVerticalBandUI();
   updateSoundUI();
   updateWeatherUI();
-  renderTodayStats();
   showParentTab('pending');
   document.getElementById('parent-modal').classList.add('open');
 }
@@ -6237,6 +6364,21 @@ function suggestTasksForName(name){
 // ═══ 前日をコピー ═══
 // 「昨日は全部30分後ろにずらした。今日も同じ」という繰り返しをなくす。
 // その日だけの調整（時刻の上書き・おやすみ）を、まるごと別の日に引き継ぐ。
+// 直近maxDays日以内で、時刻変更・おやすみなど何かしら調整がある一番新しい日を探す
+// （週末を挟むと「きのう」が土日で調整が無く、金曜の調整を引き継げない問題への対応）
+function findLastAdjustedDay(beforeDate, maxDays){
+  for(let i=1;i<=maxDays;i++){
+    const d=new Date(beforeDate); d.setDate(d.getDate()-i);
+    const dk=dateKey(d);
+    const hasAdj = getBags().some(bag=>
+      (bag.timeByDate && Object.prototype.hasOwnProperty.call(bag.timeByDate, dk)) ||
+      (bag.endByDate && Object.prototype.hasOwnProperty.call(bag.endByDate, dk)) ||
+      (bag.skippedByDate && Object.prototype.hasOwnProperty.call(bag.skippedByDate, dk))
+    );
+    if(hasAdj) return d;
+  }
+  return null;
+}
 function copyDayAdjustments(fromDate, toDate){
   const fk=dateKey(fromDate), tk=dateKey(toDate);
   let changed=0;
@@ -6278,19 +6420,8 @@ function copyDayAdjustments(fromDate, toDate){
   }};
 }
 
-function renderBagHeadingSummary(){
-  const wrap=document.getElementById('bag-heading-summary'); if(!wrap) return;
-  const bags=getBags().filter(b=>b.enabled);
-  const weekly=bags.filter(b=>b.repeatType!=='monthly_nth');
-  const monthly=bags.filter(b=>b.repeatType==='monthly_nth');
-  if(!weekly.length && !monthly.length){ wrap.innerHTML=''; return; }
-  function group(title, list){
-    if(!list.length) return '';
-    const names=list.map(b=>`<span style="display:inline-block;background:var(--surface2);border:1.5px solid var(--border);border-radius: var(--r-md);padding:3px 10px;margin:2px 4px 2px 0;font-size: var(--fs-xs);font-weight:700">${b.name}</span>`).join('');
-    return `<div style="margin-bottom:8px"><div style="font-size: var(--fs-xs);font-weight:800;color:var(--text-dim);margin-bottom:4px">${title}</div><div>${names}</div></div>`;
-  }
-  wrap.innerHTML = `<div style="border:1.5px dashed var(--border);border-radius: var(--r-md);padding:10px 12px">${group('📅 習慣（毎週）', weekly)}${group('🗓️ 月ごと', monthly)}</div>`;
-}
+// (旧renderBagHeadingSummary: ＋カバンを作るの下にあった「習慣（毎週）/月ごと」の読み取り専用サマリーは削除。
+//  すぐ下のカバン一覧と完全に重複していたため)
 // ═══ ドラッグで並び替え ═══
 // ▲▼を何度も押すのは苦痛。≡を持ち上げて「行と行の間」に落とせるようにする。
 // カバン一覧と、やること一覧の両方で使い回す。
@@ -6399,7 +6530,7 @@ function arrayMoveTo(arr, from, to){
   return arr;
 }
 
-let bagListOpen = {};   // カバン一覧で、中身を開いているカバンのid
+// (旧bagListOpen: 中身の開閉トグルを廃止したため不要に)
 
 // ═══ カバンの並び替え ═══
 // 一覧の順番＝タイムラインでの優先度ではなく、保護者が管理しやすい順。
@@ -6417,7 +6548,6 @@ function moveBag(bagId, dir){
 }
 
 function renderBagList(){
-  renderBagHeadingSummary();
   const wrap=document.getElementById('bag-list'); wrap.innerHTML='';
   const bags=getBags();
   if(!bags.length){ wrap.innerHTML='<div style="color:var(--text-dim);font-size: var(--fs-sm)">まだカバンがありません。「＋カバンを作る」から作りましょう。</div>'; return; }
@@ -6462,16 +6592,13 @@ function renderBagList(){
       background:${bag.enabled?'var(--surface)':'var(--surface2)'};
       opacity:${bag.enabled?1:0.55};cursor:pointer;
     `;
-    const open = !!bagListOpen[bag.id];   // 中身を開いているか
     row.innerHTML=`
       <div style="display:flex;align-items:center;gap:6px">
         <!-- ≡ を持ち上げて、行と行の間に落とす -->
         <div class="sort-handle" aria-label="ならびかえ">≡</div>
-        <button class="bag-expand" aria-expanded="${open}" aria-label="なかみを ${open?'とじる':'ひらく'}"
-          style="min-width:44px;min-height:44px;background:none;border:none;cursor:pointer;color:var(--text-dim);font-size: var(--fs-sm);flex-shrink:0;transition:transform 0.2s;transform:rotate(${open?90:0}deg)">▶</button>
-        <div class="bag-main" style="flex:1;min-width:0;cursor:pointer">
+        <div class="bag-main" style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:5px;min-width:0">
-            <span style="width:9px;height:9px;border-radius:50%;background:${bagColor(bag.id)};flex-shrink:0"></span>
+            <button class="bag-color-dot" type="button" aria-label="この色の意味を みる" style="width:20px;height:20px;min-width:20px;border-radius:50%;background:${bagColor(bag.id)};flex-shrink:0;border:none;cursor:pointer;padding:0"></button>
             <span style="font-size: var(--fs-sm);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${bag.name}</span>${labelMark}
           </div>
           <div style="font-size: var(--fs-xs);font-weight:700;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${timeText} ／ ${dowText}</div>
@@ -6480,19 +6607,18 @@ function renderBagList(){
           aria-label="${bag.name} を ${bag.enabled?'オフ':'オン'}にする"
           style="background:${bag.enabled?accentColor:'#c7ccd6'}"><span class="sw-knob"></span></button>
       </div>
-      <div class="bag-detail" style="display:${open?'':'none'};padding:8px 0 2px 50px">
+      <div class="bag-detail" style="padding:8px 0 2px 34px">
         <div style="margin-bottom:5px">${taskChips}</div>
         <div style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px">${freeText}</div>
         <button class="bag-edit-btn" style="min-height:44px;padding:6px 14px;border-radius: var(--r-md);border:2px solid var(--border);background:var(--surface2);color:var(--text-mid);font-family:inherit;font-size: var(--fs-xs);font-weight:800;cursor:pointer">✎ へんしゅう</button>
       </div>${suggestHtml}`;
-    // 名前の部分／▶ を押すと、中身を開閉する（普段は1行のまま）
-    const toggleOpen = ()=>{
-      bagListOpen[bag.id] = !bagListOpen[bag.id];
-      renderBagList();
-    };
-    row.querySelector('.bag-main').addEventListener('click', toggleOpen);
-    row.querySelector('.bag-expand').addEventListener('click', e=>{ e.stopPropagation(); toggleOpen(); });
-    // 編集は、開いた中の「へんしゅう」から
+    // 色の丸をタップすると、意味を説明する（きろくのカレンダーや子ども画面と同じ色で、
+    // このカバンを見分けるための目印。並び替えても変わらない）
+    row.querySelector('.bag-color-dot').addEventListener('click', e=>{
+      e.stopPropagation();
+      showToast('この色は「きろく」のカレンダーや子どもの画面と同じ色です。このカバンを見分ける目印で、並び替えても変わりません。');
+    });
+    // 編集ボタン（中身は常に見えているので、これだけで編集モーダルへ）
     const editBtn = row.querySelector('.bag-edit-btn');
     if(editBtn) editBtn.addEventListener('click', e=>{
       e.stopPropagation();
