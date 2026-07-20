@@ -1617,8 +1617,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
 
         <!-- 週次の絵本ページに残るメッセージ。単発の一言(上)とは別で、その週のページにずっと残る -->
         <div style="margin-top:14px;padding-top:12px;border-top:1.5px dashed var(--border)">
-          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px">📖 今週の「ほん」ページに のこす</div>
-          <button type="button" class="info-toggle" data-info-toggle="info-2" aria-label="せつめいを みる"></button><p class="info-text" id="info-2" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">上の一言と違い、消えずに その週のページに残り続けます。</p>
+          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px">📖 今週の「ほん」ページに のこす <button type="button" class="info-toggle" data-info-toggle="info-2" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-2" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">上の一言と違い、消えずに その週のページに残り続けます。</p>
           <div class="task-add-row">
             <input type="text" id="book-msg-input" placeholder="例：今週もよくがんばったね" maxlength="40"/>
             <button class="btn btn-primary" id="book-msg-send" style="padding:7px 11px;font-size: var(--fs-xs)">のこす</button>
@@ -1627,8 +1626,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
 
         <!-- 条件つきメッセージ：節目に自動で届く。毎回書かなくてよくなる。 -->
         <div style="margin-top:14px;padding-top:12px;border-top:1.5px dashed var(--border)">
-          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px">⏳ 条件を きめて おくる</div>
-          <button type="button" class="info-toggle" data-info-toggle="info-3" aria-label="せつめいを みる"></button><p class="info-text" id="info-3" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">「このカバンを5日つづけたら」など、条件を満たした時に じどうで 届きます。毎回 書かなくて すみます。</p>
+          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px">⏳ 条件を きめて おくる <button type="button" class="info-toggle" data-info-toggle="info-3" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-3" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">「このカバンを5日つづけたら」など、条件を満たした時に じどうで 届きます。毎回 書かなくて すみます。</p>
           <select id="cond-type" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-md);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:10px;outline:none;font-family:inherit;margin-bottom:6px">
             <option value="bagStreak">カバンを ◯日 つづけたら</option>
             <option value="totalDays">ぜんぶ おわった日が ◯日に なったら</option>
@@ -1667,8 +1665,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
         <button class="btn btn-primary" id="add-bag-btn" style="width:100%;margin-bottom:10px;font-size: var(--fs-sm)">＋ カバンを作る</button>
         <button class="btn" id="bag-reorder-toggle" type="button" style="width:100%;margin-bottom:8px;font-size: var(--fs-xs);border:2px solid var(--border);background:var(--surface2);color:var(--text-dim)">📐 ならびかえ できるようにする</button>
         <div style="border:2px dashed var(--border);border-radius: var(--r-md);padding:10px 12px;margin-bottom:12px">
-          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px">🏖️ なつやすみ きかん</div>
-          <button type="button" class="info-toggle" data-info-toggle="info-6" aria-label="せつめいを みる"></button><p class="info-text" id="info-6" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">ここに登録した期間は、「この期間だけ 出す」カバン以外の<b>ふつうのカバンが自動で お休み</b>になります（1つずつ お休みに しなくてよい）。名前をつけて複数 登録できます（夏休み・冬休み・りょこう 等）。</p>
+          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px">🏖️ なつやすみ きかん <button type="button" class="info-toggle" data-info-toggle="info-6" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-6" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">ここに登録した期間は、「この期間だけ 出す」カバン以外の<b>ふつうのカバンが自動で お休み</b>になります（1つずつ お休みに しなくてよい）。名前をつけて複数 登録できます（夏休み・冬休み・りょこう 等）。</p>
           <div id="vacation-period-list" style="margin-bottom:8px"></div>
           <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
             <input type="text" id="vacation-name" placeholder="例：なつやすみ" maxlength="14" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px"/>
@@ -1733,16 +1730,14 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
             <div class="type-toggle" id="kanji-toggle">
               <button class="type-btn" id="kanji-hiragana" style="flex:1">ひらがな</button>
               <button class="type-btn" id="kanji-kanji" style="flex:1">漢字</button>
-            </div>
-            <button type="button" class="info-toggle" data-info-toggle="info-8" aria-label="せつめいを みる"></button><p class="info-text" id="info-8" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;line-height:1.4">小さい子には「ひらがな」、漢字が読める子には「漢字」。</p>
+             <button type="button" class="info-toggle" data-info-toggle="info-8" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-8" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;line-height:1.4">小さい子には「ひらがな」、漢字が読める子には「漢字」。</p>
           </div>
           <div style="margin-top:12px">
             <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:5px;font-weight:700">時刻の表示形式 🕒</label>
             <div class="type-toggle" id="time12-toggle">
               <button class="type-btn" id="time12-on" style="flex:1">12時間表示</button>
               <button class="type-btn" id="time12-off" style="flex:1">24時間表示</button>
-            </div>
-            <button type="button" class="info-toggle" data-info-toggle="info-9" aria-label="せつめいを みる"></button><p class="info-text" id="info-9" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;line-height:1.4">「12時間表示」は午前/午後付き（午後3:00）。小さい子にはこちらが分かりやすいです。</p>
+             <button type="button" class="info-toggle" data-info-toggle="info-9" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-9" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;line-height:1.4">「12時間表示」は午前/午後付き（午後3:00）。小さい子にはこちらが分かりやすいです。</p>
           </div>
         </div>
       </div>
@@ -1757,16 +1752,14 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       <button class="acc-head" type="button" data-acc-toggle="display">🖥️ 画面・タイムラインの 見え方<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
         <div>
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">画面を消さない 📱</label>
-          <button type="button" class="info-toggle" data-info-toggle="info-10" aria-label="せつめいを みる"></button><p class="info-text" id="info-10" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">アプリを開いている間、画面が消えないようにします（時計のようにつけっぱなしにしたい場合）。※対応していない端末では効かないことがあります。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">画面を消さない 📱 <button type="button" class="info-toggle" data-info-toggle="info-10" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-10" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">アプリを開いている間、画面が消えないようにします（時計のようにつけっぱなしにしたい場合）。※対応していない端末では効かないことがあります。</p>
           <div class="type-toggle" id="awake-toggle">
             <button class="type-btn" id="awake-on" style="flex:1">消さない</button>
             <button class="type-btn" id="awake-off" style="flex:1">通常</button>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">タイムラインの間隔 📏</label>
-          <button type="button" class="info-toggle" data-info-toggle="info-11" aria-label="せつめいを みる"></button><p class="info-text" id="info-11" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">1時間分の縦の長さを調整します。広くすると見やすくなりますが、スクロール量が増えます。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">タイムラインの間隔 📏 <button type="button" class="info-toggle" data-info-toggle="info-11" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-11" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">1時間分の縦の長さを調整します。広くすると見やすくなりますが、スクロール量が増えます。</p>
           <div class="type-toggle" id="zoom-toggle">
             <button class="type-btn" id="zoom-narrow" style="flex:1">コンパクト</button>
             <button class="type-btn" id="zoom-normal" style="flex:1">通常</button>
@@ -1774,8 +1767,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">現在時刻のマーカー 🕐</label>
-          <button type="button" class="info-toggle" data-info-toggle="info-12" aria-label="せつめいを みる"></button><p class="info-text" id="info-12" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">タイムライン上の「現在」の線につけるマーカーを選びます。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">現在時刻のマーカー 🕐 <button type="button" class="info-toggle" data-info-toggle="info-12" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-12" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">タイムライン上の「現在」の線につけるマーカーを選びます。</p>
           <div class="type-toggle" id="nowmarker-toggle">
             <button class="type-btn" id="nowmarker-digital" style="flex:1">デジタル時計</button>
             <button class="type-btn" id="nowmarker-analog" style="flex:1">アナログ時計</button>
@@ -1787,16 +1779,14 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">同時刻の予定が重なった時の表示 📋</label>
-          <button type="button" class="info-toggle" data-info-toggle="info-13" aria-label="せつめいを みる"></button><p class="info-text" id="info-13" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">同じ時間帯に複数の予定が重なって帯が細くなった時、予定名を縦書きにすると読みやすくなります。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">同時刻の予定が重なった時の表示 📋 <button type="button" class="info-toggle" data-info-toggle="info-13" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-13" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">同じ時間帯に複数の予定が重なって帯が細くなった時、予定名を縦書きにすると読みやすくなります。</p>
           <div class="type-toggle" id="vertical-band-toggle">
             <button class="type-btn" id="vertical-band-off" style="flex:1">横書き（通常）</button>
             <button class="type-btn" id="vertical-band-on" style="flex:1">縦書き</button>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">通知音 🔔</label>
-          <button type="button" class="info-toggle" data-info-toggle="info-14" aria-label="せつめいを みる"></button><p class="info-text" id="info-14" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">オフタイムに切り替わった時・「ぜんぶおわった」を押した時・次の予定の5分前に、やさしい音を鳴らします。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">通知音 🔔 <button type="button" class="info-toggle" data-info-toggle="info-14" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-14" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">オフタイムに切り替わった時・「ぜんぶおわった」を押した時・次の予定の5分前に、やさしい音を鳴らします。</p>
           <div class="type-toggle" id="sound-toggle">
             <button class="type-btn" id="sound-on" style="flex:1">鳴らす</button>
             <button class="type-btn" id="sound-off" style="flex:1">鳴らさない</button>
@@ -1816,8 +1806,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
         </div>
         <button class="btn btn-secondary" id="lock-change-btn" style="width:100%;margin-top:10px;font-size: var(--fs-sm);display:none">🔑 暗証番号を変更</button>
         <div style="margin-top:14px;padding-top:14px;border-top:2px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-sm);font-weight:800;color:var(--text);margin-bottom:6px">⏰ 時刻変更アイコンにも暗証番号を要求する</label>
-          <button type="button" class="info-toggle" data-info-toggle="info-16" aria-label="せつめいを みる"></button><p class="info-text" id="info-16" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.4">タイムラインの予定についている⏰アイコンを押した時にも、暗証番号を求めます。暗証番号自体は保護者ロックと共通です。</p>
+          <label style="display:block;font-size: var(--fs-sm);font-weight:800;color:var(--text);margin-bottom:6px">⏰ 時刻変更アイコンにも暗証番号を要求する <button type="button" class="info-toggle" data-info-toggle="info-16" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-16" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.4">タイムラインの予定についている⏰アイコンを押した時にも、暗証番号を求めます。暗証番号自体は保護者ロックと共通です。</p>
           <div class="type-toggle" id="timeedit-lock-toggle">
             <button class="type-btn" id="timeeditlock-on" style="flex:1">要求する</button>
             <button class="type-btn" id="timeeditlock-off" style="flex:1">要求しない</button>
@@ -1846,8 +1835,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
             <button class="type-btn" id="notify-mode-morning" style="flex:1">あさ 1回</button>
             <button class="type-btn" id="notify-mode-key" style="flex:1">だいじな分</button>
             <button class="type-btn" id="notify-mode-all" style="flex:1">ぜんぶ</button>
-          </div>
-          <button type="button" class="info-toggle" data-info-toggle="info-18" aria-label="せつめいを みる"></button><p class="info-text" id="info-18" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;line-height:1.5">
+           <button type="button" class="info-toggle" data-info-toggle="info-18" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-18" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;line-height:1.5">
             通知が多いと「うるさい」と感じて切られ、切られると二度と戻りません。<br>
             <b>まずは「あさ 1回」から始めるのをおすすめします。</b>
           </p>
@@ -1910,8 +1898,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
           <div id="auto-backup-status" style="font-size: var(--fs-xs);font-weight:800;line-height:1.5;margin-bottom:8px"></div>
           <button class="btn btn-primary" id="auto-backup-btn" style="width:100%;font-size: var(--fs-sm)"></button>
           <button class="btn btn-secondary" id="auto-backup-off" style="width:100%;margin-top:6px;font-size: var(--fs-sm);display:none">じどう保存を やめる</button>
-        </div>
-        <button type="button" class="info-toggle" data-info-toggle="info-21" aria-label="せつめいを みる"></button><p class="info-text" id="info-21" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">手動でも書き出せます。機種変更やブラウザのデータ消去に備えて、ときどき書き出しておくと安心です。</p>
+         <button type="button" class="info-toggle" data-info-toggle="info-21" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-21" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">手動でも書き出せます。機種変更やブラウザのデータ消去に備えて、ときどき書き出しておくと安心です。</p>
         <div style="display:flex;gap:8px">
           <button class="btn btn-secondary" id="export-btn" style="flex:1;font-size: var(--fs-sm)">⬇️ ぜんいん書き出す</button>
           <button class="btn btn-secondary" id="import-btn" style="flex:1;font-size: var(--fs-sm)">⬆️ 読み込む</button>
@@ -1924,7 +1911,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v91・2026-07-16</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v93・2026-07-16</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2038,8 +2025,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       </div>
     </div>
     <div class="field">
-      <label class="bag-label-toggle"><input type="checkbox" id="bag-allow-free" checked/><span>終わったら自由時間にできる</span></label>
-      <button type="button" class="info-toggle" data-info-toggle="info-24" aria-label="せつめいを みる"></button><p class="info-text" id="info-24" style="font-size: var(--fs-xs);color:var(--text-dim);margin:4px 0 0;line-height:1.4">オフにすると、「ぜんぶおわった！」を押しても、決めた終了時刻までは自由時間になりません（学校など）。</p>
+      <label class="bag-label-toggle"><input type="checkbox" id="bag-allow-free" checked/><span>終わったら自由時間にできる</span> <button type="button" class="info-toggle" data-info-toggle="info-24" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-24" style="font-size: var(--fs-xs);color:var(--text-dim);margin:4px 0 0;line-height:1.4">オフにすると、「ぜんぶおわった！」を押しても、決めた終了時刻までは自由時間になりません（学校など）。</p>
     </div>
     <div class="field">
       <label>繰り返し方</label>
@@ -2067,8 +2053,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
             <option value="0">日曜日</option><option value="1">月曜日</option><option value="2">火曜日</option>
             <option value="3">水曜日</option><option value="4">木曜日</option><option value="5">金曜日</option><option value="6">土曜日</option>
           </select>
-        </div>
-        <button type="button" class="info-toggle" data-info-toggle="info-25" aria-label="せつめいを みる"></button><p class="info-text" id="info-25" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;line-height:1.4">例：「第2」「水曜日」→ 毎月第2水曜日だけ出てくる予定になります。</p>
+         <button type="button" class="info-toggle" data-info-toggle="info-25" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-25" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;line-height:1.4">例：「第2」「水曜日」→ 毎月第2水曜日だけ出てくる予定になります。</p>
       </div>
     </div>
     <div class="field">
@@ -2092,8 +2077,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
         <div style="flex:1"><div style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:3px;font-weight:700">はじまり</div><div id="bag-default-time-sel"></div></div>
         <span style="font-size: var(--fs-md);font-weight:900;color:var(--text-dim);margin-top:14px">〜</span>
         <div style="flex:1"><div style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:3px;font-weight:700">おわり</div><div id="bag-default-end-sel"></div></div>
-      </div>
-      <button type="button" class="info-toggle" data-info-toggle="info-26" aria-label="せつめいを みる"></button><p class="info-text" id="info-26" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;line-height:1.5">空にすると、その日の「まだ時間がきまってないこと」に出ます。子どもと相談して時刻を決められます。あいた時間はじどうで オフタイムになります。</p>
+       <button type="button" class="info-toggle" data-info-toggle="info-26" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-26" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;line-height:1.5">空にすると、その日の「まだ時間がきまってないこと」に出ます。子どもと相談して時刻を決められます。あいた時間はじどうで オフタイムになります。</p>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="bag-cancel">戻る</button>
@@ -2134,8 +2118,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
 
 <div class="modal-overlay" role="dialog" aria-modal="true" id="bag-new-choice-modal">
   <div class="modal">
-    <h2>🎒 カバンを作る</h2>
-    <button type="button" class="info-toggle" data-info-toggle="info-27" aria-label="せつめいを みる"></button><p class="info-text" id="info-27" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:14px;line-height:1.5">どうやって作りますか？</p>
+    <h2>🎒 カバンを作る <button type="button" class="info-toggle" data-info-toggle="info-27" aria-label="せつめいを みる"></button></h2><p class="info-text" id="info-27" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:14px;line-height:1.5">どうやって作りますか？</p>
     <div class="modal-actions" style="flex-direction:column">
       <button class="btn btn-primary" id="bag-choice-blank" style="width:100%;margin-bottom:8px">📄 白紙から作る</button>
       <button class="btn btn-purple" id="bag-choice-copy" style="width:100%">📋 コピーして作る</button>
@@ -2168,8 +2151,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
 <!-- コピー元カバン選択モーダル -->
 <div class="modal-overlay" role="dialog" aria-modal="true" id="bag-copy-modal">
   <div class="modal">
-    <h2>📋 コピーするカバンをえらぶ</h2>
-    <button type="button" class="info-toggle" data-info-toggle="info-28" aria-label="せつめいを みる"></button><p class="info-text" id="info-28" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">やること・曜日・時刻もそのままコピーされます。</p>
+    <h2>📋 コピーするカバンをえらぶ <button type="button" class="info-toggle" data-info-toggle="info-28" aria-label="せつめいを みる"></button></h2><p class="info-text" id="info-28" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">やること・曜日・時刻もそのままコピーされます。</p>
     <div id="bag-copy-list" style="max-height:55vh;overflow-y:auto"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="bag-copy-cancel" style="width:100%">戻る</button>
@@ -4052,7 +4034,7 @@ function buildTaskCard(ev, isOvertime){
   // 残り時間は、隅の円グラフだけでなく大きな数字でも見せる（色は雰囲気、数字は事実、という役割分担）
   const bigRemainHtml = isOvertime ? '' : `<div style="font-size: var(--fs-2xl);font-weight:900;color:var(--text);line-height:1;margin-bottom:2px">のこり ${remainMin}ふん</div>`;
 
-  return `<div class="${pulseClass.trim()}" style="background:${bgFill};border:10px solid ${borderColor};border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:78vh;overflow:hidden;transition:background 0.8s linear, border-color 0.8s linear">
+  return `<div class="${pulseClass.trim()}" style="background:${bgFill};border:10px solid ${borderColor};border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:72vh;overflow:hidden;transition:background 0.8s linear, border-color 0.8s linear">
       <div style="padding:14px 18px 0;flex-shrink:0">
         ${overtimeTag}
         ${bigRemainHtml}
@@ -4061,7 +4043,7 @@ function buildTaskCard(ev, isOvertime){
           ${remainPieHTML(remainFrac, remainMin, borderColor, 48)}
         </div>
       </div>
-      <div class="now-scroll-area" style="flex:1;min-height:0;overflow-y:auto;padding:0 18px">${tasksHtml}</div>
+      <div class="now-scroll-area" style="flex:1;min-height:0;overflow-y:auto;padding:0 18px 74px">${tasksHtml}</div>
       <div style="padding:0 18px 14px">${btnHtml}${skipBtnHtml}</div>
     </div>`;
 }
@@ -4090,14 +4072,14 @@ function buildUntimedPromoCard(ev){
       : notReadyBarHTML(done, total);
   }
 
-  return `<div style="background:var(--surface2);border:10px solid var(--text-dim);border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:78vh;overflow:hidden">
+  return `<div style="background:var(--surface2);border:10px solid var(--text-dim);border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:72vh;overflow:hidden">
       <div style="padding:14px 18px 0;flex-shrink:0">
         <div style="font-size: var(--fs-sm);font-weight:900;color:#fff;background:var(--text-dim);display:inline-block;padding:3px 12px;border-radius: var(--r-md);margin-bottom:6px">⏳ じかんが きまってないよ</div>
         <div style="margin-bottom:10px">
           <div class="now-card-name" style="font-size: var(--fs-xl)">${ev.fromChild?'⭐ ':''}${ev.name}</div>
         </div>
       </div>
-      <div class="now-scroll-area" style="flex:1;min-height:0;overflow-y:auto;padding:0 18px">${tasksHtml}</div>
+      <div class="now-scroll-area" style="flex:1;min-height:0;overflow-y:auto;padding:0 18px 74px">${tasksHtml}</div>
       <div style="padding:0 18px 14px">${btnHtml}
         <button type="button" id="untimed-promo-settime" style="width:100%;margin-top:8px;padding:12px;min-height:44px;border-radius: var(--r-md);border:2px solid var(--text-dim);background:#fff;color:var(--text-dim);font-weight:900;font-size: var(--fs-sm);cursor:pointer">⏰ じかんを きめる</button>
       </div>
