@@ -1393,6 +1393,19 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
   </div>
 </div>
 
+<!-- 📅 日付えらび（きかん指定などで共通利用） -->
+<div class="modal-overlay" role="dialog" aria-modal="true" id="datepick-modal">
+  <div class="modal" style="max-width:340px;padding:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <button class="btn btn-secondary" id="datepick-prev" aria-label="まえの月" style="padding:8px 14px">◀</button>
+      <div id="datepick-label" style="font-size: var(--fs-lg);font-weight:900"></div>
+      <button class="btn btn-secondary" id="datepick-next" aria-label="つぎの月" style="padding:8px 14px">▶</button>
+    </div>
+    <div id="datepick-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>
+    <div class="modal-actions"><button class="btn btn-secondary" id="datepick-close">とじる</button></div>
+  </div>
+</div>
+
 <!-- 📖 ずかん -->
 <div class="modal-overlay" role="dialog" aria-modal="true" id="zukan-modal">
   <div class="modal" style="max-width:420px">
@@ -1671,9 +1684,9 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
             <input type="text" id="vacation-name" placeholder="例：なつやすみ" maxlength="14" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px"/>
           </div>
           <div style="display:flex;gap:8px;align-items:center">
-            <input type="date" id="vacation-from" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px"/>
+            <input type="text" id="vacation-from" readonly placeholder="えらぶ" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer"/>
             <span style="color:var(--text-dim)">〜</span>
-            <input type="date" id="vacation-until" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px"/>
+            <input type="text" id="vacation-until" readonly placeholder="えらぶ" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer"/>
           </div>
           <div style="display:flex;gap:8px;margin-top:8px">
             <button class="btn btn-primary" id="vacation-save" style="flex:1;font-size: var(--fs-xs)">＋ きかんを ついか する</button>
@@ -1911,7 +1924,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v93・2026-07-16</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v96・2026-07-21</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2064,9 +2077,9 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
         <button type="button" class="type-btn" id="bag-period-active" style="flex:1">この期間だけ 出す</button>
       </div>
       <div id="bag-period-dates" style="display:none;display:flex;gap:8px;align-items:center">
-        <input type="date" id="bag-period-from" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px"/>
+        <input type="text" id="bag-period-from" readonly placeholder="えらぶ" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer"/>
         <span style="color:var(--text-dim)">〜</span>
-        <input type="date" id="bag-period-until" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px"/>
+        <input type="text" id="bag-period-until" readonly placeholder="えらぶ" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer"/>
       </div>
       <select id="bag-period-use-vacation" style="display:none;width:100%;margin-top:8px;min-height:44px;padding:8px 12px;border-radius: var(--r-sm);border:2px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size: var(--fs-xs);font-weight:800"></select>
       <p id="bag-period-hint" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;line-height:1.4"></p>
@@ -7054,6 +7067,59 @@ function renderVacationPeriodList(){
     wrap.appendChild(row);
   });
 }
+// ── 📅 日付えらび（きかん指定の入力欄で共通利用する、自作カレンダーポップアップ） ──
+let datepickTargetId=null, datepickYear=0, datepickMonth=0;
+function openDatePicker(inputId){
+  datepickTargetId=inputId;
+  const cur=document.getElementById(inputId).value;
+  const base = cur ? new Date(cur+'T00:00:00') : new Date();
+  datepickYear=base.getFullYear(); datepickMonth=base.getMonth();
+  renderDatePicker();
+  document.getElementById('datepick-modal').classList.add('open');
+}
+function renderDatePicker(){
+  document.getElementById('datepick-label').textContent=`${datepickYear}年 ${datepickMonth+1}がつ`;
+  const grid=document.getElementById('datepick-grid');
+  grid.innerHTML='';
+  ['日','月','火','水','木','金','土'].forEach(w=>{
+    const h=document.createElement('div');
+    h.textContent=w; h.style.cssText='text-align:center;font-size: var(--fs-xs);font-weight:800;color:var(--text-dim)';
+    grid.appendChild(h);
+  });
+  const firstDay=new Date(datepickYear,datepickMonth,1).getDay();
+  const daysInMonth=new Date(datepickYear,datepickMonth+1,0).getDate();
+  const curVal=document.getElementById(datepickTargetId)?.value;
+  for(let i=0;i<firstDay;i++) grid.appendChild(document.createElement('div'));
+  for(let d=1; d<=daysInMonth; d++){
+    const dk=`${datepickYear}-${String(datepickMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isSelected = dk===curVal;
+    const cell=document.createElement('button');
+    cell.type='button';
+    cell.textContent=String(d);
+    cell.setAttribute('aria-label', `${datepickYear}年${datepickMonth+1}月${d}日を えらぶ`);
+    cell.style.cssText=`min-height:40px;border-radius: var(--r-sm);border:2px solid ${isSelected?'var(--text)':'var(--border)'};background:${isSelected?'var(--text)':'var(--surface)'};color:${isSelected?'#fff':'var(--text)'};font-size: var(--fs-sm);font-weight:800;cursor:pointer`;
+    cell.addEventListener('click',()=>{
+      const target=document.getElementById(datepickTargetId);
+      target.value=dk;
+      target.dispatchEvent(new Event('change'));
+      document.getElementById('datepick-modal').classList.remove('open');
+    });
+    grid.appendChild(cell);
+  }
+}
+document.getElementById('datepick-prev').addEventListener('click',()=>{
+  datepickMonth--; if(datepickMonth<0){ datepickMonth=11; datepickYear--; } renderDatePicker();
+});
+document.getElementById('datepick-next').addEventListener('click',()=>{
+  datepickMonth++; if(datepickMonth>11){ datepickMonth=0; datepickYear++; } renderDatePicker();
+});
+document.getElementById('datepick-close').addEventListener('click',()=>{
+  document.getElementById('datepick-modal').classList.remove('open');
+});
+['vacation-from','vacation-until','bag-period-from','bag-period-until'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',()=>openDatePicker(id));
+});
+
 document.getElementById('vacation-save').addEventListener('click',()=>{
   const name=document.getElementById('vacation-name').value.trim();
   const from=document.getElementById('vacation-from').value;
