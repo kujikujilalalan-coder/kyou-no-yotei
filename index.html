@@ -149,7 +149,7 @@ body.viewing-other-day #untimed-tray { filter: grayscale(0.55) opacity(0.82); tr
 body.viewing-other-day #date-big { color: var(--accent); }
 
 /* ── MAIN ── */
-#main { flex: 1; display: grid; grid-template-columns: 1fr 250px; min-height: 0; position: relative; }
+#main { flex: 1; display: grid; grid-template-columns: 1fr var(--want-panel-w, 250px); min-height: 0; position: relative; }
 #main.panels-collapsed { grid-template-columns: 1fr 0px; }
 #main.panels-collapsed #right-panel { padding: 0; border: none; }
 #panels-collapse-btn {
@@ -400,8 +400,9 @@ body.viewing-other-day #date-big { color: var(--accent); }
   flex-shrink: 0;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
 }
-/* 現在地マーカーの色（ガチャでアンロック・CSS変数で動的に変更） */
-:root { --now-marker-color: #52525B; --now-marker-shadow: rgba(82,82,91,0.4); }
+/* 現在地マーカーの色（ガチャでアンロック・CSS変数で動的に変更）。
+   「今どこか」を示す最重要の道しるべなので、他の装飾色とは別枠で目立つ色を初期値にしてある。 */
+:root { --now-marker-color: #27272A; --now-marker-shadow: rgba(39,39,42,0.5); }
 .tl-now-digital {
   font-weight: 900; color: #fff; background: var(--now-marker-color);
   border-radius: var(--r-sm); font-variant-numeric: tabular-nums;
@@ -410,8 +411,22 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .tl-now-digital.size-s { font-size: var(--fs-xs); padding: 3px 7px; border-radius: var(--r-sm); }
 .tl-now-digital.size-m { font-size: var(--fs-md); padding: 4px 9px; border-radius: var(--r-sm); }
 .tl-now-digital.size-l { font-size: var(--fs-lg); padding: 5px 11px; border-radius: var(--r-md); }
-.tl-now-analog-margin { border-radius: 50%; box-shadow: 0 0 0 2.5px var(--now-marker-color), 0 2px 5px var(--now-marker-shadow); }
-.tl-now-bar { flex: 1; height: 5px; background: var(--now-marker-color); opacity: 0.95; margin-right: 16px; border-radius: 3px; box-shadow: 0 0 6px var(--now-marker-shadow), 0 1px 3px rgba(0,0,0,0.25); }
+.tl-now-analog-margin {
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--now-marker-color), 0 2px 6px var(--now-marker-shadow);
+}
+.tl-now-bar {
+  flex: 1; height: 6px; background: var(--now-marker-color); opacity: 0.95; margin-right: 16px; border-radius: 3px;
+  box-shadow: 0 0 8px var(--now-marker-shadow), 0 1px 3px rgba(0,0,0,0.3);
+}
+/* 脈動は「アプリを開いた瞬間だけ」。ずっと動き続けると気が散るため、気づかせたら止まる */
+.tl-now-analog-margin.pulse-on-open, .tl-now-bar.pulse-on-open {
+  animation: now-marker-pulse 0.9s ease-in-out 3;
+}
+@keyframes now-marker-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
 
 /* コインバッジ（ずかんボタン上） */
 #zukan-coin-badge {
@@ -1092,15 +1107,15 @@ body.fab-left #back-to-now { right: auto; left: 16px; }
 
 /* ── 縦向き（タブレットを縦にしたとき）：横2分割をやめ、やりたいことを下部に ── */
 @media (orientation: portrait) {
-  #main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+  #main { grid-template-columns: 1fr; grid-template-rows: 1fr var(--want-panel-h, 180px); }
   #main.panels-collapsed { grid-template-columns: 1fr; grid-template-rows: 1fr 0px; }
   #main.panels-collapsed #right-panel { border-top-width: 0; }
   #right-panel {
     border-left: none; border-top: 3px solid var(--border);
-    max-height: 22vh;
+    max-height: 45vh; overflow-y: auto;
   }
-  /* 縦向き：上境目の中央に配置 */
-  #panels-collapse-btn { left: 50%; top: -16px; transform: translateX(-50%); }
+  /* 縦向き：上境目に配置(左右位置はJSでドラッグ位置を反映するため、ここではtopのみ指定) */
+  #panels-collapse-btn.vertical-mode { top: -16px; transform: translateX(-50%); }
   #want-header { padding: 12px 18px 10px; }
   #want-title { font-size: var(--fs-md); }
   #topbar { padding: 6px 12px; gap: 4px; }
@@ -1393,8 +1408,18 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
   </div>
 </div>
 
+<!-- 🎒 イレギュラー期間中に稼働させるカバンを選ぶ -->
+<div class="modal-overlay" role="dialog" aria-modal="true" id="vacation-bagpick-modal" style="z-index:300">
+  <div class="modal" style="max-width:400px">
+    <h2 style="color:var(--danger)" id="vacation-bagpick-title">🎒 稼働させる カバン</h2>
+    <p style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">この期間中も うごかす カバンだけ、チェックを入れてください。チェックしなかった カバンは、この期間だけ お休みになります。</p>
+    <div id="vacation-bagpick-list"></div>
+    <div class="modal-actions"><button class="btn btn-secondary" id="vacation-bagpick-close">とじる</button></div>
+  </div>
+</div>
+
 <!-- 📅 日付えらび（きかん指定などで共通利用） -->
-<div class="modal-overlay" role="dialog" aria-modal="true" id="datepick-modal">
+<div class="modal-overlay" role="dialog" aria-modal="true" id="datepick-modal" style="z-index:300">
   <div class="modal" style="max-width:340px;padding:16px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <button class="btn btn-secondary" id="datepick-prev" aria-label="まえの月" style="padding:8px 14px">◀</button>
@@ -1620,7 +1645,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
     <div class="acc-section open" data-acc="message" data-tab-group="pending">
       <button class="acc-head" type="button" data-acc-toggle="message">💬 こどもに ひとこと おくる<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-        <button type="button" class="info-toggle" data-info-toggle="info-1" aria-label="せつめいを みる"></button><p class="info-text" id="info-1" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">つぎに「ぜんぶおわった！」を おしたとき、こどもの がめんに 出ます。</p>
+        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-1" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-1" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">つぎに「ぜんぶおわった！」を おしたとき、こどもの がめんに 出ます。</p>
         <div id="msg-presets" style="margin-bottom:8px"></div>
         <div class="task-add-row">
           <input type="text" id="msg-input" placeholder="例：きのうより はやかったね！" maxlength="24"/>
@@ -1629,8 +1654,8 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
         <div id="msg-current" style="margin-top:8px;font-size: var(--fs-xs);line-height:1.5"></div>
 
         <!-- 週次の絵本ページに残るメッセージ。単発の一言(上)とは別で、その週のページにずっと残る -->
-        <div style="margin-top:14px;padding-top:12px;border-top:1.5px dashed var(--border)">
-          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px">📖 今週の「ほん」ページに のこす <button type="button" class="info-toggle" data-info-toggle="info-2" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-2" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">上の一言と違い、消えずに その週のページに残り続けます。</p>
+        <div style="margin-top:14px;padding-top:12px;border-top:1.5px dashed var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px"><span>
+          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>📖 今週の「ほん」ページに のこす</span></span><button type="button" class="info-toggle" data-info-toggle="info-2" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-2" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">上の一言と違い、消えずに その週のページに残り続けます。</p>
           <div class="task-add-row">
             <input type="text" id="book-msg-input" placeholder="例：今週もよくがんばったね" maxlength="40"/>
             <button class="btn btn-primary" id="book-msg-send" style="padding:7px 11px;font-size: var(--fs-xs)">のこす</button>
@@ -1638,8 +1663,8 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
         </div>
 
         <!-- 条件つきメッセージ：節目に自動で届く。毎回書かなくてよくなる。 -->
-        <div style="margin-top:14px;padding-top:12px;border-top:1.5px dashed var(--border)">
-          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px">⏳ 条件を きめて おくる <button type="button" class="info-toggle" data-info-toggle="info-3" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-3" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">「このカバンを5日つづけたら」など、条件を満たした時に じどうで 届きます。毎回 書かなくて すみます。</p>
+        <div style="margin-top:14px;padding-top:12px;border-top:1.5px dashed var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px"><span>
+          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>⏳ 条件を きめて おくる</span></span><button type="button" class="info-toggle" data-info-toggle="info-3" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-3" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">「このカバンを5日つづけたら」など、条件を満たした時に じどうで 届きます。毎回 書かなくて すみます。</p>
           <select id="cond-type" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-md);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:10px;outline:none;font-family:inherit;margin-bottom:6px">
             <option value="bagStreak">カバンを ◯日 つづけたら</option>
             <option value="totalDays">ぜんぶ おわった日が ◯日に なったら</option>
@@ -1665,7 +1690,8 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
     <div data-tab-group="pending" style="margin:10px 18px 0;padding-top:10px;border-top:1px dashed var(--border)">
       <button type="button" id="dev-reset-toggle" style="background:none;border:none;padding:2px 0;font-family:inherit;font-size: var(--fs-xs);color:var(--text-dim);opacity:0.7;cursor:pointer">🧪 開発用（実際に使い始める前に削除する）▾</button>
       <div id="dev-reset-body" style="display:none;margin-top:6px">
-        <button type="button" class="info-toggle" data-info-toggle="info-4" aria-label="せつめいを みる"></button><p class="info-text" id="info-4" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">動作確認でためた コイン・ガチャ結果・なかま・ヘッダー設定を全部リセットします。</p>
+        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-4" aria-label="せつめいを みる"></button></div>
+        <p class="info-text" id="info-4" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">動作確認でためた コイン・ガチャ結果・なかま・ヘッダー設定を全部リセットします。</p>
         <button class="btn" id="dev-reset-btn" style="width:100%;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🗑️ 色・ガチャ・コインを リセット</button>
       </div>
     </div>
@@ -1674,19 +1700,19 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
     <div class="acc-section open" data-acc="bag" data-tab-group="bag">
       <button class="acc-head" type="button" data-acc-toggle="bag">🎒 やることカバン<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-        <button type="button" class="info-toggle" data-info-toggle="info-5" aria-label="せつめいを みる"></button><p class="info-text" id="info-5" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">「学校の宿題」などのカバンを作り、中身（やること）を入れます。オンにして曜日を決めると、その日に出ます。時刻はあとから決められます。</p>
+        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-5" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-5" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">「学校の宿題」などのカバンを作り、中身（やること）を入れます。オンにして曜日を決めると、その日に出ます。時刻はあとから決められます。</p>
         <button class="btn btn-primary" id="add-bag-btn" style="width:100%;margin-bottom:10px;font-size: var(--fs-sm)">＋ カバンを作る</button>
         <button class="btn" id="bag-reorder-toggle" type="button" style="width:100%;margin-bottom:8px;font-size: var(--fs-xs);border:2px solid var(--border);background:var(--surface2);color:var(--text-dim)">📐 ならびかえ できるようにする</button>
-        <div style="border:2px dashed var(--border);border-radius: var(--r-md);padding:10px 12px;margin-bottom:12px">
-          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px">🏖️ なつやすみ きかん <button type="button" class="info-toggle" data-info-toggle="info-6" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-6" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">ここに登録した期間は、「この期間だけ 出す」カバン以外の<b>ふつうのカバンが自動で お休み</b>になります（1つずつ お休みに しなくてよい）。名前をつけて複数 登録できます（夏休み・冬休み・りょこう 等）。</p>
+        <div style="border:2px dashed var(--border);border-radius: var(--r-md);padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>
+          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>🗓️ イレギュラーきかん</span></span><button type="button" class="info-toggle" data-info-toggle="info-6" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-6" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">この期間中に<b>稼働させるカバンを選ぶ</b>と、選ばなかったカバンは自動でお休みになります（新しく作ったカバンも、選ばない限り安全側でお休みになります）。名前をつけて複数 登録できます（夏休み・冬休み・りょこう 等）。</p>
           <div id="vacation-period-list" style="margin-bottom:8px"></div>
           <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
             <input type="text" id="vacation-name" placeholder="例：なつやすみ" maxlength="14" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px"/>
           </div>
           <div style="display:flex;gap:8px;align-items:center">
-            <input type="text" id="vacation-from" readonly placeholder="えらぶ" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer"/>
+            <button type="button" id="vacation-from" data-value="" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left;appearance:none;-webkit-appearance:none">えらぶ</button>
             <span style="color:var(--text-dim)">〜</span>
-            <input type="text" id="vacation-until" readonly placeholder="えらぶ" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer"/>
+            <button type="button" id="vacation-until" data-value="" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left;appearance:none;-webkit-appearance:none">えらぶ</button>
           </div>
           <div style="display:flex;gap:8px;margin-top:8px">
             <button class="btn btn-primary" id="vacation-save" style="flex:1;font-size: var(--fs-xs)">＋ きかんを ついか する</button>
@@ -1719,10 +1745,6 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
             <button class="btn btn-primary" id="pname-save-btn">保存</button>
             <button class="btn btn-danger" id="pname-del-btn">削除</button>
           </div>
-          <div style="margin-top:10px">
-            <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:5px;font-weight:700">ヘッダーの いろ</label>
-            <div class="emoji-grid" id="header-color-grid"></div>
-          </div>
           <div style="margin-top:12px;display:flex;gap:12px">
             <div style="flex:1">
               <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:5px;font-weight:700">起きる時間 🌅</label>
@@ -1734,23 +1756,21 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
             </div>
           </div>
           <div style="margin-top:12px">
-            <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:5px;font-weight:700">あいた時間の呼び名 🎈</label>
+            <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:5px;font-weight:700"><span>あいた時間の呼び名 🎈</span><button type="button" class="info-toggle" data-info-toggle="info-7" aria-label="せつめいを みる"></button></label>
             <input type="text" id="free-label-input" placeholder="じゆうじかん" maxlength="10" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-md);font-weight:700;padding:10px 12px;outline:none;font-family:inherit;box-sizing:border-box"/>
-            <button type="button" class="info-toggle" data-info-toggle="info-7" aria-label="せつめいを みる"></button><p class="info-text" id="info-7" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;line-height:1.4">予定のすきまや、ぜんぶ終わったあとの自由時間に出る言葉です。</p>
+            <p class="info-text" id="info-7" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;line-height:1.4">予定のすきまや、ぜんぶ終わったあとの自由時間に出る言葉です。</p>
           </div>
-          <div style="margin-top:12px">
+          <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>
             <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:5px;font-weight:700">日付の表記 ✏️</label>
             <div class="type-toggle" id="kanji-toggle">
               <button class="type-btn" id="kanji-hiragana" style="flex:1">ひらがな</button>
-              <button class="type-btn" id="kanji-kanji" style="flex:1">漢字</button>
-             <button type="button" class="info-toggle" data-info-toggle="info-8" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-8" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;line-height:1.4">小さい子には「ひらがな」、漢字が読める子には「漢字」。</p>
+              <button class="type-btn" id="kanji-kanji" style="flex:1">漢字</button></span><button type="button" class="info-toggle" data-info-toggle="info-8" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-8" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;line-height:1.4">小さい子には「ひらがな」、漢字が読める子には「漢字」。</p>
           </div>
-          <div style="margin-top:12px">
+          <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>
             <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:5px;font-weight:700">時刻の表示形式 🕒</label>
             <div class="type-toggle" id="time12-toggle">
               <button class="type-btn" id="time12-on" style="flex:1">12時間表示</button>
-              <button class="type-btn" id="time12-off" style="flex:1">24時間表示</button>
-             <button type="button" class="info-toggle" data-info-toggle="info-9" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-9" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;line-height:1.4">「12時間表示」は午前/午後付き（午後3:00）。小さい子にはこちらが分かりやすいです。</p>
+              <button class="type-btn" id="time12-off" style="flex:1">24時間表示</button></span><button type="button" class="info-toggle" data-info-toggle="info-9" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-9" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;line-height:1.4">「12時間表示」は午前/午後付き（午後3:00）。小さい子にはこちらが分かりやすいです。</p>
           </div>
         </div>
       </div>
@@ -1765,14 +1785,14 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       <button class="acc-head" type="button" data-acc-toggle="display">🖥️ 画面・タイムラインの 見え方<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
         <div>
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">画面を消さない 📱 <button type="button" class="info-toggle" data-info-toggle="info-10" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-10" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">アプリを開いている間、画面が消えないようにします（時計のようにつけっぱなしにしたい場合）。※対応していない端末では効かないことがあります。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>画面を消さない 📱</span><button type="button" class="info-toggle" data-info-toggle="info-10" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-10" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">アプリを開いている間、画面が消えないようにします（時計のようにつけっぱなしにしたい場合）。※対応していない端末では効かないことがあります。</p>
           <div class="type-toggle" id="awake-toggle">
             <button class="type-btn" id="awake-on" style="flex:1">消さない</button>
             <button class="type-btn" id="awake-off" style="flex:1">通常</button>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">タイムラインの間隔 📏 <button type="button" class="info-toggle" data-info-toggle="info-11" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-11" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">1時間分の縦の長さを調整します。広くすると見やすくなりますが、スクロール量が増えます。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>タイムラインの間隔 📏</span><button type="button" class="info-toggle" data-info-toggle="info-11" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-11" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">1時間分の縦の長さを調整します。広くすると見やすくなりますが、スクロール量が増えます。</p>
           <div class="type-toggle" id="zoom-toggle">
             <button class="type-btn" id="zoom-narrow" style="flex:1">コンパクト</button>
             <button class="type-btn" id="zoom-normal" style="flex:1">通常</button>
@@ -1780,7 +1800,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">現在時刻のマーカー 🕐 <button type="button" class="info-toggle" data-info-toggle="info-12" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-12" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">タイムライン上の「現在」の線につけるマーカーを選びます。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>現在時刻のマーカー 🕐</span><button type="button" class="info-toggle" data-info-toggle="info-12" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-12" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">タイムライン上の「現在」の線につけるマーカーを選びます。</p>
           <div class="type-toggle" id="nowmarker-toggle">
             <button class="type-btn" id="nowmarker-digital" style="flex:1">デジタル時計</button>
             <button class="type-btn" id="nowmarker-analog" style="flex:1">アナログ時計</button>
@@ -1792,14 +1812,14 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">同時刻の予定が重なった時の表示 📋 <button type="button" class="info-toggle" data-info-toggle="info-13" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-13" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">同じ時間帯に複数の予定が重なって帯が細くなった時、予定名を縦書きにすると読みやすくなります。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>同時刻の予定が重なった時の表示 📋</span><button type="button" class="info-toggle" data-info-toggle="info-13" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-13" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">同じ時間帯に複数の予定が重なって帯が細くなった時、予定名を縦書きにすると読みやすくなります。</p>
           <div class="type-toggle" id="vertical-band-toggle">
             <button class="type-btn" id="vertical-band-off" style="flex:1">横書き（通常）</button>
             <button class="type-btn" id="vertical-band-on" style="flex:1">縦書き</button>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">通知音 🔔 <button type="button" class="info-toggle" data-info-toggle="info-14" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-14" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">オフタイムに切り替わった時・「ぜんぶおわった」を押した時・次の予定の5分前に、やさしい音を鳴らします。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>通知音 🔔</span><button type="button" class="info-toggle" data-info-toggle="info-14" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-14" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">オフタイムに切り替わった時・「ぜんぶおわった」を押した時・次の予定の5分前に、やさしい音を鳴らします。</p>
           <div class="type-toggle" id="sound-toggle">
             <button class="type-btn" id="sound-on" style="flex:1">鳴らす</button>
             <button class="type-btn" id="sound-off" style="flex:1">鳴らさない</button>
@@ -1812,14 +1832,14 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
     <div class="acc-section" data-acc="lock" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="lock">🔒 保護者ロック<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-        <button type="button" class="info-toggle" data-info-toggle="info-15" aria-label="せつめいを みる"></button><p class="info-text" id="info-15" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">ロックをかけると、この⚙️設定を開くときに暗証番号（4桁）が必要になります。子どもが勝手に設定を変えるのを防げます。</p>
+        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-15" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-15" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">ロックをかけると、この⚙️設定を開くときに暗証番号（4桁）が必要になります。子どもが勝手に設定を変えるのを防げます。</p>
         <div class="type-toggle" id="lock-toggle">
           <button class="type-btn" id="lock-on" style="flex:1">ロックを使う</button>
           <button class="type-btn" id="lock-off" style="flex:1">使わない</button>
         </div>
         <button class="btn btn-secondary" id="lock-change-btn" style="width:100%;margin-top:10px;font-size: var(--fs-sm);display:none">🔑 暗証番号を変更</button>
         <div style="margin-top:14px;padding-top:14px;border-top:2px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-sm);font-weight:800;color:var(--text);margin-bottom:6px">⏰ 時刻変更アイコンにも暗証番号を要求する <button type="button" class="info-toggle" data-info-toggle="info-16" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-16" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.4">タイムラインの予定についている⏰アイコンを押した時にも、暗証番号を求めます。暗証番号自体は保護者ロックと共通です。</p>
+          <label style="display:block;font-size: var(--fs-sm);font-weight:800;color:var(--text);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>⏰ 時刻変更アイコンにも暗証番号を要求する</span><button type="button" class="info-toggle" data-info-toggle="info-16" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-16" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.4">タイムラインの予定についている⏰アイコンを押した時にも、暗証番号を求めます。暗証番号自体は保護者ロックと共通です。</p>
           <div class="type-toggle" id="timeedit-lock-toggle">
             <button class="type-btn" id="timeeditlock-on" style="flex:1">要求する</button>
             <button class="type-btn" id="timeeditlock-off" style="flex:1">要求しない</button>
@@ -1833,7 +1853,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
     <div class="acc-section" data-acc="notify" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="notify">🔔 おしらせ（通知）<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-        <button type="button" class="info-toggle" data-info-toggle="info-17" aria-label="せつめいを みる"></button><p class="info-text" id="info-17" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">
+        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-17" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-17" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">
           予定の5分前と、終わりの時刻に おしらせを出します。<br>
           <b>アプリを開いている間、またはホーム画面に追加してバックグラウンドにある間だけ届きます。</b>
           完全に閉じている時は届きません（サーバーを使わないアプリのため）。
@@ -1859,7 +1879,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
     <div class="acc-section" data-acc="night" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="night">🌃 ナイトモード<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-        <button type="button" class="info-toggle" data-info-toggle="info-19" aria-label="せつめいを みる"></button><p class="info-text" id="info-19" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">設定した時間になると、画面を暗くして小さな時計だけにします（つけっぱなしによる画面の焼き付き防止・電池の節約）。画面をタッチするとしばらく通常表示に戻ります。</p>
+        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-19" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-19" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">設定した時間になると、画面を暗くして小さな時計だけにします（つけっぱなしによる画面の焼き付き防止・電池の節約）。画面をタッチするとしばらく通常表示に戻ります。</p>
         <div class="type-toggle" id="night-toggle">
           <button class="type-btn" id="night-on" style="flex:1">使う</button>
           <button class="type-btn" id="night-off" style="flex:1">使わない</button>
@@ -1881,7 +1901,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
     <div class="acc-section" data-acc="weather" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="weather">🌤️ おてんき<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-        <button type="button" class="info-toggle" data-info-toggle="info-20" aria-label="せつめいを みる"></button><p class="info-text" id="info-20" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.6">住んでいる地域を入れると、その場所の天気（晴れ・くもり・雨・雪）をタイムラインの空に表示します。<br>地域を入れると、天気を調べるために位置情報として使用します。入れない場合は、当たり障りのない天気（晴れ・くもり）がランダムで表示されます。</p>
+        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-20" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-20" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.6">住んでいる地域を入れると、その場所の天気（晴れ・くもり・雨・雪）をタイムラインの空に表示します。<br>地域を入れると、天気を調べるために位置情報として使用します。入れない場合は、当たり障りのない天気（晴れ・くもり）がランダムで表示されます。</p>
         <div class="field"><label>地域（市町村名など）</label>
           <div style="display:flex;gap:8px">
             <input type="text" id="weather-region-input" placeholder="例：横浜市" style="flex:1" maxlength="30"/>
@@ -1911,20 +1931,23 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
           <div id="auto-backup-status" style="font-size: var(--fs-xs);font-weight:800;line-height:1.5;margin-bottom:8px"></div>
           <button class="btn btn-primary" id="auto-backup-btn" style="width:100%;font-size: var(--fs-sm)"></button>
           <button class="btn btn-secondary" id="auto-backup-off" style="width:100%;margin-top:6px;font-size: var(--fs-sm);display:none">じどう保存を やめる</button>
-         <button type="button" class="info-toggle" data-info-toggle="info-21" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-21" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">手動でも書き出せます。機種変更やブラウザのデータ消去に備えて、ときどき書き出しておくと安心です。</p>
+        </div>
+        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-21" aria-label="せつめいを みる"></button></div>
+        <p class="info-text" id="info-21" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">手動でも書き出せます。機種変更やブラウザのデータ消去に備えて、ときどき書き出しておくと安心です。</p>
         <div style="display:flex;gap:8px">
           <button class="btn btn-secondary" id="export-btn" style="flex:1;font-size: var(--fs-sm)">⬇️ ぜんいん書き出す</button>
           <button class="btn btn-secondary" id="import-btn" style="flex:1;font-size: var(--fs-sm)">⬆️ 読み込む</button>
         </div>
         <div style="margin-top:12px;padding-top:12px;border-top:1.5px dashed var(--border)">
-          <button type="button" class="info-toggle" data-info-toggle="info-22" aria-label="せつめいを みる"></button><p class="info-text" id="info-22" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">📱 子ども用タブレットに渡すとき：いま選んでいる子だけを書き出せます。タブレット側で読み込むと、その子だけが表示されます。</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size: var(--fs-xs);color:var(--text-dim);font-weight:800;margin-bottom:4px"><span>📱 この子だけ 書き出す</span><button type="button" class="info-toggle" data-info-toggle="info-22" aria-label="せつめいを みる"></button></div>
+          <p class="info-text" id="info-22" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">子ども用タブレットに渡すとき：いま選んでいる子だけを書き出せます。タブレット側で読み込むと、その子だけが表示されます。</p>
           <button class="btn btn-secondary" id="export-child-btn" style="width:100%;font-size: var(--fs-sm)">⬇️ この子だけ書き出す（タブレット用）</button>
         </div>
         <input type="file" id="import-file" accept="application/json" style="display:none"/>
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v96・2026-07-21</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v109・2026-07-21</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2001,7 +2024,8 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
         <button class="btn btn-secondary" data-shift="10"  style="flex:1;min-height:44px">＋10ぷん</button>
       </div>
       <button class="btn" id="ev-skip-today" style="width:100%;margin-top:10px;min-height:44px;background:var(--surface2);border:2px solid var(--border);color:var(--text-dim)">😴 きょうは おやすみにする</button>
-      <button type="button" class="info-toggle" data-info-toggle="info-23" aria-label="せつめいを みる"></button><p class="info-text" id="info-23" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;line-height:1.4">おやすみにしても、カバンは消えません。らいしゅうは いつもどおり でてきます。</p>
+      <div style="display:flex;justify-content:flex-end;margin-top:6px"><button type="button" class="info-toggle" data-info-toggle="info-23" aria-label="せつめいを みる"></button></div>
+      <p class="info-text" id="info-23" style="font-size: var(--fs-xs);color:var(--text-dim);line-height:1.4">おやすみにしても、カバンは消えません。らいしゅうは いつもどおり でてきます。</p>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="ev-cancel">戻る</button>
@@ -2077,9 +2101,9 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
         <button type="button" class="type-btn" id="bag-period-active" style="flex:1">この期間だけ 出す</button>
       </div>
       <div id="bag-period-dates" style="display:none;display:flex;gap:8px;align-items:center">
-        <input type="text" id="bag-period-from" readonly placeholder="えらぶ" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer"/>
+        <button type="button" id="bag-period-from" data-value="" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left;appearance:none;-webkit-appearance:none">えらぶ</button>
         <span style="color:var(--text-dim)">〜</span>
-        <input type="text" id="bag-period-until" readonly placeholder="えらぶ" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer"/>
+        <button type="button" id="bag-period-until" data-value="" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left;appearance:none;-webkit-appearance:none">えらぶ</button>
       </div>
       <select id="bag-period-use-vacation" style="display:none;width:100%;margin-top:8px;min-height:44px;padding:8px 12px;border-radius: var(--r-sm);border:2px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size: var(--fs-xs);font-weight:800"></select>
       <p id="bag-period-hint" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;line-height:1.4"></p>
@@ -2131,7 +2155,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
 
 <div class="modal-overlay" role="dialog" aria-modal="true" id="bag-new-choice-modal">
   <div class="modal">
-    <h2>🎒 カバンを作る <button type="button" class="info-toggle" data-info-toggle="info-27" aria-label="せつめいを みる"></button></h2><p class="info-text" id="info-27" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:14px;line-height:1.5">どうやって作りますか？</p>
+    <h2 style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>🎒 カバンを作る</span><button type="button" class="info-toggle" data-info-toggle="info-27" aria-label="せつめいを みる"></button></h2><p class="info-text" id="info-27" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:14px;line-height:1.5">どうやって作りますか？</p>
     <div class="modal-actions" style="flex-direction:column">
       <button class="btn btn-primary" id="bag-choice-blank" style="width:100%;margin-bottom:8px">📄 白紙から作る</button>
       <button class="btn btn-purple" id="bag-choice-copy" style="width:100%">📋 コピーして作る</button>
@@ -2164,7 +2188,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
 <!-- コピー元カバン選択モーダル -->
 <div class="modal-overlay" role="dialog" aria-modal="true" id="bag-copy-modal">
   <div class="modal">
-    <h2>📋 コピーするカバンをえらぶ <button type="button" class="info-toggle" data-info-toggle="info-28" aria-label="せつめいを みる"></button></h2><p class="info-text" id="info-28" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">やること・曜日・時刻もそのままコピーされます。</p>
+    <h2 style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>📋 コピーするカバンをえらぶ</span><button type="button" class="info-toggle" data-info-toggle="info-28" aria-label="せつめいを みる"></button></h2><p class="info-text" id="info-28" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">やること・曜日・時刻もそのままコピーされます。</p>
     <div id="bag-copy-list" style="max-height:55vh;overflow-y:auto"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="bag-copy-cancel" style="width:100%">戻る</button>
@@ -2290,9 +2314,12 @@ if(data.activeChild===undefined) data.activeChild=0;
 if(!data.parentLock) data.parentLock={enabled:false,pin:''};
 if(data.requireTimeEditPin===undefined) data.requireTimeEditPin=false;
 if(data.timelineZoom===undefined) data.timelineZoom=3.4;
-if(data.nowMarkerStyle===undefined) data.nowMarkerStyle='digital';
+if(data.nowMarkerStyle===undefined) data.nowMarkerStyle='analog';
+if(!data.nowMarkerStyleMigratedV98){ data.nowMarkerStyle='analog'; data.nowMarkerStyleMigratedV98=true; } // 既存データもアナログへ一度だけ強制移行
 if(data.nowMarkerSize===undefined) data.nowMarkerSize='m'; // s/m/l
 if(data.verticalBandText===undefined) data.verticalBandText=false;
+if(data.wantPanelHeightPx===undefined) data.wantPanelHeightPx=180;
+if(data.wantPanelWidthPx===undefined) data.wantPanelWidthPx=250;
 if(data.nowMarkerColor===undefined) data.nowMarkerColor='marker-gray'; // 重なった帯の縦書き
 if(!data.todayCombo) data.todayCombo={date:'',count:0};
 if(data.soundEnabled===undefined) data.soundEnabled=true;
@@ -2568,11 +2595,15 @@ function bagActiveOn(bag, date){
   if(bag.periodMode==='active' && !dateInRangeStr(date, bag.periodFrom, bag.periodUntil)) return false;
   // 通常カバンの一時停止(夏休み中だけ お休み 等)：期間内は出さない。期間が終われば自動で元通り
   if(bag.periodMode==='pause' && bag.periodFrom && bag.periodUntil && dateInRangeStr(date, bag.periodFrom, bag.periodUntil)) return false;
-  // なつやすみ等の一括おやすみ期間(child.vacationPeriods、複数・名前付き)を指定していたら、
-  // 期間限定カバン(periodMode==='active')以外の「通常カバン」は自動でお休みになる。
+  // イレギュラー期間(child.vacationPeriods、複数・名前付き)を指定していたら、
+  // その期間中は「稼働させる」と選んだカバン(bagIds)＋期間限定カバン(periodMode==='active')以外、
+  // 自動でお休みになる（新しく作ったカバンも、明示的に稼働させない限り安全側でお休みになる）。
   const vc=getChild();
-  const vacPeriods = vc && (vc.vacationPeriods || (vc.vacationFrom && vc.vacationUntil ? [{id:'legacy',name:'なつやすみ',from:vc.vacationFrom,until:vc.vacationUntil}] : []));
-  if(vacPeriods && bag.periodMode!=='active' && vacPeriods.some(p=>dateInRangeStr(date, p.from, p.until))) return false;
+  const vacPeriods = vc && (vc.vacationPeriods || (vc.vacationFrom && vc.vacationUntil ? [{id:'legacy',name:'イレギュラー',from:vc.vacationFrom,until:vc.vacationUntil,bagIds:[]}] : []));
+  if(vacPeriods){
+    const activePeriod = vacPeriods.find(p=>dateInRangeStr(date, p.from, p.until));
+    if(activePeriod && bag.periodMode!=='active' && !(activePeriod.bagIds||[]).includes(bag.id)) return false;
+  }
   // その日だけ「おやすみ」にした日は出さない（病気・急な予定変更など）。
   // カバン自体は消さないので、翌週以降はいつも通り出る。
   if(bag.skippedByDate && bag.skippedByDate[dateKey(date)]) return false;
@@ -3073,6 +3104,7 @@ let currentNowEvId = null;
 let selectedNowTaskId = null; // 同時刻に複数のオンタイムがある時、どれを右に出すか（子どもが選ぶ）
 
 let userScrolledAway = false;
+let appJustOpened = true; // 現在地マーカーの脈動は、アプリを開いた最初の描画だけ
 let focusedOverlapId = null; // 重なった予定をタップした時、一時的にどれを前面にするか
 let scrollTimer = null;
 
@@ -3584,23 +3616,26 @@ function renderTimeline(){
     });
   }
 
-  // ── 現在地マーカー：横線はタイムライン全幅に、時刻表示は左余白（目盛りのそば）に出す ──
+  // ── 現在地マーカー：横線は時計のある左余白を避けて右側だけに、時刻表示は左余白（目盛りのそば）に出す ──
+  const sizeKey = data.nowMarkerSize||'m';
+  const analogPx = {s:56, m:76, l:100}[sizeKey] || 76;
   const nowLine=document.createElement('div');
-  nowLine.style.cssText=`position:absolute;left:0;right:0;top:${cur*PX_PER_MIN}px;height:0;display:flex;align-items:center;z-index:8;pointer-events:none;`;
-  nowLine.innerHTML=`<div class="tl-now-bar"></div>`;
+  const marginPx = lg.getBoundingClientRect().width; // 左余白の実際のpx幅(%指定なので画面幅で変わる)
+  const barExtraLeft = Math.max(0, (analogPx+10) - marginPx); // 時計の実寸が余白よりはみ出す分だけ追加でずらす
+  nowLine.style.cssText=`position:absolute;left:${barExtraLeft}px;right:0;top:${cur*PX_PER_MIN}px;height:0;display:flex;align-items:center;z-index:8;pointer-events:none;`;
+  nowLine.innerHTML=`<div class="tl-now-bar${appJustOpened?' pulse-on-open':''}"></div>`;
   inner.appendChild(nowLine);
 
   const nowY=cur*PX_PER_MIN;
   const nowBadge=document.createElement('div');
   nowBadge.style.cssText=`position:absolute;left:2px;top:${nowY}px;transform:translateY(-50%);z-index:9;display:flex;align-items:center;gap:4px;`;
-  const sizeKey = data.nowMarkerSize||'m';
-  const analogPx = {s:56, m:76, l:100}[sizeKey] || 76;
   if(data.nowMarkerStyle==='analog'){
-    nowBadge.innerHTML=`<div class="tl-now-walker tl-now-analog-margin">${analogNowClockSVG(Math.round(cur),analogPx)}</div>`;
+    nowBadge.innerHTML=`<div class="tl-now-walker tl-now-analog-margin${appJustOpened?' pulse-on-open':''}">${analogNowClockSVG(Math.round(cur),analogPx)}</div>`;
   } else {
     nowBadge.innerHTML=`<div class="tl-now-walker tl-now-digital size-${sizeKey}">${fmtTimeDisp(fmtMin(cur))}</div>`;
   }
   lg.appendChild(nowBadge);
+  appJustOpened=false; // 脈動は最初の1回だけ
 
   // 通常モード：nowEvIdのカードにクリックハンドラを登録
   // 分割モード：右パネルに出ているsplitEvIdのカードに登録（nowEvIdとは違う場合がある）
@@ -4923,7 +4958,7 @@ function logCompletionEvent(child, savedMin, coinsGranted, bagType, bagId, sched
 // 現在地マーカーの色。上に白文字で時刻を出すため、6色すべてが
 // 白とのコントラスト4.5:1(WCAG AA)を満たす濃さにしてある（色相は保っているので呼び名は変わらない）。
 const MARKER_COLORS=[
-  {id:'marker-gray',   color:'#52525B', shadow:'rgba(82,82,91,0.4)',   name:{kanji:'はいいろ',  hira:'はいいろ'}, default:true, price:0},
+  {id:'marker-gray',   color:'#27272A', shadow:'rgba(39,39,42,0.5)',   name:{kanji:'はいいろ',  hira:'はいいろ'}, default:true, price:0},
   {id:'marker-indigo', color:'#4f46e5', shadow:'rgba(99,102,241,0.45)', name:{kanji:'あいいろ',hira:'あいいろ'}, price:6},
   {id:'marker-red',    color:'#dc2626', shadow:'rgba(239,68,68,0.45)',   name:{kanji:'あか',    hira:'あか'}, price:6},
   {id:'marker-green',  color:'#15803d', shadow:'rgba(34,197,94,0.45)',   name:{kanji:'みどり',  hira:'みどり'}, price:6},
@@ -5936,22 +5971,6 @@ const GLASS_STYLES = [
   {id:'glass-dark', name:{kanji:'くろすりガラス',hira:'くろすりがらす'}, price:28, blur:12, tint:'rgba(30,27,75,0.45)'},
 ];
 
-function buildHeaderColorGrid(current){
-  const g=document.getElementById('header-color-grid'); g.innerHTML='';
-  HEADER_THEMES.forEach(t=>{
-    const d=document.createElement('div');
-    d.className='emoji-opt'+(t.id===(current||'default')?' selected':'');
-    d.style.cssText=`display:flex;align-items:center;justify-content:center;background:${t.bg};min-height:40px;border-radius: var(--r-sm);`;
-    d.innerHTML=`<div style="font-size: var(--fs-xs);font-weight:800;color:var(--text-dim)">${t.name.kanji}</div>`;
-    d.addEventListener('click',()=>{
-      g.querySelectorAll('.emoji-opt').forEach(x=>x.classList.remove('selected'));
-      d.classList.add('selected');
-      if(editChildIdx!==null){ data.children[editChildIdx].headerColor=t.id; save(); tick(); }
-    });
-    g.appendChild(d);
-  });
-}
-
 function renderChildSwitcher(){
   const wrap=document.getElementById('child-switcher'); wrap.innerHTML='';
   data.children.forEach((child,i)=>{
@@ -6006,7 +6025,6 @@ function buildTimeSelect(containerId, value, onChange, allowEmpty, c){
 function openChildEdit(idx){
   editChildIdx=idx;
   document.getElementById('pname-input').value=data.children[idx].name;
-  buildHeaderColorGrid(data.children[idx].headerColor);
   const c=data.children[idx]; const rt=c.routine||{};
   buildTimeSelect('wake-sel', c.wakeTime||'07:00', v=>{c.wakeTime=v;save();tick();}, false, c);
   buildTimeSelect('sleep-sel', c.sleepTime||'21:00', v=>{c.sleepTime=v;save();tick();}, false, c);
@@ -7042,11 +7060,15 @@ function migrateVacationPeriods(){
   const c=getChild();
   if(!c.vacationPeriods){
     c.vacationPeriods = (c.vacationFrom && c.vacationUntil)
-      ? [{id:'p'+Date.now(), name:'なつやすみ', from:c.vacationFrom, until:c.vacationUntil}]
+      ? [{id:'p'+Date.now(), name:'イレギュラー', from:c.vacationFrom, until:c.vacationUntil, bagIds:[]}]
       : [];
     delete c.vacationFrom; delete c.vacationUntil;
     save();
   }
+  // 旧データ(bagIds未定義)を補う
+  let migrated=false;
+  (c.vacationPeriods||[]).forEach(p=>{ if(!p.bagIds){ p.bagIds=[]; migrated=true; } });
+  if(migrated) save();
 }
 function renderVacationPeriodList(){
   const wrap=document.getElementById('vacation-period-list');
@@ -7056,22 +7078,69 @@ function renderVacationPeriodList(){
   wrap.innerHTML='';
   periods.forEach(p=>{
     const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;background:var(--danger-light);border-radius: var(--r-sm);padding:6px 10px;margin-bottom:6px';
-    row.innerHTML=`<div style="flex:1;min-width:0;font-size: var(--fs-xs);font-weight:800;color:var(--danger);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}（${p.from.slice(5).replace('-','/')}〜${p.until.slice(5).replace('-','/')}）</div>
-      <button type="button" data-id="${p.id}" aria-label="${p.name}を けす" style="min-width:44px;min-height:36px;border:none;background:none;color:var(--danger);font-weight:900;font-size: var(--fs-md);cursor:pointer">✕</button>`;
-    row.querySelector('button').addEventListener('click',()=>{
+    row.style.cssText='background:var(--danger-light);border-radius: var(--r-sm);padding:6px 10px;margin-bottom:6px';
+    const activeCount=(p.bagIds||[]).length;
+    row.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
+        <div style="flex:1;min-width:0;font-size: var(--fs-xs);font-weight:800;color:var(--danger);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}（${p.from.slice(5).replace('-','/')}〜${p.until.slice(5).replace('-','/')}）</div>
+        <button type="button" data-id="${p.id}" aria-label="${p.name}を けす" style="min-width:44px;min-height:36px;border:none;background:none;color:var(--danger);font-weight:900;font-size: var(--fs-md);cursor:pointer">✕</button>
+      </div>
+      <button type="button" data-bagpick="${p.id}" style="width:100%;margin-top:4px;min-height:36px;border:1.5px solid var(--danger);border-radius: var(--r-sm);background:#fff;color:var(--danger);font-size: var(--fs-xs);font-weight:800;cursor:pointer">🎒 稼働させる カバン（${activeCount}件）▶</button>`;
+    row.querySelector('button[aria-label]').addEventListener('click',()=>{
       c.vacationPeriods = c.vacationPeriods.filter(x=>x.id!==p.id);
       save(); tick(); renderVacationPeriodList();
       showToast(`「${p.name}」を けしました`);
     });
+    row.querySelector('[data-bagpick]').addEventListener('click',()=>openVacationBagPick(p.id));
     wrap.appendChild(row);
   });
+}
+// イレギュラー期間ごとに「稼働させるカバン」を選ぶ
+function openVacationBagPick(periodId){
+  const c=getChild();
+  const period=(c.vacationPeriods||[]).find(p=>p.id===periodId);
+  if(!period) return;
+  document.getElementById('vacation-bagpick-title').textContent=`🎒 「${period.name}」中に 稼働させる カバン`;
+  const listEl=document.getElementById('vacation-bagpick-list');
+  const bags=getBags();
+  if(!bags.length){
+    listEl.innerHTML='<div style="font-size: var(--fs-sm);color:var(--text-dim)">カバンが まだ ありません。</div>';
+  } else {
+    listEl.innerHTML=bags.map(b=>{
+      const checked=(period.bagIds||[]).includes(b.id);
+      return `<label style="display:flex;align-items:center;gap:10px;min-height:44px;padding:4px 2px;cursor:pointer">
+          <input type="checkbox" data-bag-id="${b.id}" ${checked?'checked':''} style="width:22px;height:22px;flex-shrink:0;accent-color:var(--danger)"/>
+          <span style="width:14px;height:14px;border-radius:50%;background:${bagColor(b.id)};flex-shrink:0"></span>
+          <span style="font-size: var(--fs-sm);font-weight:700">${b.name}</span>
+        </label>`;
+    }).join('');
+    listEl.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+      cb.addEventListener('change',()=>{
+        const bagId=cb.dataset.bagId;
+        if(!period.bagIds) period.bagIds=[];
+        if(cb.checked){ if(!period.bagIds.includes(bagId)) period.bagIds.push(bagId); }
+        else { period.bagIds=period.bagIds.filter(id=>id!==bagId); }
+        save(); tick();
+        renderVacationPeriodList();
+      });
+    });
+  }
+  document.getElementById('vacation-bagpick-modal').classList.add('open');
+}
+document.getElementById('vacation-bagpick-close').addEventListener('click',()=>{
+  document.getElementById('vacation-bagpick-modal').classList.remove('open');
+});
+// 日付選択フィールド(button要素)のvalueを共通の書式で読み書きするヘルパー
+function getDateFieldValue(id){ return document.getElementById(id).dataset.value||''; }
+function setDateFieldValue(id, val){
+  const el=document.getElementById(id);
+  el.dataset.value=val;
+  el.textContent = val ? `${val.slice(0,4)}/${val.slice(5,7)}/${val.slice(8,10)}` : 'えらぶ';
 }
 // ── 📅 日付えらび（きかん指定の入力欄で共通利用する、自作カレンダーポップアップ） ──
 let datepickTargetId=null, datepickYear=0, datepickMonth=0;
 function openDatePicker(inputId){
   datepickTargetId=inputId;
-  const cur=document.getElementById(inputId).value;
+  const cur=getDateFieldValue(inputId);
   const base = cur ? new Date(cur+'T00:00:00') : new Date();
   datepickYear=base.getFullYear(); datepickMonth=base.getMonth();
   renderDatePicker();
@@ -7088,7 +7157,7 @@ function renderDatePicker(){
   });
   const firstDay=new Date(datepickYear,datepickMonth,1).getDay();
   const daysInMonth=new Date(datepickYear,datepickMonth+1,0).getDate();
-  const curVal=document.getElementById(datepickTargetId)?.value;
+  const curVal=getDateFieldValue(datepickTargetId);
   for(let i=0;i<firstDay;i++) grid.appendChild(document.createElement('div'));
   for(let d=1; d<=daysInMonth; d++){
     const dk=`${datepickYear}-${String(datepickMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -7099,9 +7168,8 @@ function renderDatePicker(){
     cell.setAttribute('aria-label', `${datepickYear}年${datepickMonth+1}月${d}日を えらぶ`);
     cell.style.cssText=`min-height:40px;border-radius: var(--r-sm);border:2px solid ${isSelected?'var(--text)':'var(--border)'};background:${isSelected?'var(--text)':'var(--surface)'};color:${isSelected?'#fff':'var(--text)'};font-size: var(--fs-sm);font-weight:800;cursor:pointer`;
     cell.addEventListener('click',()=>{
-      const target=document.getElementById(datepickTargetId);
-      target.value=dk;
-      target.dispatchEvent(new Event('change'));
+      setDateFieldValue(datepickTargetId, dk);
+      document.getElementById(datepickTargetId).dispatchEvent(new Event('change'));
       document.getElementById('datepick-modal').classList.remove('open');
     });
     grid.appendChild(cell);
@@ -7122,17 +7190,17 @@ document.getElementById('datepick-close').addEventListener('click',()=>{
 
 document.getElementById('vacation-save').addEventListener('click',()=>{
   const name=document.getElementById('vacation-name').value.trim();
-  const from=document.getElementById('vacation-from').value;
-  const until=document.getElementById('vacation-until').value;
+  const from=getDateFieldValue('vacation-from');
+  const until=getDateFieldValue('vacation-until');
   if(!name){ showToast('名前を つけてください'); return; }
   if(!from || !until){ showToast('はじまりと おわりの 両方を えらんでください'); return; }
   if(new Date(from) > new Date(until)){ showToast('おわりは、はじまりより あとにしてください'); return; }
   const c=getChild(); if(!c.vacationPeriods) c.vacationPeriods=[];
-  c.vacationPeriods.push({id:'p'+Date.now(), name, from, until});
+  c.vacationPeriods.push({id:'p'+Date.now(), name, from, until, bagIds:[]});
   save(); tick();
   document.getElementById('vacation-name').value='';
-  document.getElementById('vacation-from').value='';
-  document.getElementById('vacation-until').value='';
+  setDateFieldValue('vacation-from','');
+  setDateFieldValue('vacation-until','');
   renderVacationPeriodList();
   showToast(`「${name}」を ついかしました`);
 });
@@ -7384,11 +7452,11 @@ function updateBagPeriodUI(){
   document.getElementById('bag-period-pause').classList.toggle('active-on', bagPeriodMode==='pause');
   document.getElementById('bag-period-active').classList.toggle('active-on', bagPeriodMode==='active');
   document.getElementById('bag-period-dates').style.display = bagPeriodMode==='none' ? 'none' : 'flex';
-  document.getElementById('bag-period-from').value = bagPeriodFrom;
-  document.getElementById('bag-period-until').value = bagPeriodUntil;
+  setDateFieldValue('bag-period-from', bagPeriodFrom);
+  setDateFieldValue('bag-period-until', bagPeriodUntil);
   const hint=document.getElementById('bag-period-hint');
-  if(bagPeriodMode==='pause') hint.textContent='この期間だけ お休みになり、期間が終わると自動で もとに戻ります。※ふつうのカバンをまとめてお休みにしたい時は、保護者設定トップの「🏖️ なつやすみ きかん」の方が1回の設定ですみます。';
-  else if(bagPeriodMode==='active') hint.textContent='この期間だけ 出てきて、期間の外では 一切出てきません。※夏休み専用の新しいカバンを作る時に使います。ふつうのカバンをお休みにしたい時は「🏖️ なつやすみ きかん」を使ってください。';
+  if(bagPeriodMode==='pause') hint.textContent='この期間だけ お休みになり、期間が終わると自動で もとに戻ります。※ふつうのカバンをまとめてお休みにしたい時は、保護者設定トップの「🗓️ イレギュラーきかん」の方が1回の設定ですみます。';
+  else if(bagPeriodMode==='active') hint.textContent='この期間だけ 出てきて、期間の外では 一切出てきません。※夏休み専用の新しいカバンを作る時に使います。ふつうのカバンをお休みにしたい時は「🗓️ イレギュラーきかん」を使ってください。';
   else hint.textContent='';
   // 保護者設定トップに登録済みの期間から選んで、日付を1タップで流用できるようにする
   const useVacSel=document.getElementById('bag-period-use-vacation');
@@ -7413,8 +7481,8 @@ document.getElementById('bag-period-use-vacation').addEventListener('change',(e)
 document.getElementById('bag-period-none').addEventListener('click',()=>{ bagPeriodMode='none'; updateBagPeriodUI(); });
 document.getElementById('bag-period-pause').addEventListener('click',()=>{ bagPeriodMode='pause'; updateBagPeriodUI(); });
 document.getElementById('bag-period-active').addEventListener('click',()=>{ bagPeriodMode='active'; updateBagPeriodUI(); });
-document.getElementById('bag-period-from').addEventListener('change',e=>{ bagPeriodFrom=e.target.value; });
-document.getElementById('bag-period-until').addEventListener('change',e=>{ bagPeriodUntil=e.target.value; });
+document.getElementById('bag-period-from').addEventListener('change',e=>{ bagPeriodFrom=e.target.dataset.value; });
+document.getElementById('bag-period-until').addEventListener('change',e=>{ bagPeriodUntil=e.target.dataset.value; });
 document.getElementById('bag-repeat-weekly').addEventListener('click',()=>{ bagRepeatType='weekly'; updateBagDowUI(); });
 document.getElementById('bag-repeat-monthly').addEventListener('click',()=>{ bagRepeatType='monthly_nth'; updateBagDowUI(); });
 document.getElementById('bag-nth-week').addEventListener('change',e=>{ bagNthWeek=Number(e.target.value); });
@@ -7679,12 +7747,65 @@ function applyPanelsCollapsed(){
   const btn=document.getElementById('panels-collapse-btn');
   btn.classList.toggle('active', panelsCollapsed);
   btn.textContent = panelsCollapsed ? '🔼' : '🔽';
-  btn.title = panelsCollapsed ? 'らんを もとに もどす' : 'した・よこの らんを たたむ';
+  btn.title = panelsCollapsed ? 'らんを もとに もどす' : 'ドラッグで 大きさを かえる／タップで たたむ';
 }
 document.getElementById('panels-collapse-btn').addEventListener('click',()=>{
+  if(collapseBtnDragMoved) return; // ドラッグの直後のクリックは無視(誤操作防止)
   panelsCollapsed=!panelsCollapsed;
   applyPanelsCollapsed();
 });
+// 収納ボタンをドラッグして、「やりたいこと」パネルの見える大きさ（縦向き＝高さ／横向き＝幅）を調整する
+let collapseBtnDragMoved=false;
+function applyPanelSize(){
+  const isVertical=window.matchMedia('(orientation: portrait)').matches;
+  document.getElementById('panels-collapse-btn').classList.toggle('vertical-mode', isVertical);
+  const h=data.wantPanelHeightPx!=null?data.wantPanelHeightPx:180;
+  const w=data.wantPanelWidthPx!=null?data.wantPanelWidthPx:250;
+  document.documentElement.style.setProperty('--want-panel-h', h+'px');
+  document.documentElement.style.setProperty('--want-panel-w', w+'px');
+}
+{
+  const btn=document.getElementById('panels-collapse-btn');
+  let dragging=false, startPos=0, startSize=0;
+  const onDown=(clientX, clientY)=>{
+    dragging=true; collapseBtnDragMoved=false;
+    const isVertical=window.matchMedia('(orientation: portrait)').matches;
+    startPos = isVertical ? clientY : clientX;
+    startSize = isVertical
+      ? (data.wantPanelHeightPx!=null?data.wantPanelHeightPx:180)
+      : (data.wantPanelWidthPx!=null?data.wantPanelWidthPx:250);
+  };
+  const onMove=(clientX, clientY)=>{
+    if(!dragging) return;
+    const isVertical=window.matchMedia('(orientation: portrait)').matches;
+    const pos = isVertical ? clientY : clientX;
+    const delta = isVertical ? (startPos-pos) : (startPos-pos); // 上/左にドラッグするほど パネルが大きくなる
+    if(Math.abs(delta)>6) collapseBtnDragMoved=true;
+    let size = startSize + delta;
+    if(isVertical){
+      size=Math.max(90, Math.min(window.innerHeight*0.6, size));
+      data.wantPanelHeightPx=size;
+    } else {
+      size=Math.max(150, Math.min(window.innerWidth*0.6, size));
+      data.wantPanelWidthPx=size;
+    }
+    applyPanelSize();
+  };
+  const onUp=()=>{
+    if(!dragging) return;
+    dragging=false;
+    if(collapseBtnDragMoved) save();
+    setTimeout(()=>{ collapseBtnDragMoved=false; }, 50);
+  };
+  btn.addEventListener('touchstart', e=>onDown(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
+  btn.addEventListener('touchmove', e=>onMove(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
+  btn.addEventListener('touchend', onUp);
+  btn.addEventListener('mousedown', e=>onDown(e.clientX, e.clientY));
+  window.addEventListener('mousemove', e=>onMove(e.clientX, e.clientY));
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('resize', applyPanelSize);
+  applyPanelSize();
+}
 
 // ═══════════════════════════════════════════════════════════════
 // 習慣化：きっかけ(Cue)を作る
