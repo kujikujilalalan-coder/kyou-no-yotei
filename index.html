@@ -1427,7 +1427,11 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       <button class="btn btn-secondary" id="datepick-next" aria-label="つぎの月" style="padding:8px 14px">▶</button>
     </div>
     <div id="datepick-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>
-    <div class="modal-actions"><button class="btn btn-secondary" id="datepick-close">とじる</button></div>
+    <div id="datepick-multi-count" style="display:none;text-align:center;font-size: var(--fs-sm);font-weight:800;color:var(--danger);margin-top:10px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="datepick-close">とじる</button>
+      <button class="btn btn-primary" id="datepick-done" style="display:none">けってい する</button>
+    </div>
   </div>
 </div>
 
@@ -1703,17 +1707,15 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
         <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-5" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-5" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">「学校の宿題」などのカバンを作り、中身（やること）を入れます。オンにして曜日を決めると、その日に出ます。時刻はあとから決められます。</p>
         <button class="btn btn-primary" id="add-bag-btn" style="width:100%;margin-bottom:10px;font-size: var(--fs-sm)">＋ カバンを作る</button>
         <button class="btn" id="bag-reorder-toggle" type="button" style="width:100%;margin-bottom:8px;font-size: var(--fs-xs);border:2px solid var(--border);background:var(--surface2);color:var(--text-dim)">📐 ならびかえ できるようにする</button>
-        <div style="border:2px dashed var(--border);border-radius: var(--r-md);padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>
-          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>🗓️ イレギュラーきかん</span></span><button type="button" class="info-toggle" data-info-toggle="info-6" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-6" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">この期間中に<b>稼働させるカバンを選ぶ</b>と、選ばなかったカバンは自動でお休みになります（新しく作ったカバンも、選ばない限り安全側でお休みになります）。名前をつけて複数 登録できます（夏休み・冬休み・りょこう 等）。</p>
+        <div style="border:2px dashed var(--border);border-radius: var(--r-md);padding:10px 12px;margin-bottom:12px">
+          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>🗓️ イレギュラーきかん</span><button type="button" class="info-toggle" data-info-toggle="info-6" aria-label="せつめいを みる"></button></div>
+          <p class="info-text" id="info-6" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">この期間中に<b>稼働させるカバンを選ぶ</b>と、選ばなかったカバンは自動でお休みになります（新しく作ったカバンも、選ばない限り安全側でお休みになります）。日付は連続していなくても、1日ずつ好きなだけ選べます。名前をつけて複数 登録できます（夏休み・冬休み・りょこう 等）。</p>
           <div id="vacation-period-list" style="margin-bottom:8px"></div>
           <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
             <input type="text" id="vacation-name" placeholder="例：なつやすみ" maxlength="14" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px"/>
           </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button type="button" id="vacation-from" data-value="" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left;appearance:none;-webkit-appearance:none">えらぶ</button>
-            <span style="color:var(--text-dim)">〜</span>
-            <button type="button" id="vacation-until" data-value="" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 6px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left;appearance:none;-webkit-appearance:none">えらぶ</button>
-          </div>
+          <button type="button" id="vacation-dates-btn" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left">📅 日づけを えらぶ（0にち）</button>
+          <div id="vacation-dates-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
           <div style="display:flex;gap:8px;margin-top:8px">
             <button class="btn btn-primary" id="vacation-save" style="flex:1;font-size: var(--fs-xs)">＋ きかんを ついか する</button>
           </div>
@@ -1947,7 +1949,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v109・2026-07-21</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v110・2026-07-21</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2595,13 +2597,14 @@ function bagActiveOn(bag, date){
   if(bag.periodMode==='active' && !dateInRangeStr(date, bag.periodFrom, bag.periodUntil)) return false;
   // 通常カバンの一時停止(夏休み中だけ お休み 等)：期間内は出さない。期間が終われば自動で元通り
   if(bag.periodMode==='pause' && bag.periodFrom && bag.periodUntil && dateInRangeStr(date, bag.periodFrom, bag.periodUntil)) return false;
-  // イレギュラー期間(child.vacationPeriods、複数・名前付き)を指定していたら、
+  // イレギュラー期間(child.vacationPeriods、複数・名前付き、個別の日付をいくつでも指定できる)を指定していたら、
   // その期間中は「稼働させる」と選んだカバン(bagIds)＋期間限定カバン(periodMode==='active')以外、
   // 自動でお休みになる（新しく作ったカバンも、明示的に稼働させない限り安全側でお休みになる）。
   const vc=getChild();
-  const vacPeriods = vc && (vc.vacationPeriods || (vc.vacationFrom && vc.vacationUntil ? [{id:'legacy',name:'イレギュラー',from:vc.vacationFrom,until:vc.vacationUntil,bagIds:[]}] : []));
+  const vacPeriods = vc && (vc.vacationPeriods || (vc.vacationFrom && vc.vacationUntil ? [{id:'legacy',name:'イレギュラー',dates:expandDateRange(vc.vacationFrom,vc.vacationUntil),bagIds:[]}] : []));
   if(vacPeriods){
-    const activePeriod = vacPeriods.find(p=>dateInRangeStr(date, p.from, p.until));
+    const dk=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    const activePeriod = vacPeriods.find(p=>(p.dates||[]).includes(dk));
     if(activePeriod && bag.periodMode!=='active' && !(activePeriod.bagIds||[]).includes(bag.id)) return false;
   }
   // その日だけ「おやすみ」にした日は出さない（病気・急な予定変更など）。
@@ -7056,19 +7059,39 @@ document.getElementById('bag-reorder-toggle').addEventListener('click',()=>{
   renderBagList();
 });
 // 旧: 単一のvacationFrom/vacationUntil → 新: 複数・名前付きのvacationPeriods配列へ移行
+// 旧from/until(範囲)方式のデータを、dates配列(個別日付)に展開する(移行処理専用)
+function expandDateRange(from, until){
+  const out=[]; const start=new Date(from+'T00:00:00'), end=new Date(until+'T00:00:00');
+  for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
+    out.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+  }
+  return out;
+}
 function migrateVacationPeriods(){
   const c=getChild();
   if(!c.vacationPeriods){
     c.vacationPeriods = (c.vacationFrom && c.vacationUntil)
-      ? [{id:'p'+Date.now(), name:'イレギュラー', from:c.vacationFrom, until:c.vacationUntil, bagIds:[]}]
+      ? [{id:'p'+Date.now(), name:'イレギュラー', dates:expandDateRange(c.vacationFrom,c.vacationUntil), bagIds:[]}]
       : [];
     delete c.vacationFrom; delete c.vacationUntil;
     save();
   }
-  // 旧データ(bagIds未定義)を補う
+  // 旧データ(bagIds未定義／from-until方式のまま)を補う
   let migrated=false;
-  (c.vacationPeriods||[]).forEach(p=>{ if(!p.bagIds){ p.bagIds=[]; migrated=true; } });
+  (c.vacationPeriods||[]).forEach(p=>{
+    if(!p.bagIds){ p.bagIds=[]; migrated=true; }
+    if(!p.dates && p.from && p.until){ p.dates=expandDateRange(p.from,p.until); delete p.from; delete p.until; migrated=true; }
+    if(!p.dates){ p.dates=[]; migrated=true; }
+  });
   if(migrated) save();
+}
+// 選んだ日付の配列を短く要約して表示する(例: 3日以内はそのまま列挙、それ以上は件数+最初の日)
+function summarizeDates(dates){
+  const sorted=[...(dates||[])].sort();
+  if(!sorted.length) return '日づけ未選択';
+  const fmt=dk=>`${Number(dk.slice(5,7))}/${Number(dk.slice(8,10))}`;
+  if(sorted.length<=3) return sorted.map(fmt).join('・');
+  return `${fmt(sorted[0])} ほか ぜんぶで${sorted.length}にち`;
 }
 function renderVacationPeriodList(){
   const wrap=document.getElementById('vacation-period-list');
@@ -7081,7 +7104,7 @@ function renderVacationPeriodList(){
     row.style.cssText='background:var(--danger-light);border-radius: var(--r-sm);padding:6px 10px;margin-bottom:6px';
     const activeCount=(p.bagIds||[]).length;
     row.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
-        <div style="flex:1;min-width:0;font-size: var(--fs-xs);font-weight:800;color:var(--danger);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}（${p.from.slice(5).replace('-','/')}〜${p.until.slice(5).replace('-','/')}）</div>
+        <button type="button" data-editdates="${p.id}" style="flex:1;min-width:0;text-align:left;background:none;border:none;padding:2px;cursor:pointer;font-size: var(--fs-xs);font-weight:800;color:var(--danger);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}（${summarizeDates(p.dates)}）✎</button>
         <button type="button" data-id="${p.id}" aria-label="${p.name}を けす" style="min-width:44px;min-height:36px;border:none;background:none;color:var(--danger);font-weight:900;font-size: var(--fs-md);cursor:pointer">✕</button>
       </div>
       <button type="button" data-bagpick="${p.id}" style="width:100%;margin-top:4px;min-height:36px;border:1.5px solid var(--danger);border-radius: var(--r-sm);background:#fff;color:var(--danger);font-size: var(--fs-xs);font-weight:800;cursor:pointer">🎒 稼働させる カバン（${activeCount}件）▶</button>`;
@@ -7091,6 +7114,12 @@ function renderVacationPeriodList(){
       showToast(`「${p.name}」を けしました`);
     });
     row.querySelector('[data-bagpick]').addEventListener('click',()=>openVacationBagPick(p.id));
+    row.querySelector('[data-editdates]').addEventListener('click',()=>{
+      openDatePickerMulti(p.dates||[], (newDates)=>{
+        p.dates=newDates; save(); tick(); renderVacationPeriodList();
+        showToast(`「${p.name}」の 日づけを 直しました`);
+      });
+    });
     wrap.appendChild(row);
   });
 }
@@ -7137,12 +7166,30 @@ function setDateFieldValue(id, val){
   el.textContent = val ? `${val.slice(0,4)}/${val.slice(5,7)}/${val.slice(8,10)}` : 'えらぶ';
 }
 // ── 📅 日付えらび（きかん指定の入力欄で共通利用する、自作カレンダーポップアップ） ──
+// 単一選択(bag-period-from等)：タップした瞬間に1件決定して閉じる。
+// 複数選択(datepickMulti=true)：タップするたびにオン/オフをトグルし、「けってい」を押すまで閉じない。連続していない日もいくつでも選べる。
 let datepickTargetId=null, datepickYear=0, datepickMonth=0;
+let datepickMulti=false, datepickSelectedDates=new Set(), datepickOnDone=null;
 function openDatePicker(inputId){
+  datepickMulti=false;
   datepickTargetId=inputId;
   const cur=getDateFieldValue(inputId);
   const base = cur ? new Date(cur+'T00:00:00') : new Date();
   datepickYear=base.getFullYear(); datepickMonth=base.getMonth();
+  document.getElementById('datepick-multi-count').style.display='none';
+  document.getElementById('datepick-done').style.display='none';
+  renderDatePicker();
+  document.getElementById('datepick-modal').classList.add('open');
+}
+// 複数の日付をトグル選択するモードで開く。initialDates=最初から選択済みにする日付の配列、onDone(datesArray)=けってい時に呼ばれる
+function openDatePickerMulti(initialDates, onDone){
+  datepickMulti=true;
+  datepickSelectedDates=new Set(initialDates||[]);
+  datepickOnDone=onDone;
+  const base = initialDates && initialDates.length ? new Date(initialDates[0]+'T00:00:00') : new Date();
+  datepickYear=base.getFullYear(); datepickMonth=base.getMonth();
+  document.getElementById('datepick-multi-count').style.display='block';
+  document.getElementById('datepick-done').style.display='block';
   renderDatePicker();
   document.getElementById('datepick-modal').classList.add('open');
 }
@@ -7157,22 +7204,34 @@ function renderDatePicker(){
   });
   const firstDay=new Date(datepickYear,datepickMonth,1).getDay();
   const daysInMonth=new Date(datepickYear,datepickMonth+1,0).getDate();
-  const curVal=getDateFieldValue(datepickTargetId);
+  const curVal=datepickMulti ? null : getDateFieldValue(datepickTargetId);
   for(let i=0;i<firstDay;i++) grid.appendChild(document.createElement('div'));
   for(let d=1; d<=daysInMonth; d++){
     const dk=`${datepickYear}-${String(datepickMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isSelected = dk===curVal;
+    const isSelected = datepickMulti ? datepickSelectedDates.has(dk) : dk===curVal;
     const cell=document.createElement('button');
     cell.type='button';
     cell.textContent=String(d);
     cell.setAttribute('aria-label', `${datepickYear}年${datepickMonth+1}月${d}日を えらぶ`);
     cell.style.cssText=`min-height:40px;border-radius: var(--r-sm);border:2px solid ${isSelected?'var(--text)':'var(--border)'};background:${isSelected?'var(--text)':'var(--surface)'};color:${isSelected?'#fff':'var(--text)'};font-size: var(--fs-sm);font-weight:800;cursor:pointer`;
-    cell.addEventListener('click',()=>{
-      setDateFieldValue(datepickTargetId, dk);
-      document.getElementById(datepickTargetId).dispatchEvent(new Event('change'));
-      document.getElementById('datepick-modal').classList.remove('open');
-    });
+    if(datepickMulti){
+      cell.addEventListener('click',()=>{
+        if(datepickSelectedDates.has(dk)) datepickSelectedDates.delete(dk);
+        else datepickSelectedDates.add(dk);
+        renderDatePicker();
+        document.getElementById('datepick-multi-count').textContent=`${datepickSelectedDates.size}にち えらんでいます`;
+      });
+    } else {
+      cell.addEventListener('click',()=>{
+        setDateFieldValue(datepickTargetId, dk);
+        document.getElementById(datepickTargetId).dispatchEvent(new Event('change'));
+        document.getElementById('datepick-modal').classList.remove('open');
+      });
+    }
     grid.appendChild(cell);
+  }
+  if(datepickMulti){
+    document.getElementById('datepick-multi-count').textContent=`${datepickSelectedDates.size}にち えらんでいます`;
   }
 }
 document.getElementById('datepick-prev').addEventListener('click',()=>{
@@ -7184,23 +7243,36 @@ document.getElementById('datepick-next').addEventListener('click',()=>{
 document.getElementById('datepick-close').addEventListener('click',()=>{
   document.getElementById('datepick-modal').classList.remove('open');
 });
-['vacation-from','vacation-until','bag-period-from','bag-period-until'].forEach(id=>{
+document.getElementById('datepick-done').addEventListener('click',()=>{
+  document.getElementById('datepick-modal').classList.remove('open');
+  if(datepickOnDone) datepickOnDone([...datepickSelectedDates].sort());
+});
+['bag-period-from','bag-period-until'].forEach(id=>{
   document.getElementById(id).addEventListener('click',()=>openDatePicker(id));
 });
 
+let vacationNewDates=[];
+document.getElementById('vacation-dates-btn').addEventListener('click',()=>{
+  openDatePickerMulti(vacationNewDates, (dates)=>{
+    vacationNewDates=dates;
+    document.getElementById('vacation-dates-btn').textContent=`📅 日づけを えらぶ（${dates.length}にち）`;
+    const chipsEl=document.getElementById('vacation-dates-chips');
+    chipsEl.innerHTML = dates.map(dk=>
+      `<span style="background:var(--surface2);border:1.5px solid var(--border);border-radius: var(--r-full);padding:3px 10px;font-size: var(--fs-xs);font-weight:700">${Number(dk.slice(5,7))}/${Number(dk.slice(8,10))}</span>`
+    ).join('');
+  });
+});
 document.getElementById('vacation-save').addEventListener('click',()=>{
   const name=document.getElementById('vacation-name').value.trim();
-  const from=getDateFieldValue('vacation-from');
-  const until=getDateFieldValue('vacation-until');
   if(!name){ showToast('名前を つけてください'); return; }
-  if(!from || !until){ showToast('はじまりと おわりの 両方を えらんでください'); return; }
-  if(new Date(from) > new Date(until)){ showToast('おわりは、はじまりより あとにしてください'); return; }
+  if(!vacationNewDates.length){ showToast('日づけを 1つ以上 えらんでください'); return; }
   const c=getChild(); if(!c.vacationPeriods) c.vacationPeriods=[];
-  c.vacationPeriods.push({id:'p'+Date.now(), name, from, until, bagIds:[]});
+  c.vacationPeriods.push({id:'p'+Date.now(), name, dates:vacationNewDates, bagIds:[]});
   save(); tick();
   document.getElementById('vacation-name').value='';
-  setDateFieldValue('vacation-from','');
-  setDateFieldValue('vacation-until','');
+  vacationNewDates=[];
+  document.getElementById('vacation-dates-btn').textContent='📅 日づけを えらぶ（0にち）';
+  document.getElementById('vacation-dates-chips').innerHTML='';
   renderVacationPeriodList();
   showToast(`「${name}」を ついかしました`);
 });
@@ -7466,7 +7538,7 @@ function updateBagPeriodUI(){
   if(bagPeriodMode!=='none' && periods.length){
     useVacSel.style.display='block';
     useVacSel.innerHTML='<option value="">（登録した きかんを えらぶ）</option>'+
-      periods.map(p=>`<option value="${p.id}">${p.name}（${p.from.slice(5).replace('-','/')}〜${p.until.slice(5).replace('-','/')}）</option>`).join('');
+      periods.map(p=>`<option value="${p.id}">${p.name}（${summarizeDates(p.dates)}）</option>`).join('');
   } else {
     useVacSel.style.display='none';
   }
@@ -7474,8 +7546,9 @@ function updateBagPeriodUI(){
 document.getElementById('bag-period-use-vacation').addEventListener('change',(e)=>{
   const vc=getChild();
   const p=(vc.vacationPeriods||[]).find(x=>x.id===e.target.value);
-  if(!p) return;
-  bagPeriodFrom=p.from; bagPeriodUntil=p.until;
+  if(!p || !(p.dates||[]).length) return;
+  const sorted=[...p.dates].sort();
+  bagPeriodFrom=sorted[0]; bagPeriodUntil=sorted[sorted.length-1];
   updateBagPeriodUI();
 });
 document.getElementById('bag-period-none').addEventListener('click',()=>{ bagPeriodMode='none'; updateBagPeriodUI(); });
