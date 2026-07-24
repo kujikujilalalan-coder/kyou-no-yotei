@@ -124,11 +124,11 @@ body {
 #parent-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 #timer-btn {
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-dim);
-  border-radius: var(--r-sm); font-size: var(--fs-md); font-weight: 800; padding: 5px 12px;
-  cursor: pointer; font-family: inherit; flex-shrink: 0; white-space: nowrap;
-  min-height: 44px; min-width: 44px;
+  width: 44px; height: 44px; border-radius: 50%; font-size: var(--fs-lg); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit;
 }
-#timer-btn:hover { background: var(--text-dim); color: #fff; }
+#timer-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
+#timer-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
 #fullscreen-btn {
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-dim);
   width: 44px; height: 44px; border-radius: 50%; font-size: var(--fs-lg); cursor: pointer;
@@ -151,14 +151,9 @@ body.viewing-other-day #date-big { color: var(--accent); }
 /* ── MAIN ── */
 #main { flex: 1; display: grid; grid-template-columns: 1fr var(--want-panel-w, 250px); min-height: 0; position: relative; }
 #main.panels-collapsed { grid-template-columns: 1fr 0px; }
+#main.want-panel-disabled { grid-template-columns: 1fr !important; grid-template-rows: 1fr !important; }
+#main.want-panel-disabled #right-panel, #main.want-panel-disabled #panels-collapse-btn { display: none !important; }
 #main.panels-collapsed #right-panel { padding: 0; border: none; }
-#panels-collapse-btn {
-  position: absolute; z-index: 20; top: 10px; right: 258px;
-  background: var(--surface2); border: 2px solid var(--border); color: var(--text-dim);
-  width: 44px; height: 44px; border-radius: 50%; font-size: var(--fs-md); cursor: pointer;
-  display: flex; align-items: center; justify-content: center; font-family: inherit;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: right 0.3s, bottom 0.3s, top 0.3s;
-}
 #left-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
 /* ── 左：タイムライン（1本・現在区間がせり出す） ── */
@@ -437,7 +432,6 @@ body.viewing-other-day #date-big { color: var(--accent); }
   padding:0 5px;box-shadow:0 2px 6px rgba(245,158,11,0.5);
   pointer-events:none;
 }
-#zukan-btn { position:relative; }
 
 /* ガチャUI */
 #gacha-coin-display {
@@ -545,26 +539,22 @@ body.fab-left #back-to-now { right: auto; left: 16px; }
   box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: background 0.2s, color 0.2s;
 }
 #panels-collapse-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+/* 畳んだ時：パネル幅が0になるので、パネル基準(left:-16px)のままだと画面外にはみ出す。画面の右端基準に切り替える */
+#main.panels-collapsed #panels-collapse-btn { left: auto; right: 8px; }
+#main.panels-collapsed #panels-collapse-btn.vertical-mode { left: 50%; right: auto; }
 #want-header {
   padding: 14px 16px 10px; border-bottom: 2px solid var(--border); flex-shrink: 0;
   display: flex; flex-direction: column; align-items: stretch; gap: 8px;
 }
 #want-title { font-size: var(--fs-md); font-weight: 900; white-space: nowrap; }
 #want-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-#stamp-view-btn {
-  background: var(--surface2); border: 2px solid var(--border); color: var(--text-dim);
-  border-radius: var(--r-sm); font-size: var(--fs-md); font-weight: 800; padding: 5px 12px;
-  cursor: pointer; font-family: inherit; flex-shrink: 0; white-space: nowrap;
-  min-height: 44px; min-width: 44px;
+/* ずかん・きろく：常時見えるボタン(以前は⚡をタップして飛び出す形だったが、⚡は保護者専用にしたため直接出す) */
+#child-fab-zukan, #child-fab-kiroku {
+  display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 2px solid var(--border);
+  color: var(--text); border-radius: var(--r-sm); font-size: var(--fs-sm); font-weight: 800;
+  padding: 8px 12px; cursor: pointer; font-family: inherit; min-height: 44px; position: relative;
 }
-#stamp-view-btn:hover { background: var(--text-dim); color: #fff; }
-#zukan-btn {
-  background: var(--surface2); border: 2px solid var(--border); color: var(--text-dim);
-  border-radius: var(--r-sm); font-size: var(--fs-md); font-weight: 800; padding: 5px 12px;
-  cursor: pointer; font-family: inherit; flex-shrink: 0; white-space: nowrap;
-  min-height: 44px; min-width: 44px;
-}
-#zukan-btn:hover { background: var(--text-dim); color: #fff; }
+#child-fab-zukan:hover, #child-fab-kiroku:hover { background: var(--text-dim); color: #fff; }
 /* 図鑑グリッドの各セル */
 .zukan-cell {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -1115,7 +1105,7 @@ body.fab-left #back-to-now { right: auto; left: 16px; }
     max-height: 45vh; overflow-y: auto;
   }
   /* 縦向き：上境目に配置(左右位置はJSでドラッグ位置を反映するため、ここではtopのみ指定) */
-  #panels-collapse-btn.vertical-mode { top: -16px; transform: translateX(-50%); }
+  #panels-collapse-btn.vertical-mode { left: 50%; top: -16px; transform: translateX(-50%); }
   #want-header { padding: 12px 18px 10px; }
   #want-title { font-size: var(--fs-md); }
   #topbar { padding: 6px 12px; gap: 4px; }
@@ -1154,18 +1144,34 @@ body.fab-left #back-to-now { right: auto; left: 16px; }
 /* ── 片手操作用（保護者）：親指が自然に届く右下に置く ──
    根拠：保護者の操作(時刻変更・日付移動・設定)は全て画面上部にあり、
    抱っこ中は持ち替えないと届かない。ここから同じ操作に到達できるようにする。 */
+/* ── 保護者用クイックアクセス：本体のジェスチャー(戻る・ホームバー・通知)とぶつからないよう、
+   画面の端から少し内側・縦の中央あたりに、薄い取っ手として常時置いておく。
+   タップすると今までどおりのクイックシートが開く。左右は保護者設定で選べる。 ── */
 #quick-fab {
-  position: fixed; right: 14px; bottom: 14px; z-index: 110;
-  width: 56px; height: 56px; border-radius: 50%;
-  background: var(--surface2); color: var(--text); border: 2px solid var(--border);
-  font-size: var(--fs-xl); cursor: pointer; font-family: inherit;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-  display: flex; align-items: center; justify-content: center;
+  position: fixed; right: 0; top: 70%; transform: translateY(-50%); z-index: 110;
+  width: 52px; height: 76px; /* タップ領域は44px以上確保(a11y)。見た目は::afterで薄い取っ手だけ表示 */
+  background: none; border: none; color: var(--text-dim);
+  font-size: var(--fs-sm); cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: flex-end;
+  opacity: 0.65; transition: opacity 0.2s;
 }
-/* 左手用（右腕で抱っこしている時など）。抱っこする腕は日によって変わるので、
-   長押しですぐ入れ替えられるようにする。 */
-body.fab-left #quick-fab { right: auto; left: 14px; }
-#quick-fab:active { transform: scale(0.92); }
+#quick-fab::after {
+  content: ''; position: absolute; right: 6px; top: 0; width: 26px; height: 76px;
+  background: var(--surface2); border: 2px solid var(--border); border-right: none;
+  border-radius: var(--r-md) 0 0 var(--r-md);
+  box-shadow: -2px 2px 10px rgba(0,0,0,0.14); z-index: -1;
+}
+#quick-fab span { position: relative; margin-right: 4px; pointer-events: none; }
+#quick-fab:hover, #quick-fab:active { opacity: 1; }
+/* 保護者設定で「ひだり」を選んだ場合 */
+body.fab-left #quick-fab { right: auto; left: 0; justify-content: flex-start; }
+body.fab-left #quick-fab::after {
+  right: auto; left: 6px; border-radius: 0 var(--r-md) var(--r-md) 0;
+  border-right: 2px solid var(--border); border-left: none;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.14);
+}
+body.fab-left #quick-fab span { margin-right: 0; margin-left: 4px; }
+#quick-fab:active { transform: translateY(-50%) scale(0.95); }
 #quick-sheet {
   position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 130;
   background: var(--surface); border: 2px solid var(--border); border-radius: var(--r-lg);
@@ -1306,6 +1312,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
   <div id="topbar-row2">
     <div id="day-label-badge"></div>
     <div class="topbar-right">
+      <button id="timer-btn" aria-label="タイマー" title="タイマー">⏲️</button>
       <button id="fullscreen-btn" aria-label="全画面表示" title="全画面表示">⛶</button>
       <button id="child-switch-btn" aria-label="こどもを きりかえる">なまえ ▼</button>
       <button id="parent-btn" aria-label="保護者設定" style="position:relative">⚙️<span id="header-pending-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;font-size: var(--fs-xs);font-weight:900;min-width:18px;height:18px;border-radius: var(--r-sm);align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 0 2px var(--surface)">0</span></button>
@@ -1325,6 +1332,8 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
 </div>
 
 <div id="main">
+  <!-- タイムラインの帯と、右のカードをつなぐ接続線(分割モードの時だけ) -->
+  <svg id="now-connector-svg" style="position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:15;" aria-hidden="true"></svg>
   <!-- 左カラム：タイムライン＋時間未定トレイ -->
   <div id="left-col">
     <div id="timeline-col">
@@ -1334,7 +1343,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       <button id="back-to-now" aria-label="いまの じかんへ うごかす"></button>
       <!-- 片手（親指）でよく使う操作に届くための、画面右下のボタン。
            抱っこ・料理・洗濯をしながらでも、持ち替えずに操作できるようにする。 -->
-      <button id="quick-fab" aria-label="きょうの よていを すぐ なおす" title="きょうの予定をすぐ直す">⚡</button>
+      <button id="quick-fab" aria-label="きょうの よていを すぐ なおす" title="きょうの予定をすぐ直す"><span>⚡</span></button>
       <div id="quick-sheet" aria-hidden="true">
         <div class="qs-title">きょうの よていを すぐ なおす</div>
         <div style="font-size: var(--fs-xs);color:var(--text-dim);margin:-4px 0 6px;line-height:1.4">きょう1日だけの 変更です。ずっと変えたい時は ⚙️ から。</div>
@@ -1359,9 +1368,8 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
     <div id="want-header">
       <div id="want-title">やりたいこと</div>
       <div id="want-actions">
-        <button id="timer-btn" aria-label="タイマー" title="タイマー">⏲️ タイマー</button>
-        <button id="zukan-btn" aria-label="ずかんをみる" title="ずかんをみる">📖 ずかん<span id="zukan-coin-badge" style="display:none">0</span></button>
-        <button id="stamp-view-btn" aria-label="きろくをみる" title="きろくを みる">🌟 きろく</button>
+        <button id="child-fab-zukan" aria-label="ずかんをみる">📖<span>ずかん</span><span id="zukan-coin-badge" style="display:none">0</span></button>
+        <button id="child-fab-kiroku" aria-label="きろくをみる">🌟<span>きろく</span></button>
         <button id="want-add-btn" aria-label="やりたいことを ついか">＋ ついか</button>
       </div>
     </div>
@@ -1787,6 +1795,13 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       <button class="acc-head" type="button" data-acc-toggle="display">🖥️ 画面・タイムラインの 見え方<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
         <div>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>「やりたいこと」パネル 🎈</span><button type="button" class="info-toggle" data-info-toggle="info-30" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-30" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">タイマー・ずかん・きろく・やりたいことの入力欄をまとめたパネルです。小さい子には不要なら消せます（申請の記録データは消えません）。</p>
+          <div class="type-toggle" id="wantpanel-toggle">
+            <button class="type-btn" id="wantpanel-on" style="flex:1">出す</button>
+            <button class="type-btn" id="wantpanel-off" style="flex:1">出さない</button>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
           <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>画面を消さない 📱</span><button type="button" class="info-toggle" data-info-toggle="info-10" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-10" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">アプリを開いている間、画面が消えないようにします（時計のようにつけっぱなしにしたい場合）。※対応していない端末では効かないことがあります。</p>
           <div class="type-toggle" id="awake-toggle">
             <button class="type-btn" id="awake-on" style="flex:1">消さない</button>
@@ -1949,7 +1964,7 @@ body.fab-left #quick-fab { right: auto; left: 14px; }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v110・2026-07-21</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v118・2026-07-22</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2321,6 +2336,7 @@ if(!data.nowMarkerStyleMigratedV98){ data.nowMarkerStyle='analog'; data.nowMarke
 if(data.nowMarkerSize===undefined) data.nowMarkerSize='m'; // s/m/l
 if(data.verticalBandText===undefined) data.verticalBandText=false;
 if(data.wantPanelHeightPx===undefined) data.wantPanelHeightPx=180;
+if(data.nowCardWidthPct===undefined) data.nowCardWidthPct=100;
 if(data.wantPanelWidthPx===undefined) data.wantPanelWidthPx=250;
 if(data.nowMarkerColor===undefined) data.nowMarkerColor='marker-gray'; // 重なった帯の縦書き
 if(!data.todayCombo) data.todayCombo={date:'',count:0};
@@ -2785,26 +2801,32 @@ function getTodayDayLabels(){
 // ═══ タイムライン描画 ═══
 // 残り時間の色（青→オレンジ→赤）。hueの単純な回転だと途中でピンク/マゼンタを経由してしまい、
 // 「もうすぐ終わる」という直感的な危険度が伝わりにくいため、2区間のRGB補間で青→オレンジ→赤にする。
-function remainColorRGB(remainFrac){
+function remainColorRGB(remainFrac, baseHex){
   // 3段階でパキッと切り替える（なめらかな連続グラデーションだと「今どの段階か」が分かりにくいため）。
-  // 青＝余裕あり(経過50%未満)／黄＝そろそろ(50〜80%)／赤＝あぶない(80%以上)
+  // 安全＝カバンの色(経過50%未満、baseHex未指定なら既定の青)／黄＝そろそろ(50〜80%)／赤＝あぶない(80%以上)
   // 黄は目に優しい本物の黄色(#F2C14E)。ただし黄色は原理的に白文字と好コントラストを作れないため、
   // 白文字を乗せる箇所(now-card-tag等)は remainBadgeTextColor() で文字色を別に決める。
   const elapsedFrac = Math.max(0, Math.min(1, 1-remainFrac));
-  const blue=[37,99,235], amber=[242,193,78], red=[220,38,38];
-  if(elapsedFrac<0.5) return {r:blue[0], g:blue[1], b:blue[2]};
+  const amber=[242,193,78], red=[220,38,38];
+  if(elapsedFrac<0.5){
+    if(baseHex){
+      const h=baseHex.replace('#','');
+      return {r:parseInt(h.slice(0,2),16), g:parseInt(h.slice(2,4),16), b:parseInt(h.slice(4,6),16)};
+    }
+    return {r:37,g:99,b:235}; // 既定の青(カバンの色を渡せない古い呼び出し用の後方互換)
+  }
   if(elapsedFrac<0.8) return {r:amber[0], g:amber[1], b:amber[2]};
   return {r:red[0], g:red[1], b:red[2]};
+}
+function remainColorCss(remainFrac, alpha, baseHex){
+  const c=remainColorRGB(remainFrac, baseHex);
+  return alpha!=null ? `rgba(${c.r},${c.g},${c.b},${alpha})` : `rgb(${c.r},${c.g},${c.b})`;
 }
 // remainColorRGBの背景色に白文字を乗せる箇所向けの文字色。黄色の時だけ濃いグレーにする(白文字だとコントラストが出ないため)
 function remainBadgeTextColor(remainFrac){
   const elapsedFrac = Math.max(0, Math.min(1, 1-remainFrac));
   if(elapsedFrac>=0.5 && elapsedFrac<0.8) return 'var(--text)';
   return '#fff';
-}
-function remainColorCss(remainFrac, alpha){
-  const c=remainColorRGB(remainFrac);
-  return alpha!=null ? `rgba(${c.r},${c.g},${c.b},${alpha})` : `rgb(${c.r},${c.g},${c.b})`;
 }
 // 残り時間を「へっていく円グラフ」で見せる時計（数字だけより一目で分かるように）。
 // 12時の位置から時計回りに、残りぶんだけ色がついた扇形が減っていく。中心の数字は小さめの補助。
@@ -3104,11 +3126,13 @@ const TIMEBAND_ICONS=[
   {h:23.3,i:'sleep',side:'L',dx:0.4,sc:1.0}
 ];
 let currentNowEvId = null;
+let currentSplitMode = false;
 let selectedNowTaskId = null; // 同時刻に複数のオンタイムがある時、どれを右に出すか（子どもが選ぶ）
 
 let userScrolledAway = false;
 let appJustOpened = true; // 現在地マーカーの脈動は、アプリを開いた最初の描画だけ
 let focusedOverlapId = null; // 重なった予定をタップした時、一時的にどれを前面にするか
+let lastNowEvId = null; // 直前に「今」だったイベントID。変わったらカード幅を自動で最大化する
 let scrollTimer = null;
 
 let PX_PER_MIN = data.timelineZoom||3.4;  // 1分の高さ（保護者設定の「タイムラインの間隔」で変更可）
@@ -3167,7 +3191,7 @@ function renderTimeline(){
         }
       });
     }
-    if(nowCandidateIds.length>1 || (nowCandidateIds.length===1 && overtimeIds.has(nowCandidateIds[0]))){
+    if(nowCandidateIds.length>=1){
       splitMode=true;
       // 前回選んだものがまだ候補にあればそれを継続。無ければ一番開始が早いもの（先頭）にする
       splitEvId = nowCandidateIds.includes(selectedNowTaskId) ? selectedNowTaskId : nowCandidateIds[0];
@@ -3384,6 +3408,7 @@ function renderTimeline(){
     }
   }
   currentNowEvId=nowEvId;
+  currentSplitMode=splitMode;
   // もうすぐ始まる予定（5分以内・名前のある予定のみ）を検出 → カードをやさしく脈動させる
   let soonEvId=null;
   if(isViewingToday()){
@@ -3436,8 +3461,18 @@ function renderTimeline(){
       const pastStyle = (isPast && !isOvertimeCandidate) ? 'border-color:rgba(100,105,115,0.45);background:rgba(100,105,115,0.12)' : '';
       const overtimeStyle = isLongestOvertime ? ' overtime-pulse' : (isOvertimeCandidate ? ' overtime-static' : '');
       const nowHi = isOvertimeCandidate ? ''
-                  : isSplitNow ? (nowCandidateIds.length>1 ? 'box-shadow:0 0 0 3px var(--accent);' : '')
+                  : isSplitNow ? '' // 選択中は枠線自体を残り時間の色にしているので、別の色のリングは不要(旧: accentのbox-shadow)
                   : isNowCandidate ? 'box-shadow:0 0 0 2px var(--text-dim);' : '';
+      // 帯とカードの色を一致させる(帯だけ種類ごとの固定色、カードだけ残り時間の色、という食い違いをなくす)
+      let matchColorStyle='';
+      if(isSplitNow && !isOvertimeCandidate){
+        const mS=toMin(ev.time||'00:00'); const mE=ev.end?toMin(ev.end):mS+30;
+        const mElapsed=Math.max(0,Math.min(1,(cur-mS)/Math.max(1,mE-mS)));
+        const mBagHex = ev._bagId ? bagColor(ev._bagId) : null;
+        const mBorder = remainColorCss(1-mElapsed, null, mBagHex);
+        const mFill = remainColorCss(1-mElapsed, 0.16, mBagHex);
+        matchColorStyle = `border-color:${mBorder} !important;background:${mFill} !important;`;
+      }
       const tooShort = naturalH < 22; // 細すぎる帯は名前・アイコンを省いて色だけ
 
       // 同時刻に複数の「今の候補」が重なっていたら、左帯の中で横に並べて両方タップできるようにする
@@ -3448,6 +3483,7 @@ function renderTimeline(){
         widthPos=`calc(${100/totalCols}% - 3px)`;
       }
       block.style.cssText=`position:absolute;left:${leftPos};width:${widthPos};top:${y+2}px;height:${h}px;z-index:${isSplitNow?5:(isNowCandidate?4:3)};`;
+      if(isSplitNow){ block.dataset.connectNow='1'; block.dataset.connectId=ev.id; }
       // ⏰アイコン：複数候補が横並びの場合は帯の上部外（top: -20px）に出して幅に関係なく押せるようにする
       const multiCandidate = isNowCandidate && nowCandidateIds.length>1;
       const showEditIcon = editable && !tooShort;
@@ -3467,7 +3503,7 @@ function renderTimeline(){
         `<div style="min-width:0;${isPast?'opacity:0.75':''};${useVertical?'display:flex;align-items:center;justify-content:center;height:calc(100% - 8px);':''}">
           ${nameHtml}
         </div>`;
-      block.innerHTML=`<div class="tl-band ${ev.type}${overtimeStyle}" style="height:100%;width:100%;position:relative;overflow:visible;${pastStyle}${nowHi}">
+      block.innerHTML=`<div class="tl-band ${ev.type}${overtimeStyle}" style="height:100%;width:100%;position:relative;overflow:visible;${pastStyle}${nowHi}${matchColorStyle}">
         ${nameWrapper}
         ${editIconHtml}
       </div>`;
@@ -3516,29 +3552,26 @@ function renderTimeline(){
 
     // ── 通常モード（従来どおり） ──
     if(isNow && !editMode){
-      // 今の予定：幅広く大きく（左右ほぼいっぱい）。開始〜終了の長さどおりの1枚のカードにする
-      // 他の「後ろの予定」がタップで前面化(60)された時に隠れないよう、このカードもタップで前面化できるようにする
-      const isFocused = ev.id===focusedOverlapId;
-      block.style.cssText=`position:absolute;left:6px;right:14px;top:${y+2-extra}px;height:${h}px;z-index:${isFocused?60:5};display:flex;flex-direction:column;`;
-      const card=document.createElement('div');
-      card.style.cssText='width:100%;flex:1;display:flex;flex-direction:column;min-height:0;position:relative;';
-      card.innerHTML=buildNowCard(ev,cur,h);
-      // 本体タップ → 前面化。ただしタスクのチェック・完了ボタンの操作はそのまま優先させる
-      card.addEventListener('click',(e)=>{
-        if(e.target.closest('.now-task-item, .now-complete-btn')) return;
-        if(focusedOverlapId!==ev.id){ focusedOverlapId=ev.id; renderTimeline(); }
-      });
+      // 今の予定：タイムライン上では他の予定と同じ大きさの帯として表示し、「今これをやっている」ことが
+      // 分かるハイライト枠だけを付ける。やること本体(チェックリスト等)はやりたいことパネルの場所に出す
+      // (旧仕様: ここに開始〜終了ぶんの巨大なカードを直接埋め込んでいたが、やりたいことパネルへ移設した)
+      block.style.cssText=`position:absolute;left:6px;right:14px;top:${y+2}px;height:${h}px;z-index:5;display:flex;justify-content:center;`;
+      const routineTag=ev.isRoutine?' ・ ルーティン':'';
+      block.innerHTML=`<div class="tl-band ${ev.type}" style="height:100%;width:100%;position:relative;overflow:visible;box-shadow:0 0 0 3px var(--accent);">
+          <div style="min-width:0;">
+            <div class="tl-band-name">${ev.name}</div>
+            <div class="tl-band-tag">いま やること${routineTag} ・ ${fmtTimeDisp(ev.time)}〜</div>
+          </div>
+        </div>`;
       if(ev._bagId && !isPast){
         const icon=document.createElement('button');
         icon.type='button'; icon.className='tl-time-edit-icon'; icon.title='じかんへんこう'; icon.setAttribute('aria-label','じかんを へんこうする'); icon.textContent='⏰';
-        icon.style.top='6px'; icon.style.bottom='auto'; icon.style.zIndex='2';
         icon.addEventListener('click',e=>{
           e.stopPropagation();
           withTimeEditPin(()=>openTimeModal(ev._bagId));
         });
-        card.appendChild(icon);
+        block.appendChild(icon);
       }
-      block.appendChild(card);
     } else {
       // 後ろの予定：狭め・中央寄せ
       // z-indexは通常どれも同じ(3)。重なった時は「先にappendした方が下」＝開始が早い方が下に来る（DOM描画順によるもの）。
@@ -3745,13 +3778,14 @@ function buildNowCard(ev, cur, cardH){
   const titleFontPx=Math.max(17, Math.min(34, ch*0.06));
   const remainFontPx=Math.max(14, Math.min(24, ch*0.045));
 
-  // 残り時間の色：青→オレンジ→赤（ピンク/マゼンタを経由しない2区間補間）
-  const remainBg=(()=>{ const c=remainColorRGB(remainFrac); const mix=0.85;
+  // 残り時間の色：カバンの色→黄→赤（安全な間はカバンごとの色で分かるように）
+  const bagHex = ev._bagId ? bagColor(ev._bagId) : null;
+  const remainBg=(()=>{ const c=remainColorRGB(remainFrac, bagHex); const mix=0.85;
     const r=Math.round(c.r+(255-c.r)*mix), g=Math.round(c.g+(255-c.g)*mix), b=Math.round(c.b+(255-c.b)*mix);
     return `rgb(${r},${g},${b})`; })();
-  const remainTextRgb=remainColorRGB(remainFrac);
+  const remainTextRgb=remainColorRGB(remainFrac, bagHex);
   const remainText=`rgb(${Math.round(remainTextRgb.r*0.75)},${Math.round(remainTextRgb.g*0.75)},${Math.round(remainTextRgb.b*0.75)})`;
-  const remainBorder=remainColorCss(remainFrac);
+  const remainBorder=remainColorCss(remainFrac, null, bagHex);
   const grayBg='rgba(100,105,115,0.12)', grayBorder='rgba(100,105,115,0.4)';
 
   // 経過ぶん：グレーアウト＆過去のカードと同じ幅のパネル（カードの中に収まる内側の要素・カード自体は1枚のまま）
@@ -4041,14 +4075,15 @@ function buildTaskCard(ev, isOvertime){
   const remainFrac=1-elapsedFrac;
   const remainMin=Math.max(0,Math.round(e-cur));
 
-  // 色：青→黄→赤の3段階（buildNowCardと同じ式）
+  // 色：カバンの色→黄→赤の3段階（buildNowCardと同じ式）
   // 時間切れは常にdangerトークンで固定（remainFracの補間任せにしない）
-  const borderColor = isOvertime ? 'var(--danger)' : remainColorCss(remainFrac);
+  const bagHex = ev._bagId ? bagColor(ev._bagId) : null;
+  const borderColor = isOvertime ? 'var(--danger)' : remainColorCss(remainFrac, null, bagHex);
   // 塗りは5分刻みでカクッと伸びる（なめらかな連続より、時計の目盛りのように読み取りやすい）
   const fillPctRaw=elapsedFrac*100;
   const stepPct = duration>=20 ? Math.round((5/duration)*100) : 10; // 短い予定は10%刻み
   const fillPct = stepPct>0 ? Math.min(100, Math.floor(fillPctRaw/stepPct)*stepPct) : Math.round(fillPctRaw);
-  const fillColor=(()=>{ const c=remainColorRGB(remainFrac); const mix=0.72; // 白との混合率(高いほど淡い)
+  const fillColor=(()=>{ const c=remainColorRGB(remainFrac, bagHex); const mix=0.72; // 白との混合率(高いほど淡い)
     const r=Math.round(c.r+(255-c.r)*mix), g=Math.round(c.g+(255-c.g)*mix), b=Math.round(c.b+(255-c.b)*mix);
     return `rgb(${r},${g},${b})`; })();
   const bgFill = isOvertime ? 'var(--danger-light)' : `linear-gradient(to bottom, ${fillColor} 0%, ${fillColor} ${fillPct}%, #ffffff ${fillPct}%, #ffffff 100%)`;
@@ -4080,7 +4115,7 @@ function buildTaskCard(ev, isOvertime){
     ? `<div style="font-size: var(--fs-sm);font-weight:900;color:#fff;background:var(--danger);display:inline-block;padding:3px 12px;border-radius: var(--r-md);margin-bottom:6px">⏰ じかんが すぎたよ</div>`
     : '';
   const skipBtnHtml = isOvertime
-    ? `<button type="button" id="overtime-skip-btn" style="width:100%;margin-top:8px;padding:12px;min-height:44px;border-radius: var(--r-md);border:2px solid var(--danger);background:#fff;color:var(--danger);font-weight:900;font-size: var(--fs-sm);cursor:pointer">😴 きょうは とばす</button>`
+    ? `<button type="button" id="overtime-skip-btn" style="width:100%;margin-top:8px;padding:8px 12px;min-height:44px;border-radius: var(--r-md);border:2px solid var(--danger);background:#fff;color:var(--danger);font-weight:800;font-size: var(--fs-xs);cursor:pointer">😴 きょうは とばす</button>`
     : '';
   // 残り時間は、隅の円グラフだけでなく大きな数字でも見せる（色は雰囲気、数字は事実、という役割分担）
   const bigRemainHtml = isOvertime ? '' : `<div style="font-size: var(--fs-2xl);font-weight:900;color:var(--text);line-height:1;margin-bottom:2px">のこり ${remainMin}ふん</div>`;
@@ -4651,7 +4686,6 @@ function renderStampDayDetail(date){
     tick();
   });
 }
-document.getElementById('stamp-view-btn').addEventListener('click',openStampModal);
 document.getElementById('stamp-close').addEventListener('click',()=>document.getElementById('stamp-modal').classList.remove('open'));
 
 // ── 📖 ずかん ──
@@ -4859,9 +4893,12 @@ function renderZukanHowto(){
   document.getElementById('zukan-howto-status').innerHTML =
     `いま 🪙${coins}こ ／ ⏳${totalMin}ふん ／ 🦋${owned}ひき ／ 🌟${stamps}にち`;
 }
-document.getElementById('zukan-btn').addEventListener('click',()=>{
+document.getElementById('child-fab-zukan').addEventListener('click',()=>{
   renderZukan();
   document.getElementById('zukan-modal').classList.add('open');
+});
+document.getElementById('child-fab-kiroku').addEventListener('click',()=>{
+  openStampModal();
 });
 document.getElementById('zukan-close').addEventListener('click',()=>document.getElementById('zukan-modal').classList.remove('open'));
 function clearStampSelection(){
@@ -5579,8 +5616,74 @@ document.getElementById('quick-sheet-close').addEventListener('click', closeQuic
 applyFabSide();
 
 let _lastNotifyKey = '';
+// タイムラインの帯(今のやること)と、右のカードをつなぐ接続線。
+// 帯の中の「今の位置」(経過ぶん)から、カードの左端へ同じ色の線を引く。
+// スクロールして帯がカードより上/下に外れた場合は、カードの上端/下端から繋ぐ。
+function updateNowConnector(){
+  const svg=document.getElementById('now-connector-svg');
+  if(!svg) return;
+  svg.innerHTML='';
+  const band=document.querySelector('[data-connect-now="1"]');
+  const cardWrap=document.getElementById('now-right-panel');
+  if(!band || !cardWrap || !cardWrap.firstElementChild){ return; }
+  const bandRect=band.getBoundingClientRect();
+  const cardRect=cardWrap.getBoundingClientRect();
+  if(cardRect.width===0 || cardRect.height===0) return;
+  // 帯の中の「今」の位置(経過ぶん)を、evの時刻情報から計算
+  const id=band.dataset.connectId;
+  const ev=(getTodayEvents()||[]).find(e=>e.id===id);
+  let elapsedFrac=0.5, bagHex=null;
+  if(ev){
+    const s=toMin(ev.time||'00:00'); const e=ev.end?toMin(ev.end):s+30;
+    elapsedFrac=Math.max(0,Math.min(1,(nowMin()-s)/Math.max(1,e-s)));
+    bagHex = ev._bagId ? bagColor(ev._bagId) : null;
+  }
+  const color=remainColorCss(1-elapsedFrac, null, bagHex);
+  const fillColor=remainColorCss(1-elapsedFrac, 0.4, bagHex);
+  // 接続線・接続点は、ヘッダーにはみ出さないよう「タイムライン表示エリア」の範囲内にクランプする
+  const timelineColRect = document.getElementById('timeline-col')?.getBoundingClientRect();
+  const clampTop = timelineColRect ? timelineColRect.top : 0;
+  const clampBottom = timelineColRect ? timelineColRect.bottom : window.innerHeight;
+  // 「残り時間ぶん」の上端＝今の位置、下端＝この予定の終わり(帯の下端)
+  const remainTopY = Math.max(clampTop, Math.min(clampBottom, bandRect.top + bandRect.height*elapsedFrac));
+  const remainBottomY = Math.max(clampTop, Math.min(clampBottom, bandRect.bottom));
+  const startX = bandRect.right;
+  const endX = cardRect.left;
+  // カード側は、帯の上端・下端をそのままカードの上端・下端に対応させる(ヘッダーにはみ出さないようクランプ)
+  const cardTopY = Math.max(clampTop, cardRect.top);
+  const cardBottomY = Math.min(clampBottom, cardRect.bottom);
+  const ns='http://www.w3.org/2000/svg';
+  // 上端どうし・下端どうしを繋ぐ2本の線と、その間を塗って「1枚のカード」に見せる
+  const midX=(startX+endX)/2;
+  const dTop = `M ${startX} ${remainTopY} C ${midX} ${remainTopY}, ${midX} ${cardTopY}, ${endX} ${cardTopY}`;
+  const dBottom = `M ${startX} ${remainBottomY} C ${midX} ${remainBottomY}, ${midX} ${cardBottomY}, ${endX} ${cardBottomY}`;
+  const fillPath=document.createElementNS(ns,'path');
+  fillPath.setAttribute('d', `${dTop} L ${endX} ${cardBottomY} C ${midX} ${cardBottomY}, ${midX} ${remainBottomY}, ${startX} ${remainBottomY} Z`);
+  fillPath.setAttribute('fill', fillColor);
+  svg.appendChild(fillPath);
+  [dTop, dBottom].forEach(d=>{
+    const path=document.createElementNS(ns,'path');
+    path.setAttribute('d', d);
+    path.setAttribute('stroke', color);
+    path.setAttribute('stroke-width', '3');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(path);
+  });
+  // 帯側の接続点(上端・下端)にも小さい丸を置いて、起点をはっきりさせる
+  [remainTopY, remainBottomY].forEach(y=>{
+    const dot=document.createElementNS(ns,'circle');
+    dot.setAttribute('cx', startX); dot.setAttribute('cy', y); dot.setAttribute('r', '4');
+    dot.setAttribute('fill', color);
+    svg.appendChild(dot);
+  });
+}
+document.getElementById('timeline-scroll').addEventListener('scroll', ()=>requestAnimationFrame(updateNowConnector));
+window.addEventListener('resize', ()=>requestAnimationFrame(updateNowConnector));
+
 function tick(){
   updateClock(); renderTimeline(); renderWantList(); updateNightMode(); checkTodayStamp();
+  requestAnimationFrame(updateNowConnector);
   // 予定の内容が変わった時だけ、通知を予約し直す（毎分やり直すと同じ通知が積み上がる）
   if(data.notifyEnabled && swReg){
     const key = getTodayEvents().filter(e=>e._bagId && e._completedAt==null)
@@ -6352,6 +6455,7 @@ function openParent(){
   updateBackupReminder();
   updateNightUI();
   updateAwakeUI();
+  updateWantPanelToggleUI();
   updateZoomUI();
   updateNowMarkerUI();
   updateVerticalBandUI();
@@ -6383,6 +6487,15 @@ function updateAwakeUI(){
   document.getElementById('awake-on').className='type-btn'+(on?' active-on':'');
   document.getElementById('awake-off').className='type-btn'+(!on?' active-on':'');
 }
+function updateWantPanelToggleUI(){
+  document.getElementById('wantpanel-on').className='type-btn'+(data.wantPanelEnabled!==false?' active-on':'');
+  document.getElementById('wantpanel-off').className='type-btn'+(data.wantPanelEnabled===false?' active-on':'');
+}
+function applyWantPanelVisibility(){
+  document.getElementById('main').classList.toggle('want-panel-disabled', data.wantPanelEnabled===false);
+}
+document.getElementById('wantpanel-on').addEventListener('click',()=>{ data.wantPanelEnabled=true; save(); updateWantPanelToggleUI(); applyWantPanelVisibility(); });
+document.getElementById('wantpanel-off').addEventListener('click',()=>{ data.wantPanelEnabled=false; save(); updateWantPanelToggleUI(); applyWantPanelVisibility(); });
 document.getElementById('awake-on').addEventListener('click',()=>{ data.keepAwake=true; save(); updateAwakeUI(); applyKeepAwake(); });
 document.getElementById('awake-off').addEventListener('click',()=>{ data.keepAwake=false; save(); updateAwakeUI(); applyKeepAwake(); });
 function updateZoomUI(){
@@ -8329,7 +8442,7 @@ document.getElementById('cond-add').addEventListener('click',()=>{
 
 // ═══ 初期化 ═══
 applyNowMarkerColor(); updateCoinBadge();
-updatePendingBadge(); tick(); applyKeepAwake(); refreshWeatherIfNeeded();
+updatePendingBadge(); tick(); applyKeepAwake(); refreshWeatherIfNeeded(); applyWantPanelVisibility();
 maybeShowIntro(); // カバンが1つも無い＝初回なら「カバンとは何か」を説明する
 updateNotifyUI();
 maybeShowInstallBar();
