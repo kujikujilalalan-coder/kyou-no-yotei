@@ -1708,6 +1708,8 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
         <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-4" aria-label="せつめいを みる"></button></div>
         <p class="info-text" id="info-4" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">動作確認でためた コイン・ガチャ結果・なかま・ヘッダー設定を全部リセットします。</p>
         <button class="btn" id="dev-reset-btn" style="width:100%;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🗑️ 色・ガチャ・コインを リセット</button>
+        <button class="btn" id="dev-preview-unlock-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🔓 ずかんを ぜんぶ プレビュー：OFF</button>
+        <p class="info-text" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">見た目だけ全部解禁して見せます。コインやガチャの記録は変わりません（実際の交換はしません）。</p>
       </div>
     </div>
 
@@ -1725,8 +1727,18 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
           <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
             <input type="text" id="vacation-name" placeholder="例：なつやすみ" maxlength="14" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px"/>
           </div>
+          <div class="type-toggle" id="vacation-type-toggle" style="margin-bottom:8px">
+            <button type="button" class="type-btn" id="vacation-type-dates" style="flex:1">📅 日づけタップ型</button>
+            <button type="button" class="type-btn" id="vacation-type-range" style="flex:1">🗓️ 期間指定型</button>
+          </div>
           <button type="button" id="vacation-dates-btn" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left">📅 日づけを えらぶ（0にち）</button>
           <div id="vacation-dates-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+          <div id="vacation-range-fields" style="display:none;gap:8px;align-items:center">
+            <button type="button" id="vacation-range-from-btn" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left">開始日 えらぶ</button>
+            <span style="font-size: var(--fs-md);font-weight:900;color:var(--text-dim)">〜</span>
+            <button type="button" id="vacation-range-until-btn" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left">終了日 えらぶ</button>
+          </div>
+          <p style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">日づけタップ型：バラバラの日を1日ずつ選びます。期間指定型：開始日〜終了日を決めると、その中で作るカバンに「毎週◯曜日」「第◯曜日」も選べるようになります。</p>
           <div style="display:flex;gap:8px;margin-top:8px">
             <button class="btn btn-primary" id="vacation-save" style="flex:1;font-size: var(--fs-xs)">＋ きかんを ついか する</button>
           </div>
@@ -1974,7 +1986,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v140・2026-07-22</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v144・2026-07-27</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2117,6 +2129,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
           <div class="type-toggle" id="bag-repeat-type-toggle" style="margin-bottom:10px">
             <button type="button" class="type-btn" id="bag-repeat-weekly" style="flex:1">毎週（曜日で指定）</button>
             <button type="button" class="type-btn" id="bag-repeat-monthly" style="flex:1">月ごと（第◯曜日）</button>
+            <button type="button" class="type-btn" id="bag-repeat-dates" style="flex:1">📅 カレンダーで選ぶ</button>
           </div>
           <div id="bag-dow-field">
             <label>使う曜日</label>
@@ -2140,18 +2153,11 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
               </select>
              <button type="button" class="info-toggle" data-info-toggle="info-25" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-25" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;line-height:1.4">例：「第2」「水曜日」→ 毎月第2水曜日だけ出てくる予定になります。</p>
           </div>
-        </div>
-        <div class="field">
-          <label>きかん（夏休み等・任意）</label>
-          <div class="type-toggle" id="bag-period-toggle" style="margin-bottom:8px">
-            <button type="button" class="type-btn" id="bag-period-none" style="flex:1">しない</button>
-            <button type="button" class="type-btn" id="bag-period-pause" style="flex:1">この期間だけ おやすみ</button>
-            <button type="button" class="type-btn" id="bag-period-active" style="flex:1">この期間だけ 出す</button>
+          <div id="bag-dates-field" style="display:none">
+            <button type="button" id="bag-repeat-dates-btn" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left">📅 日づけを えらぶ（0にち）</button>
+            <div id="bag-repeat-dates-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+            <p id="bag-dates-hint" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;line-height:1.4">選んだ日づけだけ 出てきます。曜日は関係ありません。</p>
           </div>
-          <button type="button" id="bag-period-dates-btn" style="display:none;width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left">📅 日づけを えらぶ（0にち）</button>
-          <div id="bag-period-dates-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
-          <select id="bag-period-use-vacation" style="display:none;width:100%;margin-top:8px;min-height:44px;padding:8px 12px;border-radius: var(--r-sm);border:2px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size: var(--fs-xs);font-weight:800"></select>
-          <p id="bag-period-hint" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;line-height:1.4"></p>
         </div>
       </div>
     </div>
@@ -2645,25 +2651,34 @@ function dateInRangeStr(date, fromStr, untilStr){
 function bagActiveOn(bag, date){
   if(!bag.enabled) return false;
   const bagDk=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-  const bagDates = bag.periodDates || (bag.periodFrom && bag.periodUntil ? expandDateRange(bag.periodFrom, bag.periodUntil) : null);
-  // 期間限定(夏休み専用カバン等)：選んだ日づけ以外では一切出さない
-  if(bag.periodMode==='active' && !(bagDates && bagDates.includes(bagDk))) return false;
-  // 通常カバンの一時停止(夏休み中だけ お休み 等)：選んだ日づけは出さない。それ以外は自動で元通り
-  if(bag.periodMode==='pause' && bagDates && bagDates.includes(bagDk)) return false;
-  // イレギュラー期間(child.vacationPeriods、複数・名前付き、個別の日付をいくつでも指定できる)を指定していたら、
-  // その期間中は「稼働させる」と選んだカバン(bagIds)＋期間限定カバン(periodMode==='active')以外、
-  // 自動でお休みになる（新しく作ったカバンも、明示的に稼働させない限り安全側でお休みになる）。
-  const vc=getChild();
-  const vacPeriods = vc && (vc.vacationPeriods || (vc.vacationFrom && vc.vacationUntil ? [{id:'legacy',name:'イレギュラー',dates:expandDateRange(vc.vacationFrom,vc.vacationUntil),bagIds:[]}] : []));
-  if(vacPeriods){
-    const dk=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-    const activePeriod = vacPeriods.find(p=>(p.dates||[]).includes(dk));
-    if(activePeriod && bag.periodMode!=='active' && !(activePeriod.bagIds||[]).includes(bag.id)) return false;
-  }
   // その日だけ「おやすみ」にした日は出さない（病気・急な予定変更など）。
   // カバン自体は消さないので、翌週以降はいつも通り出る。
   if(bag.skippedByDate && bag.skippedByDate[dateKey(date)]) return false;
-  if(bag.onlyDate) return bag.onlyDate===dateKey(date);
+  if(bag.onlyDate) return bag.onlyDate===dateKey(date); // 古いデータの互換用（今の編集画面ではもう作られない）
+
+  const vc=getChild();
+  const vacPeriods = (vc && vc.vacationPeriods) || [];
+
+  if(bag.vacationPeriodId){
+    // イレギュラー期間の中で作られた「期間専用カバン」：親の期間の範囲外では一切出さない
+    const period = vacPeriods.find(p=>p.id===bag.vacationPeriodId);
+    if(!period) return false; // 親の期間が削除済みなら出さない
+    if(period.type==='range'){
+      if(!dateInRangeStr(date, period.rangeFrom, period.rangeUntil)) return false;
+    } else if(!(period.dates||[]).includes(bagDk)){
+      return false;
+    }
+    // ここで期間の枠には入っているので、この下の「カバン自身の繰り返しパターン」判定に進む
+  } else if(vacPeriods.length){
+    // 通常カバン：アクティブなイレギュラー期間中は、稼働リスト(bagIds)に入っていない限り自動でお休み
+    // （新しく作ったカバンも、選ばない限り安全側でお休みになる）
+    const activePeriod = vacPeriods.find(p=>
+      p.type==='range' ? dateInRangeStr(date, p.rangeFrom, p.rangeUntil) : (p.dates||[]).includes(bagDk)
+    );
+    if(activePeriod && !(activePeriod.bagIds||[]).includes(bag.id)) return false;
+  }
+
+  if(bag.repeatType==='dates') return (bag.repeatDates||[]).includes(bagDk);
   if(bag.repeatType==='monthly_nth'){
     if(date.getDay()!==Number(bag.nthDow)) return false;
     return Math.ceil(date.getDate()/7)===Number(bag.nthWeek);
@@ -3668,7 +3683,7 @@ function renderTimeline(){
       const soonClass = (ev.id===soonEvId) ? ' tl-band-soon' : '';
       const focusRing = isFocused ? 'box-shadow:0 0 0 3px var(--accent);' : '';
       block.innerHTML=`<div class="tl-band ${ev.type}${soonClass}" style="height:100%;width:100%;position:relative;min-height:0;overflow:visible;${pastStyle}${focusRing}">
-        <div style="position:sticky;top:0;z-index:2;min-width:0;padding:4px 6px;border-radius: var(--r-sm);background:rgba(255,255,255,0.88);backdrop-filter:blur(2px);${isPast?'opacity:0.75':''}"><div class="tl-band-name">${ev.fromChild?'⭐ ':''}${ev.name}</div><div class="tl-band-tag" style="${isPast?'color:var(--text-dim)':''}">${ev.fromChild?'じぶんで きめた ・ ':''}${fmtTimeDisp(ev.time)}〜${ev.end?fmtTimeDisp(ev.end):''}${routineTag}</div></div>
+        <div style="position:sticky;top:0;z-index:2;min-width:0;padding:4px 6px;border-radius: var(--r-sm);background:rgba(255,255,255,0.88);backdrop-filter:blur(2px);transform:translateZ(0);will-change:transform;${isPast?'opacity:0.75':''}"><div class="tl-band-name">${ev.fromChild?'⭐ ':''}${ev.name}</div><div class="tl-band-tag" style="${isPast?'color:var(--text-dim)':''}">${ev.fromChild?'じぶんで きめた ・ ':''}${fmtTimeDisp(ev.time)}〜${ev.end?fmtTimeDisp(ev.end):''}${routineTag}</div></div>
         ${tappable?'<button class="tl-time-edit-icon" type="button" title="じかんへんこう" aria-label="じかんを へんこうする">⏰</button>':''}
       </div>`;
       if(editMode){ setupDragForBlock(block, ev); }
@@ -4662,7 +4677,7 @@ function renderStampCalendar(){
     // マスの横幅は実測37〜46pxしかないため、名前は途中で切れる。フルネームは下の凡例で補完する。
     const MAX=3;
     const chips=list.slice(0,MAX).map(x=>
-      `<div style="background:${bagColor(x.bag.id)};color:#fff;font-size:8px;font-weight:800;line-height:1.35;border-radius:3px;padding:0 2px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box">${x.bag.name}</div>`
+      `<div style="background:${bagColor(x.bag.id)};color:#fff;font-size:8px;font-weight:800;line-height:1.35;border-radius:3px;padding:0 2px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box">${x.bag.labelText||x.bag.name}</div>`
     ).join('');
     const more = list.length>MAX ? `<div style="font-size:7px;font-weight:900;color:var(--text-dim);line-height:1.2">+${list.length-MAX}</div>` : '';
     const marks = list.length
@@ -4683,7 +4698,7 @@ function renderStampCalendar(){
   if(monthBagIds.size){
     const items=getBags().filter(b=>monthBagIds.has(b.id)).map(b=>
       `<span style="display:inline-flex;align-items:center;gap:5px;margin:3px 10px 3px 0;font-size: var(--fs-xs);font-weight:700">
-        <span style="width:14px;height:4px;border-radius:2px;background:${bagColor(b.id)};flex-shrink:0"></span>${b.name}
+        <span style="width:14px;height:4px;border-radius:2px;background:${bagColor(b.id)};flex-shrink:0"></span>${b.labelText||b.name}
       </span>`
     ).join('');
     legend.innerHTML=`<div style="border:1.5px dashed var(--border);border-radius: var(--r-sm);padding:8px 10px">${items}</div>`;
@@ -4826,7 +4841,10 @@ function renderZukanCreature(){
 function renderZukanColor(){
   const child=getChild();
   const kanji=!!(child&&child.kanjiMode);
-  const won=child.gachaWon||[];
+  // 🧪開発用「ぜんぶプレビュー」：見た目だけ全解禁扱いにする。child.gachaWon自体は書き換えないので、
+  // OFFに戻せば元の所持状況にすぐ戻る（コイン・交換記録も一切変更しない）。
+  const previewAllUnlocked = !!data.devPreviewAllUnlocked;
+  const won = previewAllUnlocked ? buildGachaPool().map(p=>p.id) : (child.gachaWon||[]);
   const currentHeaderId=child.headerColor||'default';
   const currentMarkerId=data.nowMarkerColor||'marker-indigo';
 
@@ -6465,6 +6483,25 @@ document.getElementById('dev-reset-btn').addEventListener('click',function(){
   showToast('リセットしました');
 });
 
+// 🧪開発用「ずかんをぜんぶプレビュー」：ヘッダー色・マーカー色・すりガラスの見た目だけ全解禁して見せる。
+// data側のフラグのみで判定し、child.gachaWon（実際の所持データ）は一切変更しない。
+function updateDevPreviewBtn(){
+  const btn=document.getElementById('dev-preview-unlock-btn');
+  if(!btn) return;
+  const on=!!data.devPreviewAllUnlocked;
+  btn.textContent = on ? '🔓 ずかんを ぜんぶ プレビュー：ON' : '🔓 ずかんを ぜんぶ プレビュー：OFF';
+  btn.style.background = on ? 'var(--warn)' : 'var(--surface2)';
+  btn.style.color = on ? 'var(--warn-text)' : 'var(--text-dim)';
+  btn.style.borderColor = on ? 'var(--warn)' : 'var(--border)';
+}
+document.getElementById('dev-preview-unlock-btn').addEventListener('click',()=>{
+  data.devPreviewAllUnlocked = !data.devPreviewAllUnlocked;
+  save();
+  updateDevPreviewBtn();
+  renderZukanColor();
+  showToast(data.devPreviewAllUnlocked ? 'ぜんぶ プレビュー表示にしました' : 'プレビューを おわりました');
+});
+
 // 子ども1人分の後方互換フィールドを補う
 function migrateChild(c){
   if(!c.wakeTime)c.wakeTime='07:00'; if(!c.sleepTime)c.sleepTime='21:00';
@@ -6489,6 +6526,11 @@ function migrateChild(c){
   // 移行は一度だけ。以降は colorIndex が正となる。
   c.bags.forEach((b,i)=>{ if(b.colorIndex==null) b.colorIndex = i % 10; });
   c.bags.forEach(b=>{ if(!b.tasks)b.tasks=[]; if(!b.dow)b.dow=[]; if(b.enabled===undefined)b.enabled=true; if(b.showInLabel===undefined)b.showInLabel=false; if(b.labelText===undefined)b.labelText=''; if(b.labelOrder===undefined)b.labelOrder=1; if(b.allowFree===undefined)b.allowFree=true; if(b.defaultTime===undefined)b.defaultTime=''; if(!b.timeByDate)b.timeByDate={}; if(!b.completedByDate)b.completedByDate={}; if(b.defaultEndTime===undefined)b.defaultEndTime=''; if(!b.endByDate)b.endByDate={}; if(b.onlyDate===undefined)b.onlyDate='';
+    // v144: カバン個別の「きかん(periodMode/periodDates)」機能を廃止。イレギュラー期間専用カバン(vacationPeriodId)と
+    // 繰り返し方の3択目「カレンダーで選ぶ(repeatType='dates'/repeatDates)」に統合したため、旧フィールドは削除する(移行はしない)。
+    delete b.periodMode; delete b.periodDates; delete b.periodFrom; delete b.periodUntil;
+    if(b.repeatDates===undefined) b.repeatDates=[];
+    if(b.vacationPeriodId===undefined) b.vacationPeriodId=null;
     // taskDoneByDateがなければ初期化（日付ごとにdone状態を管理）
     if(!b.taskDoneByDate) b.taskDoneByDate={};
     // 旧方式で task.done が true のまま残っていれば今日分に移行してクリア
@@ -7256,7 +7298,9 @@ function renderBagList(){
   bags.forEach((bag, idx)=>{
     const dowText = bag.repeatType==='monthly_nth'
       ? `月ごと・第${bag.nthWeek||1} ${DOW_LABELS[bag.nthDow||0]}曜日`
-      : ((bag.dow||[]).length===7?'毎日':(bag.dow||[]).length?bag.dow.slice().sort().map(d=>DOW_LABELS[d]).join('・'):'曜日未設定');
+      : bag.repeatType==='dates'
+        ? `指定した日づけ（${(bag.repeatDates||[]).length}にち）`
+        : ((bag.dow||[]).length===7?'毎日':(bag.dow||[]).length?bag.dow.slice().sort().map(d=>DOW_LABELS[d]).join('・'):'曜日未設定');
     const timeText=bag.defaultTime?(bag.defaultEndTime?`${bag.defaultTime}〜${bag.defaultEndTime}`:`${bag.defaultTime}〜`):'時刻はそのつど';
     const freeText=bag.allowFree===false?'終わってもオフタイムにならない':'終わったら自由時間';
 
@@ -7274,6 +7318,11 @@ function renderBagList(){
     const labelMark = bag.showInLabel
       ? `<span title="見出しに出します" style="display:inline-flex;align-items:center;gap:3px;background:var(--warn-light);border:1.5px solid var(--warn);color:var(--warn-text);border-radius: var(--r-full);padding:1px 8px;font-size: var(--fs-xs);font-weight:800;margin-left:6px">📌 見出し${bag.labelOrder?`${bag.labelOrder}`:''}</span>`
       : '';
+    // イレギュラー期間専用のカバンには、どの期間に属するか分かるように印を付ける
+    const linkedPeriod = bag.vacationPeriodId ? (getChild().vacationPeriods||[]).find(p=>p.id===bag.vacationPeriodId) : null;
+    const periodMark = linkedPeriod
+      ? `<span title="イレギュラー期間専用のカバンです" style="display:inline-flex;align-items:center;gap:3px;background:var(--danger-light);border:1.5px solid var(--danger);color:var(--danger);border-radius: var(--r-full);padding:1px 8px;font-size: var(--fs-xs);font-weight:800;margin-left:6px">🗓️ ${linkedPeriod.name}</span>`
+      : '';
     const row=document.createElement('div');
     row.style.cssText=`
       border:2px solid ${bag.enabled?'var(--border)':'#ddd'};
@@ -7289,7 +7338,7 @@ function renderBagList(){
         <div class="bag-main" style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:5px;min-width:0">
             <button class="bag-color-dot" type="button" aria-label="この色の意味を みる" style="width:20px;height:20px;min-width:20px;border-radius:50%;background:${bagColor(bag.id)};flex-shrink:0;border:none;cursor:pointer;padding:0"></button>
-            <span style="font-size: var(--fs-sm);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${bag.name}</span>${labelMark}
+            <span style="font-size: var(--fs-sm);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${bag.name}</span>${labelMark}${periodMark}
           </div>
           <div style="font-size: var(--fs-xs);font-weight:700;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${timeText} ／ ${dowText}</div>
         </div>
@@ -7368,6 +7417,9 @@ function migrateVacationPeriods(){
     if(!p.bagIds){ p.bagIds=[]; migrated=true; }
     if(!p.dates && p.from && p.until){ p.dates=expandDateRange(p.from,p.until); delete p.from; delete p.until; migrated=true; }
     if(!p.dates){ p.dates=[]; migrated=true; }
+    if(!p.type){ p.type='dates'; migrated=true; }
+    if(p.rangeFrom===undefined){ p.rangeFrom=''; migrated=true; }
+    if(p.rangeUntil===undefined){ p.rangeUntil=''; migrated=true; }
   });
   if(migrated) save();
 }
@@ -7389,22 +7441,42 @@ function renderVacationPeriodList(){
     const row=document.createElement('div');
     row.style.cssText='background:var(--danger-light);border-radius: var(--r-sm);padding:6px 10px;margin-bottom:6px';
     const activeCount=(p.bagIds||[]).length;
+    const typeTag = p.type==='range' ? '🗓️' : '📅';
+    const dateLabel = p.type==='range'
+      ? (p.rangeFrom && p.rangeUntil ? `${Number(p.rangeFrom.slice(5,7))}/${Number(p.rangeFrom.slice(8,10))}〜${Number(p.rangeUntil.slice(5,7))}/${Number(p.rangeUntil.slice(8,10))}` : '期間 未設定')
+      : summarizeDates(p.dates);
     row.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
-        <button type="button" data-editdates="${p.id}" style="flex:1;min-width:0;text-align:left;background:none;border:none;padding:2px;cursor:pointer;font-size: var(--fs-xs);font-weight:800;color:var(--danger);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}（${summarizeDates(p.dates)}）✎</button>
+        <button type="button" data-editdates="${p.id}" style="flex:1;min-width:0;text-align:left;background:none;border:none;padding:2px;cursor:pointer;font-size: var(--fs-xs);font-weight:800;color:var(--danger);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${typeTag} ${p.name}（${dateLabel}）✎</button>
         <button type="button" data-id="${p.id}" aria-label="${p.name}を けす" style="min-width:44px;min-height:36px;border:none;background:none;color:var(--danger);font-weight:900;font-size: var(--fs-md);cursor:pointer">✕</button>
       </div>
-      <button type="button" data-bagpick="${p.id}" style="width:100%;margin-top:4px;min-height:36px;border:1.5px solid var(--danger);border-radius: var(--r-sm);background:#fff;color:var(--danger);font-size: var(--fs-xs);font-weight:800;cursor:pointer">🎒 稼働させる カバン（${activeCount}件）▶</button>`;
+      <button type="button" data-bagpick="${p.id}" style="width:100%;margin-top:4px;min-height:36px;border:1.5px solid var(--danger);border-radius: var(--r-sm);background:#fff;color:var(--danger);font-size: var(--fs-xs);font-weight:800;cursor:pointer">🎒 稼働させる カバン（${activeCount}件）▶</button>
+      <button type="button" data-newbag="${p.id}" style="width:100%;margin-top:4px;min-height:36px;border:1.5px dashed var(--danger);border-radius: var(--r-sm);background:#fff;color:var(--danger);font-size: var(--fs-xs);font-weight:800;cursor:pointer">＋ この きかん専用の カバンを 作る</button>`;
     row.querySelector('button[aria-label]').addEventListener('click',()=>{
       c.vacationPeriods = c.vacationPeriods.filter(x=>x.id!==p.id);
       save(); tick(); renderVacationPeriodList();
       showToast(`「${p.name}」を けしました`);
     });
     row.querySelector('[data-bagpick]').addEventListener('click',()=>openVacationBagPick(p.id));
+    row.querySelector('[data-newbag]').addEventListener('click',()=>{
+      document.getElementById('parent-modal').classList.remove('open');
+      openBagModal(null, null, p.id);
+    });
     row.querySelector('[data-editdates]').addEventListener('click',()=>{
-      openDatePickerMulti(p.dates||[], (newDates)=>{
-        p.dates=newDates; save(); tick(); renderVacationPeriodList();
-        showToast(`「${p.name}」の 日づけを 直しました`);
-      });
+      if(p.type==='range'){
+        // 期間指定型の編集は、作成フォームに現在値を入れ直して「書きかえる」で置き換える簡易方式
+        vacationEditingId=p.id;
+        document.getElementById('vacation-name').value=p.name;
+        vacationNewType='range'; updateVacationTypeUI();
+        setVacationRangeField('vacation-range-from-btn', p.rangeFrom||'', '開始日 えらぶ');
+        setVacationRangeField('vacation-range-until-btn', p.rangeUntil||'', '終了日 えらぶ');
+        document.getElementById('vacation-save').textContent='✎ きかんを 書きかえる';
+        showToast('内容をフォームに入れました。書きかえて保存してください');
+      } else {
+        openDatePickerMulti(p.dates||[], (newDates)=>{
+          p.dates=newDates; save(); tick(); renderVacationPeriodList();
+          showToast(`「${p.name}」の 日づけを 直しました`);
+        });
+      }
     });
     wrap.appendChild(row);
   });
@@ -7534,7 +7606,7 @@ document.getElementById('datepick-done').addEventListener('click',()=>{
   if(datepickOnDone) datepickOnDone([...datepickSelectedDates].sort());
 });
 
-let vacationNewDates=[];
+let vacationNewDates=[], vacationNewType='dates', vacationEditingId=null;
 document.getElementById('vacation-dates-btn').addEventListener('click',()=>{
   openDatePickerMulti(vacationNewDates, (dates)=>{
     vacationNewDates=dates;
@@ -7545,17 +7617,55 @@ document.getElementById('vacation-dates-btn').addEventListener('click',()=>{
     ).join('');
   });
 });
+// 期間指定型の開始日/終了日ボタン。表示テキストと同時にdataset.valueへ実際の値(YYYY-MM-DD)を持たせる
+function setVacationRangeField(id, val, emptyLabel){
+  const el=document.getElementById(id);
+  el.dataset.value=val;
+  el.textContent = val ? `${val.slice(0,4)}/${val.slice(5,7)}/${val.slice(8,10)}` : emptyLabel;
+}
+function updateVacationTypeUI(){
+  document.getElementById('vacation-type-dates').classList.toggle('active-on', vacationNewType==='dates');
+  document.getElementById('vacation-type-range').classList.toggle('active-on', vacationNewType==='range');
+  document.getElementById('vacation-dates-btn').style.display = vacationNewType==='dates' ? 'block' : 'none';
+  document.getElementById('vacation-dates-chips').style.display = vacationNewType==='dates' ? 'flex' : 'none';
+  document.getElementById('vacation-range-fields').style.display = vacationNewType==='range' ? 'flex' : 'none';
+}
+document.getElementById('vacation-type-dates').addEventListener('click',()=>{ vacationNewType='dates'; updateVacationTypeUI(); });
+document.getElementById('vacation-type-range').addEventListener('click',()=>{ vacationNewType='range'; updateVacationTypeUI(); });
+document.getElementById('vacation-range-from-btn').addEventListener('click',()=>openDatePicker('vacation-range-from-btn'));
+document.getElementById('vacation-range-until-btn').addEventListener('click',()=>openDatePicker('vacation-range-until-btn'));
+updateVacationTypeUI();
 document.getElementById('vacation-save').addEventListener('click',()=>{
   const name=document.getElementById('vacation-name').value.trim();
   if(!name){ showToast('名前を つけてください'); return; }
-  if(!vacationNewDates.length){ showToast('日づけを 1つ以上 えらんでください'); return; }
+  let periodData;
+  if(vacationNewType==='range'){
+    const from=getDateFieldValue('vacation-range-from-btn');
+    const until=getDateFieldValue('vacation-range-until-btn');
+    if(!from || !until){ showToast('開始日と終了日を えらんでください'); return; }
+    if(new Date(until+'T00:00:00') < new Date(from+'T00:00:00')){ showToast('終了日は開始日より あとにしてください'); return; }
+    periodData={name, type:'range', rangeFrom:from, rangeUntil:until, dates:[]};
+  } else {
+    if(!vacationNewDates.length){ showToast('日づけを 1つ以上 えらんでください'); return; }
+    periodData={name, type:'dates', dates:vacationNewDates, rangeFrom:'', rangeUntil:''};
+  }
   const c=getChild(); if(!c.vacationPeriods) c.vacationPeriods=[];
-  c.vacationPeriods.push({id:'p'+Date.now(), name, dates:vacationNewDates, bagIds:[]});
+  if(vacationEditingId){
+    const existing=c.vacationPeriods.find(x=>x.id===vacationEditingId);
+    if(existing) Object.assign(existing, periodData);
+    vacationEditingId=null;
+    document.getElementById('vacation-save').textContent='＋ きかんを ついか する';
+  } else {
+    c.vacationPeriods.push({id:'p'+Date.now(), bagIds:[], ...periodData});
+  }
   save(); tick();
   document.getElementById('vacation-name').value='';
   vacationNewDates=[];
   document.getElementById('vacation-dates-btn').textContent='📅 日づけを えらぶ（0にち）';
   document.getElementById('vacation-dates-chips').innerHTML='';
+  setVacationRangeField('vacation-range-from-btn', '', '開始日 えらぶ');
+  setVacationRangeField('vacation-range-until-btn', '', '終了日 えらぶ');
+  vacationNewType='dates'; updateVacationTypeUI();
   renderVacationPeriodList();
   showToast(`「${name}」を ついかしました`);
 });
@@ -7612,9 +7722,9 @@ function openBagCopyModal(){
 
 // ── カバン編集モーダル ──
 let editBagId=null, bagTasks=[], bagType='on', bagDow=[], bagDefaultTime='', bagDefaultEnd='', bagColorIndex=0;
-let bagPeriodMode='none', bagPeriodDates=[];
-let bagRepeatType='weekly', bagNthWeek=1, bagNthDow=1;
-function openBagModal(id, copyFrom){
+let bagRepeatType='weekly', bagNthWeek=1, bagNthDow=1, bagRepeatDates=[];
+let bagVacationPeriodId=null, bagVacationPeriodType=null;
+function openBagModal(id, copyFrom, vacationPeriodId){
   editBagId=id;
   const bag=id?getBags().find(b=>b.id===id):(copyFrom||null);
   document.getElementById('bag-modal-title').textContent=id?'🎒 カバンをへんしゅう':'🎒 カバンを作る';
@@ -7624,7 +7734,15 @@ function openBagModal(id, copyFrom){
   bagType=id?(bag.type||'on'):'on'; // 親が作るカバン（白紙・コピー）は常にオンタイム。編集時のみ元の種類を維持
   bagTasks=bag?(bag.tasks||[]).map(t=>({...t})):[];
   bagDow=bag?(bag.dow||[]).slice():[];
-  bagRepeatType=bag?(bag.repeatType||'weekly'):'weekly';
+  // イレギュラー期間に属するカバンかどうか（新規＝渡されたvacationPeriodId、編集＝保存済みのvacationPeriodId）
+  const linkedPeriodId = bag ? (bag.vacationPeriodId||null) : (vacationPeriodId||null);
+  bagVacationPeriodId = linkedPeriodId;
+  migrateVacationPeriods();
+  const linkedPeriod = linkedPeriodId ? (getChild().vacationPeriods||[]).find(p=>p.id===linkedPeriodId) : null;
+  bagVacationPeriodType = linkedPeriod ? linkedPeriod.type : null;
+  bagRepeatType=bag?(bag.repeatType||'weekly'):(linkedPeriod && linkedPeriod.type==='dates' ? 'dates' : 'weekly');
+  bagRepeatDates = bag ? (bag.repeatDates||[]).slice()
+    : (linkedPeriod && linkedPeriod.type==='dates' ? (linkedPeriod.dates||[]).slice() : []);
   bagNthWeek=bag?(bag.nthWeek||1):1;
   bagNthDow=bag?(bag.nthDow!=null?bag.nthDow:1):1;
   bagDefaultTime=bag?bag.defaultTime||'':'';
@@ -7648,13 +7766,10 @@ function openBagModal(id, copyFrom){
     let idx=0; while(used.has(idx) && idx<BAG_PALETTE.length) idx++;
     bagColorIndex = idx % BAG_PALETTE.length;
   }
-  bagPeriodMode = bag?(bag.periodMode||'none'):'none';
-  bagPeriodDates = bag ? (bag.periodDates || (bag.periodFrom && bag.periodUntil ? expandDateRange(bag.periodFrom, bag.periodUntil) : [])) : [];
   renderBagColorPicker();
   updateBagType();
   renderBagTaskList();
   updateBagDowUI();
-  updateBagPeriodUI();
   document.getElementById('bag-modal').classList.add('open');
 }
 function updateBagType(){
@@ -7795,60 +7910,38 @@ function updateBagDowUI(){
   document.querySelectorAll('#bag-dow-grid .dow-btn').forEach(b=>{
     b.classList.toggle('sel', bagDow.includes(Number(b.dataset.d)));
   });
-  document.getElementById('bag-repeat-weekly').classList.toggle('active-on', bagRepeatType!=='monthly_nth');
+  document.getElementById('bag-repeat-weekly').classList.toggle('active-on', bagRepeatType==='weekly');
   document.getElementById('bag-repeat-monthly').classList.toggle('active-on', bagRepeatType==='monthly_nth');
-  document.getElementById('bag-dow-field').style.display = bagRepeatType==='monthly_nth' ? 'none' : '';
+  document.getElementById('bag-repeat-dates').classList.toggle('active-on', bagRepeatType==='dates');
+  document.getElementById('bag-dow-field').style.display = bagRepeatType==='weekly' ? '' : 'none';
   document.getElementById('bag-nth-field').style.display = bagRepeatType==='monthly_nth' ? '' : 'none';
+  document.getElementById('bag-dates-field').style.display = bagRepeatType==='dates' ? '' : 'none';
   document.getElementById('bag-nth-week').value=String(bagNthWeek);
   document.getElementById('bag-nth-dow').value=String(bagNthDow);
+  updateBagRepeatDatesUI();
+  // イレギュラー期間(日づけタップ型)専用のカバンは、期間の日づけ以外を選ばせても意味がないので
+  // 「毎週/月ごと」を隠し、「カレンダーで選ぶ」だけに固定する
+  const lockToDates = bagVacationPeriodType==='dates';
+  document.getElementById('bag-repeat-weekly').style.display = lockToDates?'none':'';
+  document.getElementById('bag-repeat-monthly').style.display = lockToDates?'none':'';
 }
-// 期間指定(夏休み等)：なし/一時停止/期間限定の3択＋期間の開始・終了日
-function updateBagPeriodUI(){
-  document.getElementById('bag-period-none').classList.toggle('active-on', bagPeriodMode==='none');
-  document.getElementById('bag-period-pause').classList.toggle('active-on', bagPeriodMode==='pause');
-  document.getElementById('bag-period-active').classList.toggle('active-on', bagPeriodMode==='active');
-  const datesBtn=document.getElementById('bag-period-dates-btn');
-  datesBtn.style.display = bagPeriodMode==='none' ? 'none' : 'block';
-  datesBtn.textContent = `📅 日づけを えらぶ（${bagPeriodDates.length}にち）`;
-  const chipsEl=document.getElementById('bag-period-dates-chips');
-  chipsEl.innerHTML = bagPeriodMode==='none' ? '' : bagPeriodDates.slice().sort().map(dk=>
+function updateBagRepeatDatesUI(){
+  const btn=document.getElementById('bag-repeat-dates-btn');
+  btn.textContent = `📅 日づけを えらぶ（${bagRepeatDates.length}にち）`;
+  const chipsEl=document.getElementById('bag-repeat-dates-chips');
+  chipsEl.innerHTML = bagRepeatDates.slice().sort().map(dk=>
     `<span style="background:var(--surface2);border:1.5px solid var(--border);border-radius: var(--r-full);padding:3px 10px;font-size: var(--fs-xs);font-weight:700">${Number(dk.slice(5,7))}/${Number(dk.slice(8,10))}</span>`
   ).join('');
-  const hint=document.getElementById('bag-period-hint');
-  if(bagPeriodMode==='pause') hint.textContent='選んだ日づけだけ お休みになり、それ以外は自動で もとに戻ります。※ふつうのカバンをまとめてお休みにしたい時は、保護者設定トップの「🗓️ イレギュラーきかん」の方が1回の設定ですみます。';
-  else if(bagPeriodMode==='active') hint.textContent='選んだ日づけだけ 出てきて、それ以外では 一切出てきません。※夏休み専用の新しいカバンを作る時に使います。ふつうのカバンをお休みにしたい時は「🗓️ イレギュラーきかん」を使ってください。';
-  else hint.textContent='';
-  // 保護者設定トップに登録済みの期間から選んで、日付を1タップで流用できるようにする
-  const useVacSel=document.getElementById('bag-period-use-vacation');
-  const vc=getChild();
-  migrateVacationPeriods();
-  const periods=(vc && vc.vacationPeriods)||[];
-  if(bagPeriodMode!=='none' && periods.length){
-    useVacSel.style.display='block';
-    useVacSel.innerHTML='<option value="">（登録した きかんを えらぶ）</option>'+
-      periods.map(p=>`<option value="${p.id}">${p.name}（${summarizeDates(p.dates)}）</option>`).join('');
-  } else {
-    useVacSel.style.display='none';
-  }
 }
-document.getElementById('bag-period-dates-btn').addEventListener('click',()=>{
-  openDatePickerMulti(bagPeriodDates, (dates)=>{
-    bagPeriodDates=dates;
-    updateBagPeriodUI();
+document.getElementById('bag-repeat-dates-btn').addEventListener('click',()=>{
+  openDatePickerMulti(bagRepeatDates, (dates)=>{
+    bagRepeatDates=dates;
+    updateBagRepeatDatesUI();
   });
 });
-document.getElementById('bag-period-use-vacation').addEventListener('change',(e)=>{
-  const vc=getChild();
-  const p=(vc.vacationPeriods||[]).find(x=>x.id===e.target.value);
-  if(!p || !(p.dates||[]).length) return;
-  bagPeriodDates=[...p.dates];
-  updateBagPeriodUI();
-});
-document.getElementById('bag-period-none').addEventListener('click',()=>{ bagPeriodMode='none'; updateBagPeriodUI(); });
-document.getElementById('bag-period-pause').addEventListener('click',()=>{ bagPeriodMode='pause'; updateBagPeriodUI(); });
-document.getElementById('bag-period-active').addEventListener('click',()=>{ bagPeriodMode='active'; updateBagPeriodUI(); });
 document.getElementById('bag-repeat-weekly').addEventListener('click',()=>{ bagRepeatType='weekly'; updateBagDowUI(); });
 document.getElementById('bag-repeat-monthly').addEventListener('click',()=>{ bagRepeatType='monthly_nth'; updateBagDowUI(); });
+document.getElementById('bag-repeat-dates').addEventListener('click',()=>{ bagRepeatType='dates'; updateBagDowUI(); });
 document.getElementById('bag-nth-week').addEventListener('change',e=>{ bagNthWeek=Number(e.target.value); });
 document.getElementById('bag-nth-dow').addEventListener('change',e=>{ bagNthDow=Number(e.target.value); });
 document.querySelectorAll('#bag-dow-grid .dow-btn').forEach(btn=>{
@@ -7868,23 +7961,22 @@ document.getElementById('bag-save').addEventListener('click',()=>{
   // 開始があるなら終了も必要・終了は開始より後
   if(dtime && dend && toMin(dend)<=toMin(dtime)){ showToast('おわりの時刻は はじまりより あとにしてください'); return; }
   if(dtime && !dend){ showToast('おわりの時刻も えらんでください（あとから決める場合は はじまりも空にしてください）'); return; }
-  // 期間指定：日づけを1つ以上えらぶ必要がある
-  if(bagPeriodMode!=='none'){
-    if(!bagPeriodDates.length){ showToast('きかんの 日づけを 1つ以上 えらんでください'); return; }
-  }
+  // 繰り返し方が「カレンダーで選ぶ」の時は、日づけを1つ以上えらぶ必要がある
+  if(bagRepeatType==='dates' && !bagRepeatDates.length){ showToast('日づけを 1つ以上 えらんでください'); return; }
   const c=getChild(); if(!c.bags)c.bags=[];
   const showInLabel=document.getElementById('bag-show-label').checked;
   const labelText=document.getElementById('bag-label-text').value.trim();
   const labelOrder=Number(document.getElementById('bag-label-order').value)||1;
   const allowFree=document.getElementById('bag-allow-free').checked;
   const repeatType=bagRepeatType, nthWeek=bagNthWeek, nthDow=bagNthDow;
-  const dowToSave = repeatType==='monthly_nth' ? [] : bagDow; // 月ごとの時は曜日配列は使わない
-  const periodMode = bagPeriodMode, periodDates = bagPeriodMode==='none'?[]:bagPeriodDates.slice();
+  const dowToSave = repeatType==='weekly' ? bagDow : []; // 月ごと/カレンダー指定の時は曜日配列は使わない
+  const repeatDatesToSave = repeatType==='dates' ? bagRepeatDates.slice() : [];
+  const vacationPeriodId = bagVacationPeriodId || null;
   if(editBagId){
     const bag=c.bags.find(b=>b.id===editBagId);
-    if(bag){ bag.name=name; bag.type=bagType; bag.tasks=bagTasks; bag.dow=dowToSave; bag.repeatType=repeatType; bag.nthWeek=nthWeek; bag.nthDow=nthDow; bag.defaultTime=dtime; bag.defaultEndTime=dend; bag.showInLabel=showInLabel; bag.labelText=labelText; bag.labelOrder=labelOrder; bag.allowFree=allowFree; bag.onlyDate=''; bag.colorIndex=bagColorIndex; bag.periodMode=periodMode; bag.periodDates=periodDates; delete bag.periodFrom; delete bag.periodUntil; }
+    if(bag){ bag.name=name; bag.type=bagType; bag.tasks=bagTasks; bag.dow=dowToSave; bag.repeatType=repeatType; bag.repeatDates=repeatDatesToSave; bag.nthWeek=nthWeek; bag.nthDow=nthDow; bag.defaultTime=dtime; bag.defaultEndTime=dend; bag.showInLabel=showInLabel; bag.labelText=labelText; bag.labelOrder=labelOrder; bag.allowFree=allowFree; bag.onlyDate=''; bag.colorIndex=bagColorIndex; bag.vacationPeriodId=vacationPeriodId; }
   } else {
-    c.bags.push({id:Date.now().toString(),name,type:bagType,tasks:bagTasks,enabled:true,dow:dowToSave,repeatType,nthWeek,nthDow,defaultTime:dtime,defaultEndTime:dend,timeByDate:{},endByDate:{},completedByDate:{},showInLabel,labelText,labelOrder,allowFree,colorIndex:bagColorIndex,periodMode,periodDates});
+    c.bags.push({id:Date.now().toString(),name,type:bagType,tasks:bagTasks,enabled:true,dow:dowToSave,repeatType,repeatDates:repeatDatesToSave,nthWeek,nthDow,defaultTime:dtime,defaultEndTime:dend,timeByDate:{},endByDate:{},completedByDate:{},showInLabel,labelText,labelOrder,allowFree,colorIndex:bagColorIndex,vacationPeriodId});
   }
   save(); tick(); document.getElementById('bag-modal').classList.remove('open'); openParent(); showParentTab('bag');
 });
@@ -8626,7 +8718,8 @@ document.getElementById('cond-add').addEventListener('click',()=>{
 });
 
 // ═══ 初期化 ═══
-applyNowMarkerColor(); updateCoinBadge();
+migrateVacationPeriods();
+applyNowMarkerColor(); updateCoinBadge(); updateDevPreviewBtn();
 updatePendingBadge(); tick(); applyKeepAwake(); refreshWeatherIfNeeded(); applyWantPanelVisibility();
 maybeShowIntro(); // カバンが1つも無い＝初回なら「カバンとは何か」を説明する
 updateNotifyUI();
