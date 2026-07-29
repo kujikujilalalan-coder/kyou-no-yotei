@@ -19,7 +19,7 @@
   --surface2: #EDE0C8;   /* ベージュ寄りの面色（旧: zinc-100 #F4F4F5） */
   --border: #D9C7AE;     /* ベージュ（旧: zinc-300 #D4D4D8） */
   --on-color: #4338CA;  /* indigo-700 = オンタイム（旧: 茶オレンジ #d45a08） */
-  --off-color: #0E7490; /* cyan-700 = オフタイム（旧: 青 #2f6690） */
+  --off-color: #206679; /* cyan-700→彩度58%帯に調整 = オフタイム（旧: 青 #2f6690 → #0E7490） */
   --off-light: #CFFAFE; /* cyan-50（旧: blue-50 #dceaf3） */
   --off-bg: #A5F3FC;    /* cyan-100（旧: blue-100 #b9d9ec） */
   /* ── セマンティックカラー：色相は維持し、彩度・明度だけをイラストのトーンに合わせた ── */
@@ -66,6 +66,9 @@
   --warn-text:  #24374A;               /* 黄色の上に載せる濃い文字(新しい--textと同じネイビー) */
   --warn-light: rgba(242,193,78,0.18); /* 薄い背景 */
   --gold:       #b45309;              /* コイン・スタンプの色。今回のトーン調整の対象外(報酬色として維持) */
+  --water:      #2d73a9;              /* 木を育てる「水」。成功(163°)と選択中(263°)の間の未使用の色相(206°) */
+  --leaf:       #418131;              /* 木の葉・成長。成功色(163°)とは意味を分けるため別Hue(108°)にした若葉色 */
+  --soil:       #63462c;              /* 木を育てる演出の土。CTA/報酬と同じ暖色系だが彩度を落とした低彩度の茶色 */
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { width: 100%; height: 100%; overflow: hidden; }
@@ -1013,7 +1016,7 @@ body.fab-left #back-to-now { right: auto; left: 16px; }
 .child-row.active { border-color: var(--off-color); background: var(--off-light); }
 .child-row-name { flex: 1; font-size: var(--fs-md); font-weight: 700; }
 .small-btn { background: var(--surface2); border: 1.5px solid var(--border); color: var(--text-dim); border-radius: var(--r-sm); font-size: var(--fs-xs); font-weight: 700; padding: 4px 10px; cursor: pointer; font-family: inherit; }
-.small-btn.danger { border-color: #ef4444; color: #ef4444; }
+.small-btn.danger { border-color: var(--danger); color: var(--danger); }
 .name-edit-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
 .name-edit-row input { flex: 1 1 100%; background: var(--surface); border: 2px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-size: var(--fs-md); padding: 10px 12px; outline: none; font-family: inherit; font-weight: 700; }
 .name-edit-row button { flex: 1; min-width: 0; }
@@ -1355,7 +1358,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
         <div id="want-title">やりたいこと</div>
         <div id="want-actions">
           <button id="child-fab-zukan" aria-label="ずかんをみる">📚<span>ずかん</span><span id="zukan-coin-badge" style="display:none">0</span></button>
-          <button id="child-fab-book" aria-label="ほんをみる">📖<span>ほん</span></button>
+          <button id="child-fab-book" aria-label="そだてノートを みる">🌱<span>そだてノート</span></button>
           <button id="want-add-btn" aria-label="やりたいことを ついか">＋ ついか</button>
         </div>
       </div>
@@ -1375,7 +1378,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
     </div>
     <div class="type-toggle" id="stamp-mode-toggle" style="margin-bottom:12px">
       <button type="button" class="type-btn" id="stamp-mode-record" style="flex:1">📅 カレンダー</button>
-      <button type="button" class="type-btn" id="stamp-mode-book" style="flex:1">📖 ほん</button>
+      <button type="button" class="type-btn" id="stamp-mode-book" style="flex:1">🌱 そだてノート</button>
     </div>
     <div id="book-page-wrap" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -1385,13 +1388,11 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
       <div id="book-top-bag" style="text-align:center;font-size: var(--fs-sm);font-weight:800;color:var(--text-dim);margin-bottom:6px"></div>
       <div id="book-page-body"></div>
-      <div id="book-sticker-area" style="margin-top:10px;text-align:center"></div>
       <div style="text-align:center;margin-top:6px;font-size: var(--fs-sm);font-weight:800;color:var(--gold)" id="stamp-streak"></div>
       <!-- 積み上がったものを見せる：ごほうびは減るが、やってきた事実は減らない -->
       <div id="stamp-achievements" style="margin-top:10px"></div>
       <!-- 【12】積み上がる塔：やり終えた日が下から積み上がる。
            ガチャの対極。使っても減らないし、誰にも取られない。 -->
-      <div id="stamp-tower-wrap" style="margin-top:12px"></div>
     </div>
     <div id="calendar-page-wrap">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -1415,6 +1416,25 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
     <p style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">この期間中も うごかす カバンだけ、チェックを入れてください。チェックしなかった カバンは、この期間だけ お休みになります。</p>
     <div id="vacation-bagpick-list"></div>
     <div class="modal-actions"><button class="btn btn-secondary" id="vacation-bagpick-close">とじる</button></div>
+  </div>
+</div>
+
+<!-- 🗓️ イレギュラー期間の専用ページ：期間の設定・稼働カバン・専用カバン一覧をここにまとめる -->
+<div class="modal-overlay" role="dialog" aria-modal="true" id="vacation-detail-modal" style="z-index:250">
+  <div class="modal" style="max-width:420px">
+    <div class="parent-header" style="margin:-24px -28px 16px;padding:18px 24px 14px">
+      <h2 style="color:var(--text)" id="vacation-detail-title">🗓️ きかん</h2>
+      <button type="button" class="parent-header-close" id="vacation-detail-close-top" aria-label="とじる">✕</button>
+    </div>
+    <div id="vacation-detail-datelabel" style="font-size: var(--fs-sm);font-weight:800;color:var(--danger);margin-bottom:8px"></div>
+    <div id="vacation-detail-calendar" style="margin-bottom:10px"></div>
+    <button type="button" id="vacation-detail-editdates" style="width:100%;margin-bottom:8px;min-height:44px;border:1.5px solid var(--danger);border-radius: var(--r-sm);background:#fff;color:var(--danger);font-size: var(--fs-xs);font-weight:800;cursor:pointer">✎ 日づけ／期間を なおす</button>
+    <button type="button" id="vacation-detail-bagpick" style="width:100%;margin-bottom:8px;min-height:44px;border:1.5px solid var(--danger);border-radius: var(--r-sm);background:#fff;color:var(--danger);font-size: var(--fs-xs);font-weight:800;cursor:pointer">🎒 稼働させる カバン（<span id="vacation-detail-bagpick-count">0</span>件）▶</button>
+    <div style="border-top:1.5px dashed var(--border);margin:14px 0 10px"></div>
+    <div style="font-size: var(--fs-sm);font-weight:800;color:var(--text-dim);margin-bottom:8px">この きかん専用の カバン</div>
+    <div id="vacation-detail-bag-list" style="margin-bottom:8px"></div>
+    <button type="button" id="vacation-detail-newbag" style="width:100%;margin-bottom:14px;min-height:44px;border:1.5px dashed var(--danger);border-radius: var(--r-sm);background:#fff;color:var(--danger);font-size: var(--fs-xs);font-weight:800;cursor:pointer">＋ この きかん専用の カバンを 作る</button>
+    <button type="button" id="vacation-detail-delete" class="btn btn-danger" style="width:100%;font-size: var(--fs-xs)">🗑️ この きかんを けす</button>
   </div>
 </div>
 
@@ -1667,37 +1687,43 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
           <button class="btn btn-primary" id="msg-send" style="padding:7px 11px;font-size: var(--fs-xs)">おくる</button>
         </div>
         <div id="msg-current" style="margin-top:8px;font-size: var(--fs-xs);line-height:1.5"></div>
+      </div>
+    </div>
 
-        <!-- 週次の絵本ページに残るメッセージ。単発の一言(上)とは別で、その週のページにずっと残る -->
-        <div style="margin-top:14px;padding-top:12px;border-top:1.5px dashed var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px"><span>
-          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>📖 今週の「ほん」ページに のこす</span></span><button type="button" class="info-toggle" data-info-toggle="info-2" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-2" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">上の一言と違い、消えずに その週のページに残り続けます。</p>
-          <div class="task-add-row">
-            <input type="text" id="book-msg-input" placeholder="例：今週もよくがんばったね" maxlength="40"/>
-            <button class="btn btn-primary" id="book-msg-send" style="padding:7px 11px;font-size: var(--fs-xs)">のこす</button>
-          </div>
+    <!-- 週次の絵本ページに残るメッセージ。単発の一言(上)とは別で、その週のページにずっと残る -->
+    <div class="acc-section" data-acc="book-message" data-tab-group="pending">
+      <button class="acc-head" type="button" data-acc-toggle="book-message">🌱 今週の「そだてノート」ページに のこす<span class="acc-chevron">▶</span></button>
+      <div class="acc-body">
+        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-2" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-2" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">上の一言と違い、消えずに その週のページに残り続けます。</p>
+        <div class="task-add-row">
+          <input type="text" id="book-msg-input" placeholder="例：今週もよくがんばったね" maxlength="40"/>
+          <button class="btn btn-primary" id="book-msg-send" style="padding:7px 11px;font-size: var(--fs-xs)">のこす</button>
         </div>
+      </div>
+    </div>
 
-        <!-- 条件つきメッセージ：節目に自動で届く。毎回書かなくてよくなる。 -->
-        <div style="margin-top:14px;padding-top:12px;border-top:1.5px dashed var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px"><span>
-          <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>⏳ 条件を きめて おくる</span></span><button type="button" class="info-toggle" data-info-toggle="info-3" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-3" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">「このカバンを5日つづけたら」など、条件を満たした時に じどうで 届きます。毎回 書かなくて すみます。</p>
-          <select id="cond-type" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-md);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:10px;outline:none;font-family:inherit;margin-bottom:6px">
-            <option value="bagStreak">カバンを ◯日 つづけたら</option>
-            <option value="totalDays">ぜんぶ おわった日が ◯日に なったら</option>
-            <option value="bestStreak">さいちょう きろくを こえたら</option>
-          </select>
-          <div id="cond-bag-row" style="margin-bottom:6px">
-            <select id="cond-bag" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-md);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:10px;outline:none;font-family:inherit"></select>
-          </div>
-          <div id="cond-n-row" style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-            <input type="number" id="cond-n" min="1" max="365" value="5" style="width:90px;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-md);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:10px;outline:none;font-family:inherit"/>
-            <span style="font-size: var(--fs-sm);font-weight:700;color:var(--text-dim)">日</span>
-          </div>
-          <div class="task-add-row">
-            <input type="text" id="cond-text" placeholder="例：5日つづいたね、すごい！" maxlength="24"/>
-            <button class="btn btn-primary" id="cond-add" style="padding:7px 11px;font-size: var(--fs-xs)">よやく</button>
-          </div>
-          <div id="cond-list" style="margin-top:8px"></div>
+    <!-- 条件つきメッセージ：節目に自動で届く。毎回書かなくてよくなる。 -->
+    <div class="acc-section" data-acc="cond-message" data-tab-group="pending">
+      <button class="acc-head" type="button" data-acc-toggle="cond-message">⏳ 条件を きめて おくる<span class="acc-chevron">▶</span></button>
+      <div class="acc-body">
+        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-3" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-3" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">「このカバンを5日つづけたら」など、条件を満たした時に じどうで 届きます。毎回 書かなくて すみます。</p>
+        <select id="cond-type" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-md);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:10px;outline:none;font-family:inherit;margin-bottom:6px">
+          <option value="bagStreak">カバンを ◯日 つづけたら</option>
+          <option value="totalDays">ぜんぶ おわった日が ◯日に なったら</option>
+          <option value="bestStreak">さいちょう きろくを こえたら</option>
+        </select>
+        <div id="cond-bag-row" style="margin-bottom:6px">
+          <select id="cond-bag" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-md);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:10px;outline:none;font-family:inherit"></select>
         </div>
+        <div id="cond-n-row" style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <input type="number" id="cond-n" min="1" max="365" value="5" style="width:90px;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-md);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:10px;outline:none;font-family:inherit"/>
+          <span style="font-size: var(--fs-sm);font-weight:700;color:var(--text-dim)">日</span>
+        </div>
+        <div class="task-add-row">
+          <input type="text" id="cond-text" placeholder="例：5日つづいたね、すごい！" maxlength="24"/>
+          <button class="btn btn-primary" id="cond-add" style="padding:7px 11px;font-size: var(--fs-xs)">よやく</button>
+        </div>
+        <div id="cond-list" style="margin-top:8px"></div>
       </div>
     </div>
 
@@ -1710,6 +1736,8 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
         <button class="btn" id="dev-reset-btn" style="width:100%;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🗑️ 色・ガチャ・コインを リセット</button>
         <button class="btn" id="dev-preview-unlock-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🔓 ずかんを ぜんぶ プレビュー：OFF</button>
         <p class="info-text" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">見た目だけ全部解禁して見せます。コインやガチャの記録は変わりません（実際の交換はしません）。</p>
+        <button class="btn" id="dev-force-sunday-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🧪 きょうを にちようび として あつかう：OFF</button>
+        <p class="info-text" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">木を育てる機能のテスト用。ONにすると、実際の曜日に関係なく「そだてノート」で先週分の水やりができます（種は本当に1つ消費します）。</p>
       </div>
     </div>
 
@@ -1719,7 +1747,6 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       <div class="acc-body">
         <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-5" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-5" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">「学校の宿題」などのカバンを作り、中身（やること）を入れます。オンにして曜日を決めると、その日に出ます。時刻はあとから決められます。</p>
         <button class="btn btn-primary" id="add-bag-btn" style="width:100%;margin-bottom:10px;font-size: var(--fs-sm)">＋ カバンを作る</button>
-        <button class="btn" id="bag-reorder-toggle" type="button" style="width:100%;margin-bottom:8px;font-size: var(--fs-xs);border:2px solid var(--border);background:var(--surface2);color:var(--text-dim)">📐 ならびかえ できるようにする</button>
         <div style="border:2px dashed var(--border);border-radius: var(--r-md);padding:10px 12px;margin-bottom:12px">
           <div style="font-size: var(--fs-sm);font-weight:900;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>🗓️ イレギュラーきかん</span><button type="button" class="info-toggle" data-info-toggle="info-6" aria-label="せつめいを みる"></button></div>
           <p class="info-text" id="info-6" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">この期間中に<b>稼働させるカバンを選ぶ</b>と、選ばなかったカバンは自動でお休みになります（新しく作ったカバンも、選ばない限り安全側でお休みになります）。日付は連続していなくても、1日ずつ好きなだけ選べます。名前をつけて複数 登録できます（夏休み・冬休み・りょこう 等）。</p>
@@ -1732,7 +1759,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
             <button type="button" class="type-btn" id="vacation-type-range" style="flex:1">🗓️ 期間指定型</button>
           </div>
           <button type="button" id="vacation-dates-btn" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left">📅 日づけを えらぶ（0にち）</button>
-          <div id="vacation-dates-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+          <div id="vacation-dates-chips" style="margin-top:8px"></div>
           <div id="vacation-range-fields" style="display:none;gap:8px;align-items:center">
             <button type="button" id="vacation-range-from-btn" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left">開始日 えらぶ</button>
             <span style="font-size: var(--fs-md);font-weight:900;color:var(--text-dim)">〜</span>
@@ -1986,7 +2013,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v144・2026-07-27</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v159・2026-07-29</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2155,7 +2182,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
           </div>
           <div id="bag-dates-field" style="display:none">
             <button type="button" id="bag-repeat-dates-btn" style="width:100%;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:9px 8px;outline:none;font-family:inherit;min-height:44px;cursor:pointer;text-align:left">📅 日づけを えらぶ（0にち）</button>
-            <div id="bag-repeat-dates-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+            <div id="bag-repeat-dates-chips" style="margin-top:8px"></div>
             <p id="bag-dates-hint" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;line-height:1.4">選んだ日づけだけ 出てきます。曜日は関係ありません。</p>
           </div>
         </div>
@@ -2283,7 +2310,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
 
 <script>
 const EMOJIS = ['🌅','🌙','🍳','🥛','📚','✏️','🎒','🏫','🏠','⚽','🎮','🛁','😴','💤','❤️','✅'];
-const ON_COL='#4338CA', OFF_COL='#0E7490';
+const ON_COL='#4338CA', OFF_COL='#206679';
 
 // アプリ内トースト（ネイティブalertの代替）。非ブロックで数秒表示
 let _toastTimer=null;
@@ -2393,6 +2420,12 @@ if(!data.weather) data.weather={region:'', lat:null, lon:null, cache:null, cache
 data.children.forEach(c=>{
   if(!c.wakeTime) c.wakeTime='07:00';
   if(!c.sleepTime) c.sleepTime='21:00';
+  // 🌱木を育てる機能：初めて開いた時に種を1つだけ無料でプレゼントする（2本目以降はコインで買う）
+  if(!c.seedsGranted){ c.seeds=(c.seeds||0)+1; c.seedsGranted=true; }
+  if(c.seeds===undefined) c.seeds=0;
+  // v154: 週ごとにリセットする方式(lastTree)を廃止。同じ木がレア(ゴールドの実)が出るまでずっと育ち続ける方式(tree)に変更
+  delete c.lastTree;
+  if(!c.tree) c.tree={waterCount:0, pendingFruits:0, completed:false, lastWateredAt:new Date().toISOString()};
   // 「オフタイム」はカタカナ英語で対象年齢（未就学〜低学年）に意味が伝わらないため「じゆうじかん」を初期値にする
   if(!c.freeLabel) c.freeLabel='じゆうじかん';
   // 12時間表示（ごぜん/ごご付き）を初期値に。24時間表示の「13じ」「20じ」は、
@@ -2438,6 +2471,10 @@ data.children.forEach(c=>{
     if(!b.timeByDate)b.timeByDate={}; if(!b.completedByDate)b.completedByDate={};
     if(b.defaultEndTime===undefined)b.defaultEndTime='';
     if(!b.endByDate)b.endByDate={};
+    // v144: カバン個別の「きかん(periodMode/periodDates)」機能を廃止したため、旧フィールドは削除する(移行はしない)
+    delete b.periodMode; delete b.periodDates; delete b.periodFrom; delete b.periodUntil;
+    if(b.repeatDates===undefined) b.repeatDates=[];
+    if(b.vacationPeriodId===undefined) b.vacationPeriodId=null;
   });
 });
 if(!data._oldLabelsCleared){ data._oldLabelsCleared=true; try{ save(); }catch(e){} }
@@ -3226,11 +3263,11 @@ function computeOverlapColumns(events){
 function renderTimeline(){
   const scroll=document.getElementById('timeline-scroll');
   const col=document.getElementById('timeline-col');
-  // 前回の右パネル（分割レイアウト）を消す
-  const oldRight=document.getElementById('now-right-panel');
-  // 再描画でチェックリストが一番上に戻ってしまわないよう、中身のスクロール位置を覚えておく
-  const prevInnerScroll = (scroll.querySelector('.now-scroll-area') || oldRight?.querySelector('.now-scroll-area'))?.scrollTop || 0;
-  if(oldRight) oldRight.remove();
+  // 前回の右パネル（分割レイアウト。1件以上あればその件数ぶん存在する）を消す
+  const oldRights=Array.from(document.querySelectorAll('[data-now-panel="1"]'));
+  // 再描画でチェックリストが一番上に戻ってしまわないよう、中身のスクロール位置を覚えておく(先頭のパネルの分だけ)
+  const prevInnerScroll = (scroll.querySelector('.now-scroll-area') || oldRights[0]?.querySelector('.now-scroll-area'))?.scrollTop || 0;
+  oldRights.forEach(r=>r.remove());
   const prevScrollTop = scroll.scrollTop;
   scroll.innerHTML='';
   const cur=nowMin();
@@ -3276,7 +3313,8 @@ function renderTimeline(){
         }
       });
     }
-    if(nowCandidateIds.length>=1){
+    if(nowCandidateIds.length>=2){
+      // 2件以上重なった時だけ大きなカードに分割する。1件だけの時は通常の帯(全幅)のまま。
       splitMode=true;
       // 前回選んだものがまだ候補にあればそれを継続。無ければ一番開始が早いもの（先頭）にする
       splitEvId = nowCandidateIds.includes(selectedNowTaskId) ? selectedNowTaskId : nowCandidateIds[0];
@@ -3313,21 +3351,15 @@ function renderTimeline(){
 
   // ステージ（左右の余白＋中央の本体）
   const SIDE=TL_SIDE; // 左右余白の割合(%)
-  const RAIL_W_PCT = 26;           // 分割時の本体（細い帯）の幅(%)
   const stage=document.createElement('div');
   stage.style.cssText=`position:relative;width:100%;height:${24*60*PX_PER_MIN}px;`;
   scroll.appendChild(stage);
   // 左右の余白に 時間帯グラデーション（朝昼夕夜）
-  // 分割モード時：右の余白は「レール（本体）の右端 〜 画面右端」まで広げる。
-  // オンタイムカードはこの広いグラデーションの上にレイヤーされる（＝右側は全部「空」の背景になる）
-  const rgLeftPct = SIDE + RAIL_W_PCT; // 分割時：レール右端(%)
-  const rgWidthPct = 100 - rgLeftPct;  // 分割時：そこから画面右端までの幅(%)
+  // ※レール方式は廃止。splitMode中も余白の幅は変えない（本体は常にSIDE〜100-SIDEの全幅）
   const lg=document.createElement('div');
   lg.style.cssText=`position:absolute;left:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;pointer-events:none;`;
   const rg=document.createElement('div');
-  rg.style.cssText = splitMode
-    ? `position:absolute;left:${rgLeftPct}%;top:0;width:${rgWidthPct}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;pointer-events:none;`
-    : `position:absolute;right:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;pointer-events:none;`;
+  rg.style.cssText = `position:absolute;right:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;pointer-events:none;`;
   stage.appendChild(lg); stage.appendChild(rg);
   // 空に淡いきらめきを常時散らす（不透明度だけで質感を足す。色相は変えない）
   {
@@ -3415,25 +3447,33 @@ function renderTimeline(){
       });
     });
   }
-  // 「カバン由来のオンタイム予定」が「今・進行中」かつ「やること(tasks)を持ち」かつ「まだ完了していない」時だけ分割する。
-  // オフタイムや、やること無し・完了済みでは分割しない（＝普段の全幅タイムライン）。
-  // 同時刻に複数のオンタイムが重なっていたら、全部を候補として集める（やり終える順番は子どもが決められる）。
-  // ※ splitMode判定はlg/rg作成前（上部）に移動済み。ここでは幅の計算だけ行う。RAIL_W_PCTも上部で定義済み。
-  const LEFT_RAIL_RIGHT = splitMode ? (100-SIDE-RAIL_W_PCT) : SIDE; // 本体の右端(%)
+  // 「カバン由来のオンタイム予定」が「今・進行中」かつ「やること(tasks)を持ち」かつ「まだ完了していない」時だけ、
+  // 大きな全幅(または等分)カードで表示する。オフタイムや、やること無し・完了済みでは今まで通りの帯のまま。
+  // 同時刻に複数のオンタイムが重なっていたら、全部を候補として集め、画面をその件数ぶん均等に分ける。
+  // ※ splitMode判定はlg/rg作成前（上部）に移動済み。ここでは幅の計算だけ行う。
 
-  // 内側の絶対配置コンテナ（本体・中央寄せで狭める）
+  // 内側の絶対配置コンテナ（本体・中央寄せで狭める）。レール方式は廃止したので常に通常幅。
   const inner=document.createElement('div');
-  inner.style.cssText=`position:absolute;left:${SIDE}%;right:${LEFT_RAIL_RIGHT}%;top:0;height:${24*60*PX_PER_MIN}px;`;
+  inner.style.cssText=`position:absolute;left:${SIDE}%;right:${SIDE}%;top:0;height:${24*60*PX_PER_MIN}px;`;
   stage.appendChild(inner);
 
-  // 分割モード時：右側に「いまのやること」を大きく出すためのパネル（ビューポート固定・縦中央・スクロール追従）
-  let rightArea=null;
+  // 「今」の候補ぶんだけ、画面をN等分してそれぞれに大きなカードを出す（1件なら全幅、2件なら左右2分割、3件なら3分割…）
+  // ※時間未設定カバンの昇格(promotedUntimedEv)だけでsplitModeがtrueになる場合は候補0件なので、その時は1枠だけ作る
+  let rightAreas=[];
   if(splitMode){
-    rightArea=document.createElement('div');
-    rightArea.id='now-right-panel';
-    // 左レール右端(SIDE+RAIL_W_PCT)から始め、画面右端ぎりぎりまで（＝広げた余白グラデーションの上に重ねる）
-    rightArea.style.cssText=`position:absolute;left:${SIDE+RAIL_W_PCT+1}%;right:2%;top:50%;transform:translateY(-50%);z-index:10;`;
-    col.appendChild(rightArea);
+    const nCand=Math.max(1, nowCandidateIds.length);
+    const totalWidthPct = 100 - 2*SIDE; // 本体の幅
+    const gapPct = nCand>1 ? 1 : 0; // カード同士のすきま
+    const colWidthPct = totalWidthPct/nCand - gapPct;
+    for(let idx=0; idx<nCand; idx++){
+      const area=document.createElement('div');
+      area.id=`now-right-panel-${idx}`;
+      area.dataset.nowPanel='1';
+      const leftPct = SIDE + (totalWidthPct/nCand)*idx + (idx>0?gapPct/2:0);
+      area.style.cssText=`position:absolute;left:${leftPct}%;width:${colWidthPct}%;top:50%;transform:translateY(-50%);z-index:10;max-height:65vh;overflow-y:auto;`;
+      col.appendChild(area);
+      rightAreas.push(area);
+    }
   }
 
   // ── 睡眠ゾーン（背景） ──
@@ -3469,11 +3509,10 @@ function renderTimeline(){
   }
 
   // ── 起床・就寝マーカー ──
-  const markerLeft = splitMode ? 2 : 6;
   [['🌅 おきる',wake],['🌙 ねる',sleep]].forEach(([lbl,mn])=>{
     const mk=document.createElement('div');
-    mk.style.cssText=`position:absolute;left:${markerLeft}px;right:6px;top:${mn*PX_PER_MIN}px;height:0;display:flex;align-items:center;gap:6px;z-index:2;`;
-    mk.innerHTML=`<div style="flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--accent) 0 6px,transparent 6px 12px);opacity:0.6"></div>${splitMode?'':`<div style="font-size: var(--fs-xs);font-weight:800;color:#7c2d12;background:rgba(255,255,255,0.9);padding:2px 8px;border-radius: var(--r-sm);white-space:nowrap">${lbl}</div>`}`;
+    mk.style.cssText=`position:absolute;left:6px;right:6px;top:${mn*PX_PER_MIN}px;height:0;display:flex;align-items:center;gap:6px;z-index:2;`;
+    mk.innerHTML=`<div style="flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--accent) 0 6px,transparent 6px 12px);opacity:0.6"></div><div style="font-size: var(--fs-xs);font-weight:800;color:#7c2d12;background:rgba(255,255,255,0.9);padding:2px 8px;border-radius: var(--r-sm);white-space:nowrap">${lbl}</div>`;
     inner.appendChild(mk);
   });
 
@@ -3527,8 +3566,8 @@ function renderTimeline(){
     // 重なり防止：最低高さは一切かけない＝すべて実時間どおりの高さで描く。
     // 「今の予定」カードだけは、次の予定にぶつからない範囲で下に少しだけ伸ばして見やすくする。
     let h, extra=0;
-    if(splitMode){
-      h=Math.max(naturalH,2);
+    if(nowCandidateIds.includes(ev.id)){
+      h=Math.max(naturalH,2); // どのみち帯は描かず使われないが、計算エラーを避けるため一応入れておく
     } else if(isNow && !editMode){
       // 次の予定の開始位置までの余白を計算し、その範囲で最大64pxまで（上方向には伸ばさない）
       const nextStart = (i<sorted.length-1) ? toMin(sorted[i+1].time)*PX_PER_MIN : sleep*PX_PER_MIN;
@@ -3540,99 +3579,37 @@ function renderTimeline(){
 
     const block=document.createElement('div');
 
-    if(splitMode){
-      // ── 分割モード：左の細い列。全予定を実時間どおりの帯で（名前のみ・時刻表記なし） ──
-      const isNowCandidate = nowCandidateIds.includes(ev.id); // 今の時間帯にかぶってる「やること」候補か
+    if(nowCandidateIds.includes(ev.id)){
       const isOvertimeCandidate = overtimeIds.has(ev.id); // 時間切れでも居座っている「やること」か
-      const isLongestOvertime = isOvertimeCandidate && ev.id===longestOvertimeId; // 脈動させるのはこれだけ
-      const editable = ev._bagId && (!isPast || isOvertimeCandidate); // 時間切れでも⏰・とばすは押せる
-      const hasTasksSplit = !!(ev.tasks && ev.tasks.length>0); // 本体タップ(覗く)の表示条件
-      const pastStyle = (isPast && !isOvertimeCandidate) ? 'border-color:rgba(100,105,115,0.45);background:rgba(100,105,115,0.12)' : '';
-      const overtimeStyle = isLongestOvertime ? ' overtime-pulse' : (isOvertimeCandidate ? ' overtime-static' : '');
-      const nowHi = isOvertimeCandidate ? ''
-                  : isSplitNow ? '' // 選択中は枠線自体を残り時間の色にしているので、別の色のリングは不要(旧: accentのbox-shadow)
-                  : isNowCandidate ? 'box-shadow:0 0 0 2px var(--text-dim);' : '';
-      // 帯とカードの色を一致させる(帯だけ種類ごとの固定色、カードだけ残り時間の色、という食い違いをなくす)
-      let matchColorStyle='';
-      if(isSplitNow && !isOvertimeCandidate){
-        const mS=toMin(ev.time||'00:00'); const mE=ev.end?toMin(ev.end):mS+30;
-        const mElapsed=Math.max(0,Math.min(1,(cur-mS)/Math.max(1,mE-mS)));
-        const mBagHex = ev._bagId ? bagColor(ev._bagId) : null;
-        const mBorder = remainColorCss(1-mElapsed, null, mBagHex);
-        const mFill = remainColorCss(1-mElapsed, 0.16, mBagHex);
-        matchColorStyle = `border-color:${mBorder} !important;background:${mFill} !important;`;
-      }
-      const tooShort = naturalH < 22; // 細すぎる帯は名前・アイコンを省いて色だけ
-
-      // 同時刻に複数の予定が重なっていたら、横に並べて両方見えるようにする。
-      // 「今の候補」どうしの重なりは既存の並び順(nowCandidateIds)を優先し、それ以外の
-      // 予定どうしの重なりは一般化した重なり検出(overlapCols)で列を割り当てる。
-      let leftPos='0', widthPos='calc(100% - 2px)';
-      if(isNowCandidate && nowCandidateIds.length>1){
-        const colIdx=nowCandidateIds.indexOf(ev.id), totalCols=nowCandidateIds.length;
-        leftPos=`calc(${(100/totalCols)*colIdx}% + 1px)`;
-        widthPos=`calc(${100/totalCols}% - 3px)`;
-      } else {
-        const oc=overlapCols.get(ev.id);
-        if(oc && oc.totalCols>1){
-          leftPos=`calc(${(100/oc.totalCols)*oc.col}% + 1px)`;
-          widthPos=`calc(${100/oc.totalCols}% - 3px)`;
+      if(splitMode){
+        // ── 2件以上の「今」候補：帯は描かず、rightAreas[colIdx]に大きなカードを出す(N件ならN等分の1枠) ──
+        const colIdx=nowCandidateIds.indexOf(ev.id);
+        const area=rightAreas[colIdx];
+        if(area){
+          area.innerHTML='';
+          const card=document.createElement('div');
+          card.style.cssText='position:relative;';
+          card.innerHTML=buildTaskCard(ev, isOvertimeCandidate);
+          area.appendChild(card);
+          if(isOvertimeCandidate){
+            const skipBtn=card.querySelector('#overtime-skip-btn');
+            if(skipBtn) skipBtn.addEventListener('click',e=>{
+              e.stopPropagation();
+              withTimeEditPin(()=>{
+                setBagSkipped(ev._bagId, getDisplayDate(), true);
+                showToast('きょうは とばしました');
+                tick();
+              });
+            });
+          }
         }
-      }
-      block.style.cssText=`position:absolute;left:${leftPos};width:${widthPos};top:${y+2}px;height:${h}px;z-index:${isSplitNow?5:(isNowCandidate?4:3)};`;
-      if(isSplitNow){ block.dataset.connectNow='1'; block.dataset.connectId=ev.id; }
-      // ⏰アイコン：複数候補が横並びの場合は帯の上部外（top: -20px）に出して幅に関係なく押せるようにする
-      const multiCandidate = isNowCandidate && nowCandidateIds.length>1;
-      const showEditIcon = editable && !tooShort;
-      const editIconHtml = showEditIcon
-        ? (multiCandidate
-          // 複数候補：帯の上端より外に出す（absoluteで-22px上）→ 幅が細くなっても隠れない
-          ? `<button class="tl-time-edit-icon" type="button" title="じかんへんこう" aria-label="じかんを へんこうする" style="position:absolute;top:-30px;left:50%;transform:translateX(-50%);z-index:10">⏰</button>`
-          // 通常：今まで通り右下
-          : `<button class="tl-time-edit-icon" type="button" title="じかんへんこう" aria-label="じかんを へんこうする">⏰</button>`)
-        : '';
-      const useVertical = multiCandidate && data.verticalBandText;
-      const nameHtml =
-        useVertical
-          ? `<div class="tl-band-name-vertical">${ev.name}</div>`
-          : `<div class="tl-band-name">${ev.fromChild?'⭐ ':''}${ev.name}</div>`;
-      const nameWrapper = tooShort ? '' :
-        `<div style="min-width:0;${isPast?'opacity:0.75':''};${useVertical?'display:flex;align-items:center;justify-content:center;height:calc(100% - 8px);':''}">
-          ${nameHtml}
-        </div>`;
-      block.innerHTML=`<div class="tl-band ${ev.type}${overtimeStyle}" style="height:100%;width:100%;position:relative;overflow:visible;${pastStyle}${nowHi}${matchColorStyle}">
-        ${nameWrapper}
-        ${editIconHtml}
-      </div>`;
-      // 本体タップ：
-      //   ・今の候補で、まだ選ばれてない方 → タップで「これをやる」に切り替え（右のカードが変わる）
-      //   ・それ以外でやることがある予定 → 中身を覗く
-      if(isNowCandidate && !isSplitNow){
-        block.style.cursor='pointer';
-        block.addEventListener('click',()=>{ selectedNowTaskId=ev.id; renderTimeline(); });
-      } else if(hasTasksSplit && !isSplitNow){
-        block.style.cursor='pointer';
-        block.addEventListener('click',()=>{ openPeekModal(ev); });
-      }
-      // ⏰アイコン → 時刻編集（本体タップとは別。伝播を止める）
-      if(showEditIcon){
-        const icon=block.querySelector('.tl-time-edit-icon');
-        if(icon) icon.addEventListener('click',e=>{
-          e.stopPropagation();
-          withTimeEditPin(()=>openTimeModal(ev._bagId));
-        });
-      }
-      inner.appendChild(block);
-
-      // 右側：このevが「今のやること」なら、大きな固定カードを出す（時間表現はしない）
-      if(isSplitNow){
-        rightArea.innerHTML='';
-        const card=document.createElement('div');
-        card.style.cssText='position:relative;';
-        card.innerHTML=buildTaskCard(ev, isOvertimeCandidate);
-        rightArea.appendChild(card);
+      } else {
+        // ── 「今」候補が1件だけ：タイムラインの帯の位置に、大きなカードをそのままフル幅で埋め込む(以前の仕様) ──
+        block.style.cssText=`position:absolute;left:6px;right:14px;top:${y+2}px;z-index:10;max-height:65vh;overflow-y:auto;`;
+        block.innerHTML=buildTaskCard(ev, isOvertimeCandidate);
+        if(!editMode) bindNowCardEl(scroll, ev, block);
         if(isOvertimeCandidate){
-          const skipBtn=card.querySelector('#overtime-skip-btn');
+          const skipBtn=block.querySelector('#overtime-skip-btn');
           if(skipBtn) skipBtn.addEventListener('click',e=>{
             e.stopPropagation();
             withTimeEditPin(()=>{
@@ -3642,7 +3619,7 @@ function renderTimeline(){
             });
           });
         }
-        nowEl=block;
+        inner.appendChild(block);
       }
       return;
     }
@@ -3709,12 +3686,13 @@ function renderTimeline(){
   });
 
   // ── 時間未設定カバンの昇格カードを右パネルに出す（自由時間の代わり） ──
-  if(promotedUntimedEv && rightArea){
-    rightArea.innerHTML='';
+  if(promotedUntimedEv && rightAreas[0]){
+    const area=rightAreas[0];
+    area.innerHTML='';
     const card=document.createElement('div');
     card.style.cssText='position:relative;';
     card.innerHTML=buildUntimedPromoCard(promotedUntimedEv);
-    rightArea.appendChild(card);
+    area.appendChild(card);
     const editBtn=card.querySelector('#untimed-promo-settime');
     if(editBtn) editBtn.addEventListener('click',e=>{
       e.stopPropagation();
@@ -3771,13 +3749,17 @@ function renderTimeline(){
   appJustOpened=false; // 脈動は最初の1回だけ
 
   // 通常モード：nowEvIdのカードにクリックハンドラを登録
-  // 分割モード：右パネルに出ているsplitEvIdのカードに登録（nowEvIdとは違う場合がある）
+  // 分割モード：nowCandidateIds全員ぶん、それぞれのカードにクリックハンドラを登録する（1件だけ選ぶ方式は廃止）
   // 昇格した時間未設定カバン：sortedに存在しない仮想evなので、promotedUntimedEvを直接渡す
   if(promotedUntimedEv && !editMode){
-    bindNowCardEl(scroll, promotedUntimedEv);
-  } else {
-    const bindTargetId = splitMode ? splitEvId : nowEvId;
-    if(bindTargetId && !editMode) bindNowCardEl(scroll, sorted.find(x=>x.id===bindTargetId));
+    bindNowCardEl(scroll, promotedUntimedEv, rightAreas[0]);
+  } else if(splitMode && !editMode){
+    nowCandidateIds.forEach((cid,idx)=>{
+      const cev=sorted.find(x=>x.id===cid);
+      if(cev) bindNowCardEl(scroll, cev, document.getElementById(`now-right-panel-${idx}`));
+    });
+  } else if(nowEvId && !editMode){
+    bindNowCardEl(scroll, sorted.find(x=>x.id===nowEvId));
   }
 
   // 自動スクロール：現在地を画面の上から25%へ（編集モード中は止める）
@@ -3791,7 +3773,7 @@ function renderTimeline(){
   }
   // チェックリストのスクロール位置を復元（一番下までスクロールしてチェックしても先頭に戻らないように）
   if(prevInnerScroll>0){
-    const newInner = scroll.querySelector('.now-scroll-area') || document.getElementById('now-right-panel')?.querySelector('.now-scroll-area');
+    const newInner = scroll.querySelector('.now-scroll-area') || document.querySelector('[data-now-panel="1"] .now-scroll-area');
     if(newInner) newInner.scrollTop = prevInnerScroll;
   }
 
@@ -3930,10 +3912,10 @@ function buildNowCard(ev, cur, cardH){
       </div>${inner}</div></div>`;
 }
 
-function bindNowCardEl(scroll, ev){
+function bindNowCardEl(scroll, ev, explicitRoot){
   if(!ev)return;
-  // 分割モードでは右パネル(timeline-col直下)にカードがあるので、そちらも対象にする
-  const roots=[scroll, document.getElementById('now-right-panel')].filter(Boolean);
+  // 分割モードでは、このevに対応する自分専用のパネル(now-right-panel-N)だけを対象にする(他の候補のパネルは触らない)
+  const roots=(explicitRoot ? [scroll, explicitRoot] : [scroll, document.getElementById('now-right-panel')]).filter(Boolean);
   roots.forEach(root=>{
     root.querySelectorAll('.now-task-item').forEach(item=>{
       item.addEventListener('click',(e)=>{
@@ -4527,7 +4509,7 @@ function openStampModal(initialTab){
   const bookBtn=document.getElementById('stamp-mode-book');
   if(initialTab==='book'){
     recordBtn.style.display='none'; bookBtn.style.display='none'; toggleBar.style.display='none';
-    document.getElementById('stamp-modal').querySelector('h2').textContent='📖 ほん';
+    document.getElementById('stamp-modal').querySelector('h2').textContent='🌱 そだてノート';
     bookBtn.click();
   } else {
     recordBtn.style.display=''; bookBtn.style.display='none'; toggleBar.style.display='none';
@@ -4540,7 +4522,7 @@ function openStampModal(initialTab){
 //   そこでカバン自体に colorIndex を固定して持たせる。
 // カバンの識別色(5色)。白文字を載せてWCAG AA(4.5:1)を満たす濃さ。
 // アプリの意味色(赤=danger/アンバー=reward/紫=purple)とは被らない色を選定。
-const BAG_PALETTE = ['#2563eb','#15803d','#c2410c','#be185d','#0f766e'];
+const BAG_PALETTE = ['#2d54a9','#228145','#a14c2b','#a92d61','#1e716a'];
 function bagColor(bagId){
   const bags=getBags();
   const bag=bags.find(b=>b.id===bagId);
@@ -4569,7 +4551,7 @@ function bagsOnDate(date){
     });
 }
 let stampSelectedKey=null; // カレンダーで選択中の日（詳細表示用）
-let stampMode='record';    // 'record'=🌟きろく(予定チップ+達成を統合表示) / 'book'=📖ほん
+let stampMode='record';    // 'record'=🌟きろく(予定チップ+達成を統合表示) / 'book'=🌱そだてノート
 let bookWeekOffset=0;       // 0=今週。マイナスで過去の週へ(上限なし)
 
 // スタンプの全履歴から、いちばん長く続いた日数を求める。
@@ -4670,7 +4652,8 @@ function renderStampCalendar(){
     const dk=`${stampViewYear}-${stampViewMonth+1}-${d}`;
     const isToday=dk===todayKey;
     const isSelected=dk===stampSelectedKey;
-    const list=bagsOnDate(date);
+    // 見出しに出す設定のあるカバンだけを、その日のチップ・凡例に出す
+    const list=bagsOnDate(date).filter(x=>x.bag.showInLabel);
     list.forEach(x=>monthBagIds.add(x.bag.id));
 
     // 予定：カバン名を色つきのチップで直接表示（タップしなくても何の日か分かるように）
@@ -4735,20 +4718,11 @@ function renderStreakAndAchievements(){
     streakEl.textContent = `🏅 じぶんの さいちょう きろく：${best}にち`;
   }
 
-  // 【15】今週やり終えた数、【16】毎日つづいていること
-  // ごほうびは使えば減るが、「やってきた事実」は減らない。それを見せる。
+  // 【16】毎日つづいていること（木を育てる機能と役割が重なる「積み上げタワー」「こんしゅうおわらせたやること」はv147で廃止）
   const ach=document.getElementById('stamp-achievements');
-  const towerWrap=document.getElementById('stamp-tower-wrap');
   {
-    renderStampTower();  // 【12】積み上がる塔
     const w=weeklySummary();
     let html='';
-    if(w.taskCount>0){
-      html += `<div style="background:var(--surface2);border:2px solid var(--border);border-radius:var(--r-md);padding:var(--sp-3);margin-bottom:var(--sp-2);text-align:center">
-        <div style="font-size:var(--fs-xs);color:var(--text-dim);font-weight:800">こんしゅう おわらせた やること</div>
-        <div style="font-size:var(--fs-xl);font-weight:900;color:var(--off-color);line-height:1.3">${w.taskCount} こ</div>
-      </div>`;
-    }
     if(w.streakBags.length){
       const names=w.streakBags.map(n=>`<span style="display:inline-block;background:var(--warn-light);border:1.5px solid var(--warn);color:var(--warn-text);border-radius:var(--r-full);padding:3px 10px;margin:2px 4px 2px 0;font-size:var(--fs-xs);font-weight:800">${n}</span>`).join('');
       html += `<div style="border:1.5px dashed var(--border);border-radius:var(--r-md);padding:var(--sp-3)">
@@ -4848,20 +4822,9 @@ function renderZukanColor(){
   const currentHeaderId=child.headerColor||'default';
   const currentMarkerId=data.nowMarkerColor||'marker-indigo';
 
-  // ロック済みマスをタップで交換できるようにする共通処理（v61: ガチャのランダム抽選を廃止／v62: アイテムごとに価格が変わる）
-  const gachaPoolForPrice=buildGachaPool();
+  // ロック済みマスの表示だけの共通処理（v154: コインでの直接交換は廃止。解禁は🌱木の実のレアのみ）
   const wireUnlockCell=(cell,id)=>{
-    const poolItem=gachaPoolForPrice.find(p=>p.id===id);
-    const price=poolItem&&poolItem.price!=null?poolItem.price:5;
-    cell.innerHTML=`<div class="zukan-color-lock">🔒</div><div class="zukan-color-name">🪙${price} こうかん</div>`;
-    cell.style.cursor='pointer';
-    cell.addEventListener('click',()=>{
-      const c=getChild();
-      if((c.coins||0)<price){ showToast(`🪙が たりないよ（あと${price-(c.coins||0)}こ）`); return; }
-      const item=unlockZukanItem(id);
-      if(item) showToast('こうかん できたよ！');
-      renderZukanColor();
-    });
+    cell.innerHTML=`<div class="zukan-color-lock">🔒</div><div class="zukan-color-name">🌳 木の実 まちだよ</div>`;
   };
 
   const totalPool=buildGachaPool().length;
@@ -4959,7 +4922,7 @@ function renderZukanColor(){
 }
 // ずかんのタブ切替（3タブぶん同じ処理が並んでいたので共通化）
 // 「しくみ」はタブでなく、なかまタブ内のⓘ開閉に変更済み(zukan-howto-toggle)。
-// 「ほん」は絵本ページそのものを持たず、きろくモーダルの「ほん」タブへその場で切り替える。
+// 「そだてノート」は絵本ページそのものを持たず、きろくモーダルの「そだてノート」タブへその場で切り替える。
 const ZUKAN_TABS = ['creature','color'];
 function showZukanTab(tab){
   ZUKAN_TABS.forEach(t=>{
@@ -5100,20 +5063,20 @@ function logCompletionEvent(child, savedMin, coinsGranted, bagType, bagId, sched
 // 白とのコントラスト4.5:1(WCAG AA)を満たす濃さにしてある（色相は保っているので呼び名は変わらない）。
 const MARKER_COLORS=[
   {id:'marker-gray',   color:'#27272A', shadow:'rgba(39,39,42,0.5)',   name:{kanji:'はいいろ',  hira:'はいいろ'}, default:true, price:0},
-  {id:'marker-indigo', color:'#4f46e5', shadow:'rgba(99,102,241,0.45)', name:{kanji:'あいいろ',hira:'あいいろ'}, price:6},
-  {id:'marker-red',    color:'#dc2626', shadow:'rgba(239,68,68,0.45)',   name:{kanji:'あか',    hira:'あか'}, price:6},
-  {id:'marker-green',  color:'#15803d', shadow:'rgba(34,197,94,0.45)',   name:{kanji:'みどり',  hira:'みどり'}, price:6},
+  {id:'marker-indigo', color:'#3b33c1', shadow:'rgba(59,51,193,0.45)', name:{kanji:'あいいろ',hira:'あいいろ'}, price:6},
+  {id:'marker-red',    color:'#b53030', shadow:'rgba(181,48,48,0.45)',   name:{kanji:'あか',    hira:'あか'}, price:6},
+  {id:'marker-green',  color:'#207936', shadow:'rgba(32,121,54,0.45)',   name:{kanji:'みどり',  hira:'みどり'}, price:6},
   {id:'marker-gold',   color:'var(--warn)', shadow:'rgba(245,158,11,0.45)', name:{kanji:'きいろ',  hira:'きいろ'}, price:6},
-  {id:'marker-pink',   color:'#be185d', shadow:'rgba(236,72,153,0.45)', name:{kanji:'ピンク',  hira:'ぴんく'}, price:6},
-  {id:'marker-teal',   color:'#0f766e', shadow:'rgba(20,184,166,0.45)', name:{kanji:'みずいろ',hira:'みずいろ'}, price:6},
-  {id:'marker-orange', color:'#c2410c', shadow:'rgba(249,115,22,0.45)', name:{kanji:'オレンジ',hira:'おれんじ'}, price:6},
+  {id:'marker-pink',   color:'#a92d61', shadow:'rgba(169,45,97,0.45)', name:{kanji:'ピンク',  hira:'ぴんく'}, price:6},
+  {id:'marker-teal',   color:'#226e81', shadow:'rgba(34,110,129,0.45)', name:{kanji:'みずいろ',hira:'みずいろ'}, price:6},
+  {id:'marker-orange', color:'#a1562b', shadow:'rgba(161,86,43,0.45)', name:{kanji:'オレンジ',hira:'おれんじ'}, price:6},
   // ── ここから追加6色（v62・アイテム倍増） ──
-  {id:'marker-violet', color:'#7c3aed', shadow:'rgba(124,58,237,0.45)', name:{kanji:'すみれいろ',hira:'すみれいろ'}, price:10},
-  {id:'marker-teal2',  color:'#115e59', shadow:'rgba(17,94,89,0.45)',   name:{kanji:'ふかみどり',hira:'ふかみどり'}, price:10},
-  {id:'marker-slate',  color:'#334155', shadow:'rgba(51,65,85,0.45)',   name:{kanji:'すみいろ',  hira:'すみいろ'}, price:10},
-  {id:'marker-purple2',color:'#7e22ce', shadow:'rgba(126,34,206,0.45)', name:{kanji:'ぶどういろ',hira:'ぶどういろ'}, price:10},
-  {id:'marker-magenta',color:'#a21caf', shadow:'rgba(162,28,175,0.45)', name:{kanji:'こうばい',  hira:'こうばい'}, price:10},
-  {id:'marker-brown',  color:'#166534', shadow:'rgba(22,101,52,0.45)',  name:{kanji:'もりみどり',hira:'もりみどり'}, price:10},
+  {id:'marker-violet', color:'#6c36c9', shadow:'rgba(108,54,201,0.45)', name:{kanji:'すみれいろ',hira:'すみれいろ'}, price:10},
+  {id:'marker-teal2',  color:'#18594c', shadow:'rgba(24,89,76,0.45)',   name:{kanji:'ふかみどり',hira:'ふかみどり'}, price:10},
+  {id:'marker-slate',  color:'#224a81', shadow:'rgba(34,74,129,0.45)',   name:{kanji:'すみいろ',  hira:'すみいろ'}, price:10},
+  {id:'marker-purple2',color:'#802da9', shadow:'rgba(128,45,169,0.45)', name:{kanji:'ぶどういろ',hira:'ぶどういろ'}, price:10},
+  {id:'marker-magenta',color:'#a12b8d', shadow:'rgba(161,43,141,0.45)', name:{kanji:'こうばい',  hira:'こうばい'}, price:10},
+  {id:'marker-brown',  color:'#1a613d', shadow:'rgba(26,97,61,0.45)',  name:{kanji:'もりみどり',hira:'もりみどり'}, price:10},
 ];
 
 // ─── トークン交換プール（ヘッダー色 + マーカー色 + すりガラス。わくは廃止済み） ───
@@ -5896,7 +5859,7 @@ function openTimerModal(){
   const pg=document.getElementById('timer-preset-grid'); pg.innerHTML='';
   TIMER_PRESETS.forEach(min=>{
     const b=document.createElement('button'); b.className='timer-preset'; b.textContent=min+'ふん';
-    b.addEventListener('click',()=>{ timerMinutes=min; updateTimerCustom(); startTimer(); });
+    b.addEventListener('click',()=>{ timerMinutes=min; updateTimerCustom(); });
     pg.appendChild(b);
   });
   updateTimerCustom();
@@ -6501,12 +6464,32 @@ document.getElementById('dev-preview-unlock-btn').addEventListener('click',()=>{
   renderZukanColor();
   showToast(data.devPreviewAllUnlocked ? 'ぜんぶ プレビュー表示にしました' : 'プレビューを おわりました');
 });
+function updateDevForceSundayBtn(){
+  const btn=document.getElementById('dev-force-sunday-btn');
+  if(!btn) return;
+  const on=!!data.devForceSunday;
+  btn.textContent = on ? '🧪 きょうを にちようび として あつかう：ON' : '🧪 きょうを にちようび として あつかう：OFF';
+  btn.style.background = on ? 'var(--warn)' : 'var(--surface2)';
+  btn.style.color = on ? 'var(--warn-text)' : 'var(--text-dim)';
+  btn.style.borderColor = on ? 'var(--warn)' : 'var(--border)';
+}
+document.getElementById('dev-force-sunday-btn').addEventListener('click',()=>{
+  data.devForceSunday = !data.devForceSunday;
+  save();
+  updateDevForceSundayBtn();
+  showToast(data.devForceSunday ? '「そだてノート」で 木を育てる操作を テストできます' : 'テストモードを おわりました');
+});
 
 // 子ども1人分の後方互換フィールドを補う
 function migrateChild(c){
   if(!c.wakeTime)c.wakeTime='07:00'; if(!c.sleepTime)c.sleepTime='21:00';
   if(!c.freeLabel)c.freeLabel='じゆうじかん';
   if(!c.events)c.events=[]; if(!c.dayLabels)c.dayLabels=[];
+  // 🌱木を育てる機能：初めて開いた時に種を1つだけ無料でプレゼントする（2本目以降はコインで買う）
+  if(!c.seedsGranted){ c.seeds=(c.seeds||0)+1; c.seedsGranted=true; }
+  if(c.seeds===undefined) c.seeds=0;
+  delete c.lastTree;
+  if(!c.tree) c.tree={waterCount:0, pendingFruits:0, completed:false, lastWateredAt:new Date().toISOString()};
   if(!c.routine)c.routine={breakfast:'',lunch:'',dinner:'',bath:'',leaveByDow:{},returnByDow:{}};
   if(!c.routine.leaveByDow)c.routine.leaveByDow={}; if(!c.routine.returnByDow)c.routine.returnByDow={};
   if(!c.routine.leaveLabelByDow)c.routine.leaveLabelByDow={}; if(!c.routine.returnLabelByDow)c.routine.returnLabelByDow={};
@@ -6603,9 +6586,7 @@ if(data.keepAwake===undefined) data.keepAwake=true;
 function openParent(){
   // 初回ガイドが開いたままだと、保護者設定より前面に重なって隠れてしまうため、必ず閉じる
   document.getElementById('intro-modal')?.classList.remove('open');
-  bagReorderMode=false;
-  const reorderBtn=document.getElementById('bag-reorder-toggle');
-  if(reorderBtn) reorderBtn.textContent='📐 ならびかえ できるようにする';
+  bagSelectMode=false; bagSelectedIds.clear();
   renderChildSwitcher(); renderPendingList(); updatePendingBadge();
   renderBagList();
   migrateVacationPeriods();
@@ -6869,6 +6850,25 @@ function buildWeekBookPage(offsetWeeks){
   const dailyMin=[0,0,0,0,0,0,0];
   logs.forEach(l=>{ if(l.savedMin>0) dailyMin[l.dow]+=l.savedMin; });
 
+  // 🌱木を育てる機能の「水」＝完了した「やること」の数（カバン1つでも中身が3つなら3こ、と週次サマリーと同じ数え方）
+  const taskCounts=[0,0,0,0,0,0,0];
+  logs.forEach(l=>{
+    const bag=getBags().find(b=>b.id===l.bagId);
+    taskCounts[l.dow] += (bag && bag.tasks) ? bag.tasks.length : 1;
+  });
+  // 「時間内に全部終わらせられた日」＝その日出るはずだったカバンが全部完了していて、かつ1つも予定時間をこえていない日
+  const goldDays=[false,false,false,false,false,false,false];
+  for(let i=0;i<7;i++){
+    const d=new Date(start); d.setDate(start.getDate()+i);
+    if(d.getTime()>Date.now()) continue; // 未来の日はまだ判定しない
+    const dueBags=getBags().filter(b=>bagActiveOn(b,d));
+    if(!dueBags.length) continue; // その日やることが何もない日は「ゴールド」に数えない
+    const dk=dateKey(d);
+    const allDone = dueBags.every(b=>b.completedByDate && b.completedByDate[dk]!=null);
+    const noneLate = logs.filter(l=>l.dow===i).every(l=>l.savedMin>=0);
+    goldDays[i] = allDone && noneLate;
+  }
+
   const tokens=(c.gachaWonLog||[]).filter(l=>inWeek(l.ts)).map(l=>{
     if(l.type==='header'){ const t=HEADER_THEMES.find(x=>x.id===l.id); return t?{kind:'header',name:t.name,bg:t.bg}:null; }
     if(l.type==='marker'){ const m=MARKER_COLORS.find(x=>x.id===l.id); return m?{kind:'marker',name:m.name,color:m.color}:null; }
@@ -6894,39 +6894,186 @@ function buildWeekBookPage(offsetWeeks){
     if(bag) topBag={name:bag.name, count:topEntry[1]};
   }
 
-  // ②その週の「シール」（子どもが選んで貼る、その週だけの飾り）
-  const stickerId=(c.weekStickers||{})[weekKey]||null;
-
-  return {start, end, weekKey, dailyMin, tokens, creatures, message, topBag, stickerId};
+  return {start, end, weekKey, dailyMin, taskCounts, goldDays, tokens, creatures, message, topBag};
 }
-
-// その週に貼れる「シール」の選択肢。1週間に1枚だけ選んで貼れる、子どもの選択で見た目が変わる飾り
-const BOOK_STICKERS = ['⭐','❤️','🌈','☀️','🎈','🍀'];
-function renderBookStickerArea(weekKey, currentStickerId){
-  const el=document.getElementById('book-sticker-area');
-  if(currentStickerId){
-    el.innerHTML = `<div style="font-size:40px;line-height:1">${currentStickerId}</div>
-      <button type="button" id="book-sticker-change" style="margin-top:4px;font-size:10px;font-weight:800;color:var(--text-dim);background:none;border:1.5px solid var(--border);border-radius: var(--r-full);padding:2px 10px;cursor:pointer">シールを かえる</button>`;
-    document.getElementById('book-sticker-change').addEventListener('click',()=>renderBookStickerPicker(weekKey));
-  } else {
-    renderBookStickerPicker(weekKey);
-  }
+// 🌱木を育てる機能：水(=完了したやることの数)の量で成長段階が決まる
+const TREE_STAGES = [
+  {min:0,  emoji:'🌱', label:'たね'},
+  {min:3,  emoji:'🌿', label:'め'},
+  {min:7,  emoji:'🌳', label:'わかぎ'},
+  {min:13, emoji:'🌳🌸', label:'はな'},
+  {min:21, emoji:'🌳🍎', label:'み'},
+];
+function treeStageForCount(n){
+  let stage=TREE_STAGES[0];
+  for(const s of TREE_STAGES){ if(n>=s.min) stage=s; }
+  return stage;
 }
-function renderBookStickerPicker(weekKey){
-  const el=document.getElementById('book-sticker-area');
-  el.innerHTML = `<div style="font-size: var(--fs-xs);color:var(--text-dim);font-weight:800;margin-bottom:6px">🏷️ こんしゅうの シールを えらぼう</div>
-    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
-      ${BOOK_STICKERS.map(s=>`<button type="button" class="book-sticker-choice" data-sticker="${s}" style="font-size:28px;background:var(--surface2);border:2px solid var(--border);border-radius: var(--r-md);width:48px;height:48px;cursor:pointer">${s}</button>`).join('')}
-    </div>`;
-  el.querySelectorAll('.book-sticker-choice').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const c=getChild();
-      if(!c.weekStickers) c.weekStickers={};
-      c.weekStickers[weekKey]=btn.dataset.sticker;
-      save();
-      renderBookStickerArea(weekKey, btn.dataset.sticker);
-    });
+// このタスクの重み(bag.tasks.length)を含めて、日時fromからの完了数を数える共通処理
+function countWeightedCompletions(fromTime){
+  const c=getChild();
+  const logs=(c.completionLog||[]).filter(l=>new Date(l.ts).getTime()>fromTime);
+  let count=0;
+  logs.forEach(l=>{
+    const bag=getBags().find(b=>b.id===l.bagId);
+    count += (bag && bag.tasks) ? bag.tasks.length : 1;
   });
+  return count;
+}
+// まだ木に注いでいない「たまった みず」の量(前回の水やり以降に完了したやることの数)
+function getBankedWater(){
+  const c=getChild();
+  const since=new Date(c.tree.lastWateredAt || 0).getTime();
+  return countWeightedCompletions(since);
+}
+// 今日が「予定のカバンを全部・時間内に終えた日」かどうか(水やり演出のゴールド判定・数値効果はなし)
+function isTodayPerfect(){
+  const c=getChild();
+  const today=new Date();
+  const dueBags=getBags().filter(b=>bagActiveOn(b,today));
+  if(!dueBags.length) return false;
+  const dk=dateKey(today);
+  const allDone = dueBags.every(b=>b.completedByDate && b.completedByDate[dk]!=null);
+  const todayStr=today.toDateString();
+  const logsToday=(c.completionLog||[]).filter(l=>new Date(l.ts).toDateString()===todayStr);
+  const noneLate = logsToday.every(l=>l.savedMin>=0);
+  return allDone && noneLate;
+}
+function renderGardenCard(){
+  const c=getChild();
+  const tree=c.tree;
+  const stage=treeStageForCount(tree.waterCount||0);
+  const sunday = new Date().getDay()===0 || !!data.devForceSunday;
+  const banked=getBankedWater();
+
+  let actionHtml='';
+  if(tree.completed){
+    const hasSeed=(c.seeds||0)>0;
+    const canBuy=(c.coins||0)>=15;
+    actionHtml = `<div style="text-align:center;margin-top:10px">
+        <div style="font-size: var(--fs-sm);font-weight:800;color:var(--gold)">✨ 木が かんせいしたよ！</div>
+        <button type="button" id="garden-plant-btn" class="btn" style="margin-top:8px;background:${hasSeed||canBuy?'var(--leaf)':'var(--surface2)'};color:${hasSeed||canBuy?'#fff':'var(--text-dim)'};min-height:44px;font-size: var(--fs-sm);font-weight:800" ${hasSeed||canBuy?'':'disabled'}>${hasSeed?'🌱 あたらしい 木を うえる':`🌱 たねを かう（🪙15）`}</button>
+        ${(!hasSeed && !canBuy) ? `<div style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px">コインが たりないよ（あと${15-(c.coins||0)}こ）</div>` : ''}
+      </div>`;
+  } else if(sunday && (tree.pendingFruits||0)>0){
+    actionHtml = `<div style="text-align:center;margin-top:10px">
+        <div style="font-size: var(--fs-sm);font-weight:800;color:var(--leaf)">🍎 みが ${tree.pendingFruits}こ なってるよ</div>
+        <button type="button" id="garden-harvest-btn" class="btn" style="margin-top:8px;background:var(--leaf);color:#fff;min-height:44px;font-size: var(--fs-sm);font-weight:800">🌾 しゅうかく する</button>
+      </div>`;
+  } else if(banked>0){
+    actionHtml = `<div style="text-align:center;margin-top:10px">
+        <div style="font-size: var(--fs-sm);font-weight:800;color:var(--water)">💧 みずが たまってるよ（${banked}こ）</div>
+        <button type="button" id="garden-water-btn" class="btn" style="margin-top:8px;background:var(--water);color:#fff;min-height:44px;font-size: var(--fs-sm);font-weight:800">💧 みずを あげる</button>
+      </div>`;
+  } else {
+    actionHtml = `<div style="text-align:center;margin-top:10px;font-size: var(--fs-xs);color:var(--text-dim)">やることを やると、おみずが たまるよ</div>`;
+  }
+
+  return `<div id="garden-card" style="border:3px solid var(--border);border-radius: var(--r-lg);padding:18px 14px;background:linear-gradient(180deg,var(--surface) 0%,var(--surface) 70%,rgba(99,70,44,0.08) 70%,rgba(99,70,44,0.08) 100%);margin-bottom:12px;position:relative;overflow:hidden">
+      <div id="garden-static-layer" style="text-align:center">
+        <div id="garden-tree-el" style="font-size:76px;line-height:1.1;transition:transform 0.6s cubic-bezier(0.34,1.56,0.64,1)">${stage.emoji}</div>
+        <div id="garden-soil-el" style="height:14px;background:var(--soil);border-radius: var(--r-sm);margin:6px auto 0;width:80%"></div>
+        <div style="font-size: var(--fs-xs);color:var(--text-dim);font-weight:800;margin-top:8px">そだてている 木（${tree.waterCount||0}こ の みず）</div>
+        ${actionHtml}
+      </div>
+    </div>`;
+}
+function wireGardenButtons(){
+  const waterBtn=document.getElementById('garden-water-btn');
+  if(waterBtn) waterBtn.addEventListener('click', waterTreeNow);
+  const harvestBtn=document.getElementById('garden-harvest-btn');
+  if(harvestBtn) harvestBtn.addEventListener('click', harvestTreeNow);
+  const plantBtn=document.getElementById('garden-plant-btn');
+  if(plantBtn) plantBtn.addEventListener('click', plantNewTree);
+}
+// 「みずをあげる」：たまった みず ぶんだけ木が育ち、実が1つなる（水がある限り毎日できる）
+function waterTreeNow(){
+  const c=getChild();
+  const banked=getBankedWater();
+  if(banked<=0) return;
+  const gold=isTodayPerfect();
+  c.tree.waterCount=(c.tree.waterCount||0)+banked;
+  c.tree.pendingFruits=(c.tree.pendingFruits||0)+1;
+  c.tree.lastWateredAt=new Date().toISOString();
+  save();
+  const treeEl=document.getElementById('garden-tree-el');
+  if(treeEl){
+    treeEl.style.transform='scale(0.85)';
+    setTimeout(()=>{
+      treeEl.textContent=treeStageForCount(c.tree.waterCount).emoji;
+      treeEl.style.transform='scale(1.15)';
+      setTimeout(()=>{ treeEl.style.transform='scale(1)'; }, 300);
+      if(gold){
+        treeEl.style.filter='drop-shadow(0 0 10px var(--gold))';
+        treeEl.animate([{transform:'scale(1) rotate(0deg)'},{transform:'scale(1.08) rotate(-4deg)'},{transform:'scale(1.08) rotate(4deg)'},{transform:'scale(1) rotate(0deg)'}], {duration:500, iterations:2});
+      } else {
+        treeEl.style.filter='';
+      }
+    }, 300);
+  }
+  showToast(gold ? '✨ ゴールドの みずを あげたよ！' : '💧 みずを あげたよ');
+  setTimeout(()=>{ renderBookPage(); }, 1200);
+}
+// 「しゅうかくする」：日曜日、たまった実を1つずつ確認する。実1個につき約30%でレア(ゴールド)。
+// レアが1つでも出たら、木はそこで完成。ゴールドの実が出た時だけ、色・すりガラスが1つ解禁される
+function harvestTreeNow(){
+  const c=getChild();
+  const n=c.tree.pendingFruits||0;
+  if(n<=0) return;
+  let rareCount=0;
+  const unlockedItems=[];
+  for(let i=0;i<n;i++){
+    if(Math.random()<0.30){
+      rareCount++;
+      const item=grantRandomRareUnlock();
+      if(item) unlockedItems.push(item);
+    }
+  }
+  c.tree.pendingFruits=0;
+  if(rareCount>0) c.tree.completed=true;
+  save();
+  if(unlockedItems.length){
+    const kanji=!!(c&&c.kanjiMode);
+    const labels=unlockedItems.map(it=>it.name?(kanji?it.name.kanji:it.name.hira):'').join('・');
+    showToast(`✨ ゴールドの みが ${unlockedItems.length}こ なった！「${labels}」が とうろく されたよ`);
+  } else if(rareCount>0){
+    showToast('✨ ゴールドの みが なった！でも もう ぜんぶ あつまってるみたい');
+  } else {
+    showToast(`🍎 みを ${n}こ しゅうかくしたよ`);
+  }
+  renderBookPage();
+}
+// ヘッダー色・マーカー色・すりガラスの未取得アイテムから、ランダムで1つ解禁する(木の実のレア専用。コイン不要)
+function grantRandomRareUnlock(){
+  const c=getChild();
+  const pool=buildGachaPool();
+  const won=c.gachaWon||[];
+  const candidates=pool.filter(p=>!won.includes(p.id));
+  if(!candidates.length) return null; // もう全種類あつめ終わっている
+  const item=candidates[Math.floor(Math.random()*candidates.length)];
+  if(!c.gachaWon) c.gachaWon=[];
+  c.gachaWon.push(item.id);
+  if(!c.gachaWonLog) c.gachaWonLog=[];
+  c.gachaWonLog.push({id:item.id, type:item.type, ts:new Date().toISOString()});
+  const cutoff=Date.now()-90*24*60*60*1000;
+  c.gachaWonLog=c.gachaWonLog.filter(e=>new Date(e.ts).getTime()>=cutoff);
+  return item;
+}
+// 木が完成した後、新しい木を植える（種があれば無料、なければコイン15で購入）
+function plantNewTree(){
+  const c=getChild();
+  if(!c.tree.completed) return;
+  if((c.seeds||0)>0){
+    c.seeds-=1;
+  } else {
+    if((c.coins||0)<15){ showToast('コインが たりないよ'); return; }
+    c.coins-=15;
+    updateCoinBadge();
+  }
+  c.tree={waterCount:0, pendingFruits:0, completed:false, lastWateredAt:new Date().toISOString()};
+  save();
+  showToast('🌱 あたらしい 木を うえたよ');
+  renderBookPage();
 }
 function renderBookPage(){
   document.getElementById('stamp-mode-record').className='type-btn'+(stampMode==='record'?' active-on':'');
@@ -6934,7 +7081,7 @@ function renderBookPage(){
   document.getElementById('book-next-week').disabled = bookWeekOffset>=0;
   renderStreakAndAchievements();
 
-  const page=buildWeekBookPage(bookWeekOffset);
+  const page = buildWeekBookPage(bookWeekOffset);
   const kanji=!!(getChild()&&getChild().kanjiMode);
   const s=page.start, e=new Date(page.end); e.setDate(e.getDate()-1);
   document.getElementById('book-week-label').textContent =
@@ -6944,25 +7091,7 @@ function renderBookPage(){
   const topBagEl=document.getElementById('book-top-bag');
   topBagEl.textContent = page.topBag ? `今週は「${page.topBag.name}」を がんばったね` : '';
 
-  // ②その週のシール（子どもが選んで貼る、その週だけの飾り）
-  renderBookStickerArea(page.weekKey, page.stickerId);
-
-  // 上半分：曜日別の棒グラフ（かせいだ時間）
-  const DOWJ=['にち','げつ','か','すい','もく','きん','ど'];
-  const maxMin=Math.max(30, ...page.dailyMin);
-  const bars=page.dailyMin.map((m,i)=>{
-    const h=Math.round((m/maxMin)*100);
-    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
-        <div style="font-size: var(--fs-xs);font-weight:800;color:var(--text-dim)">${m>0?m:''}</div>
-        <div style="width:100%;height:90px;display:flex;align-items:flex-end">
-          <div style="width:100%;height:${Math.max(2,h)}%;background:var(--gold);border-radius: var(--r-sm) var(--r-sm) 0 0"></div>
-        </div>
-        <div style="font-size: var(--fs-xs);font-weight:800;color:var(--text-dim)">${DOWJ[i]}</div>
-      </div>`;
-  }).join('');
-  const totalMin=page.dailyMin.reduce((a,b)=>a+b,0);
-
-  // 下半分：その週にゲットしたもの
+  // その週にゲットしたもの
   let gotHtml='';
   if(page.tokens.length===0 && page.creatures.length===0){
     gotHtml='<div style="color:var(--text-dim);font-size: var(--fs-sm);text-align:center;padding:10px 0">この週は まだ なにも ゲットしてないよ</div>';
@@ -6983,15 +7112,13 @@ function renderBookPage(){
     : '';
 
   document.getElementById('book-page-body').innerHTML = `
+    ${renderGardenCard()}
     <div style="border:3px solid var(--border);border-radius: var(--r-lg);padding:14px;background:var(--surface)">
-      <div style="text-align:center;font-size: var(--fs-sm);font-weight:800;color:var(--text-dim);margin-bottom:2px">この週 かせいだ じかん</div>
-      <div style="text-align:center;font-size: var(--fs-xl);font-weight:900;color:var(--gold);margin-bottom:10px">${totalMin}ふん</div>
-      <div style="display:flex;gap:4px">${bars}</div>
-      <div style="border-top:1.5px dashed var(--border);margin:14px 0"></div>
       <div style="text-align:center;font-size: var(--fs-sm);font-weight:800;color:var(--text-dim);margin-bottom:8px">この週 ゲットしたもの</div>
       ${gotHtml}
       ${msgHtml}
     </div>`;
+  wireGardenButtons();
 }
 
 function weeklySummary(){
@@ -7024,42 +7151,7 @@ function weeklySummary(){
 // 【12】積み上がる塔。
 // ごほうび(コイン・ガチャ)は使えば減るが、「やってきた事実」は誰にも取られないし減らない。
 // その対比を見せることに意味がある。1日1ブロック、下から積み上がる。
-function renderStampTower(){
-  const wrap=document.getElementById('stamp-tower-wrap');
-  if(!wrap) return;
-  const c=getChild();
-  const stamps=Object.keys(c.stamps||{});
-  const n=stamps.length;
-  if(n===0){ wrap.innerHTML=''; return; }
 
-  // 表示は最大30段。それ以上は「＋◯」でまとめる（画面に収める）
-  const SHOW=Math.min(n, 30);
-  const extra=n-SHOW;
-  // 下ほど濃く（古い＝土台）、上ほど明るく（新しい）
-  let blocks='';
-  for(let i=SHOW-1; i>=0; i--){        // 上から描く（＝新しいものが上）
-    const depth=i/Math.max(1,SHOW-1);   // 0=最新(上) 1=最古(下)
-    const light=Math.round(52 + depth*18);
-    const w=Math.round(52 + depth*30);  // 下ほど広い＝安定した土台に見える
-    blocks += `<div style="width:${w}%;height:7px;border-radius:2px;background:hsl(190,72%,${light}%);margin:0 auto 2px;"></div>`;
-  }
-  const extraLabel = extra>0
-    ? `<div style="font-size:var(--fs-xs);font-weight:900;color:var(--text-dim);margin-bottom:3px">＋${extra}</div>` : '';
-
-  wrap.innerHTML=`
-    <div style="border:2px solid var(--border);border-radius:var(--r-md);padding:var(--sp-3);background:var(--surface)">
-      <div style="font-size:var(--fs-xs);font-weight:800;color:var(--text-dim);text-align:center;margin-bottom:6px">
-        つみあげた ${n}にち
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center">
-        ${extraLabel}${blocks}
-      </div>
-      <div style="width:100%;height:3px;background:var(--text-dim);opacity:0.35;border-radius:2px;margin-top:1px"></div>
-      <div style="font-size:var(--fs-xs);color:var(--text-dim);text-align:center;margin-top:6px;line-height:1.4">
-        これは つかっても へりません。
-      </div>
-    </div>`;
-}
 
 // (旧analyzeBagDuration/applyDurationSuggestion: 完了ログから所要時間を学習し終了時刻を提案する機能は削除。
 //  ①完了ボタンを押すのが遅れると実際の所要時間でなく「押し忘れていた時間」まで加算される計算バグがあった、
@@ -7290,11 +7382,36 @@ function moveBag(bagId, dir){
   return true;
 }
 
-let bagReorderMode = false;   // オンの時だけ≡ハンドルが有効になる(誤操作防止)
+let bagSelectMode = false;      // 長押しで入る「選択モード」。この間だけ✓アイコンと≡ハンドルが出る
+let bagSelectedIds = new Set(); // 選択モード中に選ばれているカバンid
 function renderBagList(){
   const wrap=document.getElementById('bag-list'); wrap.innerHTML='';
-  const bags=getBags();
+  // イレギュラー期間専用のカバン(vacationPeriodId持ち)は、その期間の詳細ページの中だけに出す
+  const bags=getBags().filter(b=>!b.vacationPeriodId);
   if(!bags.length){ wrap.innerHTML='<div style="color:var(--text-dim);font-size: var(--fs-sm)">まだカバンがありません。「＋カバンを作る」から作りましょう。</div>'; return; }
+
+  if(bagSelectMode){
+    const bar=document.createElement('div');
+    const selCount=bagSelectedIds.size;
+    bar.style.cssText='display:flex;gap:8px;margin-bottom:8px;position:sticky;top:0;z-index:5;background:var(--surface2);padding:8px;border-radius: var(--r-md);border:2px solid var(--border)';
+    bar.innerHTML='<button type="button" id="bag-select-delete" class="btn btn-danger" style="flex:1;font-size: var(--fs-xs)" '+(selCount?'':'disabled')+'>🗑️ '+selCount+'件を けす</button>'
+      +'<button type="button" id="bag-select-done" class="btn" style="flex:1;font-size: var(--fs-xs);background:var(--surface2);border:2px solid var(--border);color:var(--text-dim)">✅ おわる</button>';
+    wrap.appendChild(bar);
+    bar.querySelector('#bag-select-delete').addEventListener('click',()=>{
+      if(!bagSelectedIds.size) return;
+      if(!confirm(bagSelectedIds.size+'件のカバンを削除しますか？')) return;
+      const c=getChild();
+      c.bags = (c.bags||[]).filter(b=>!bagSelectedIds.has(b.id));
+      bagSelectedIds.clear();
+      bagSelectMode=false;
+      save(); tick(); renderBagList();
+      showToast('けしました');
+    });
+    bar.querySelector('#bag-select-done').addEventListener('click',()=>{
+      bagSelectMode=false; bagSelectedIds.clear(); renderBagList();
+    });
+  }
+
   bags.forEach((bag, idx)=>{
     const dowText = bag.repeatType==='monthly_nth'
       ? `月ごと・第${bag.nthWeek||1} ${DOW_LABELS[bag.nthDow||0]}曜日`
@@ -7304,8 +7421,6 @@ function renderBagList(){
     const timeText=bag.defaultTime?(bag.defaultEndTime?`${bag.defaultTime}〜${bag.defaultEndTime}`:`${bag.defaultTime}〜`):'時刻はそのつど';
     const freeText=bag.allowFree===false?'終わってもオフタイムにならない':'終わったら自由時間';
 
-    // 中身（やること）を一覧から見えるようにする。今までは「やること 3こ」としか
-    // 出ておらず、開かないと中身が分からなかった。
     const tasks=(bag.tasks||[]);
     const MAX_SHOW=4;
     const taskChips = tasks.length
@@ -7314,27 +7429,26 @@ function renderBagList(){
         ).join('') + (tasks.length>MAX_SHOW ? `<span style="font-size: var(--fs-xs);font-weight:800;color:var(--text-dim)">＋${tasks.length-MAX_SHOW}</span>` : '')
       : `<span style="font-size: var(--fs-xs);color:var(--text-dim)">やること なし</span>`;
 
-    // 見出しに出すカバンには印を付ける。一覧からは分からなかった。
     const labelMark = bag.showInLabel
       ? `<span title="見出しに出します" style="display:inline-flex;align-items:center;gap:3px;background:var(--warn-light);border:1.5px solid var(--warn);color:var(--warn-text);border-radius: var(--r-full);padding:1px 8px;font-size: var(--fs-xs);font-weight:800;margin-left:6px">📌 見出し${bag.labelOrder?`${bag.labelOrder}`:''}</span>`
       : '';
-    // イレギュラー期間専用のカバンには、どの期間に属するか分かるように印を付ける
     const linkedPeriod = bag.vacationPeriodId ? (getChild().vacationPeriods||[]).find(p=>p.id===bag.vacationPeriodId) : null;
     const periodMark = linkedPeriod
       ? `<span title="イレギュラー期間専用のカバンです" style="display:inline-flex;align-items:center;gap:3px;background:var(--danger-light);border:1.5px solid var(--danger);color:var(--danger);border-radius: var(--r-full);padding:1px 8px;font-size: var(--fs-xs);font-weight:800;margin-left:6px">🗓️ ${linkedPeriod.name}</span>`
       : '';
+    const isSelected = bagSelectedIds.has(bag.id);
     const row=document.createElement('div');
     row.style.cssText=`
-      border:2px solid ${bag.enabled?'var(--border)':'#ddd'};
+      border:2px solid ${isSelected?'var(--danger)':(bag.enabled?'var(--border)':'#ddd')};
       border-left:4px solid ${bag.enabled?bagColor(bag.id):'#ccc'};
       border-radius: var(--r-md);padding:6px 8px;margin-bottom:6px;
-      background:${bag.enabled?'var(--surface)':'var(--surface2)'};
+      background:${isSelected?'var(--danger-light)':(bag.enabled?'var(--surface)':'var(--surface2)')};
       opacity:${bag.enabled?1:0.55};cursor:pointer;
     `;
     row.innerHTML=`
       <div style="display:flex;align-items:center;gap:6px">
-        <!-- ≡ を持ち上げて、行と行の間に落とす（並び替えモードの時だけ表示） -->
-        ${bagReorderMode?'<div class="sort-handle" aria-label="ならびかえ">≡</div>':''}
+        ${bagSelectMode?`<button type="button" class="bag-select-check" aria-label="えらぶ" style="width:28px;height:28px;min-width:28px;border-radius:50%;border:2px solid var(--danger);background:${isSelected?'var(--danger)':'#fff'};color:#fff;font-size:14px;font-weight:900;cursor:pointer;flex-shrink:0">${isSelected?'✓':''}</button>`:''}
+        ${bagSelectMode?'<div class="sort-handle" aria-label="ならびかえ">≡</div>':''}
         <div class="bag-main" style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:5px;min-width:0">
             <button class="bag-color-dot" type="button" aria-label="この色の意味を みる" style="width:20px;height:20px;min-width:20px;border-radius:50%;background:${bagColor(bag.id)};flex-shrink:0;border:none;cursor:pointer;padding:0"></button>
@@ -7342,39 +7456,55 @@ function renderBagList(){
           </div>
           <div style="font-size: var(--fs-xs);font-weight:700;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${timeText} ／ ${dowText}</div>
         </div>
-        <button class="bag-switch" role="switch" aria-checked="${bag.enabled}"
+        ${bagSelectMode?'':`<button class="bag-switch" role="switch" aria-checked="${bag.enabled}"
           aria-label="${bag.name} を ${bag.enabled?'オフ':'オン'}にする"
-          style="background:${bag.enabled?bagColor(bag.id):'#c7ccd6'}"><span class="sw-knob"></span></button>
+          style="background:${bag.enabled?bagColor(bag.id):'#c7ccd6'}"><span class="sw-knob"></span></button>`}
       </div>
-      <div class="bag-detail" style="padding:8px 0 2px 34px">
+      ${bagSelectMode?'':`<div class="bag-detail" style="padding:8px 0 2px 34px">
         <div style="margin-bottom:5px">${taskChips}</div>
         <div style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px">${freeText}</div>
         <button class="bag-edit-btn" style="min-height:44px;padding:6px 14px;border-radius: var(--r-md);border:2px solid var(--border);background:var(--surface2);color:var(--text-dim);font-family:inherit;font-size: var(--fs-xs);font-weight:800;cursor:pointer">✎ へんしゅう</button>
-      </div>`;
-    // 色の丸をタップすると、意味を説明する（きろくのカレンダーや子ども画面と同じ色で、
-    // このカバンを見分けるための目印。並び替えても変わらない）
-    row.querySelector('.bag-color-dot').addEventListener('click', e=>{
-      e.stopPropagation();
-      showToast('この色は「きろく」のカレンダーや子どもの画面と同じ色です。このカバンを見分ける目印で、並び替えても変わりません。');
-    });
-    // 編集ボタン（中身は常に見えているので、これだけで編集モーダルへ）
-    const editBtn = row.querySelector('.bag-edit-btn');
-    if(editBtn) editBtn.addEventListener('click', e=>{
-      e.stopPropagation();
-      document.getElementById('parent-modal').classList.remove('open');
-      openBagModal(bag.id);
-    });
-    // オン/オフのトグルスイッチ
-    row.querySelector('.bag-switch').addEventListener('click', e=>{
-      e.stopPropagation();
-      bag.enabled = !bag.enabled;
-      save(); renderBagList(); tick();
-    });
+      </div>`}`;
     row.dataset.bagId = bag.id;
+
+    if(bagSelectMode){
+      const toggleSel=(e)=>{
+        e.stopPropagation();
+        if(bagSelectedIds.has(bag.id)) bagSelectedIds.delete(bag.id); else bagSelectedIds.add(bag.id);
+        renderBagList();
+      };
+      row.querySelector('.bag-select-check')?.addEventListener('click', toggleSel);
+      row.querySelector('.bag-main')?.addEventListener('click', toggleSel);
+      row.querySelector('.bag-color-dot')?.addEventListener('click', toggleSel);
+    } else {
+      row.querySelector('.bag-color-dot').addEventListener('click', e=>{
+        e.stopPropagation();
+        showToast('この色は「きろく」のカレンダーや子ども画面と同じ色です。このカバンを見分ける目印で、並び替えても変わりません。');
+      });
+      const editBtn = row.querySelector('.bag-edit-btn');
+      if(editBtn) editBtn.addEventListener('click', e=>{
+        e.stopPropagation();
+        document.getElementById('parent-modal').classList.remove('open');
+        openBagModal(bag.id);
+      });
+      row.querySelector('.bag-switch').addEventListener('click', e=>{
+        e.stopPropagation();
+        bag.enabled = !bag.enabled;
+        save(); renderBagList(); tick();
+      });
+      let lpTimer=null, lpFired=false;
+      const startLp=()=>{ lpFired=false; lpTimer=setTimeout(()=>{
+        lpFired=true; bagSelectMode=true; bagSelectedIds.add(bag.id); renderBagList();
+      }, 550); };
+      const cancelLp=()=>{ if(lpTimer) clearTimeout(lpTimer); lpTimer=null; };
+      row.addEventListener('pointerdown', startLp);
+      row.addEventListener('pointerup', cancelLp);
+      row.addEventListener('pointerleave', cancelLp);
+      row.addEventListener('pointercancel', cancelLp);
+    }
     wrap.appendChild(row);
   });
 
-  // ≡ を持ち上げて、行と行の間に落とす
   makeSortable(wrap, {
     itemSelector: '[data-bag-id]',
     handleSelector: '.sort-handle',
@@ -7387,12 +7517,6 @@ function renderBagList(){
   });
 }
 document.getElementById('add-bag-btn').addEventListener('click',()=>{ document.getElementById('parent-modal').classList.remove('open'); document.getElementById('bag-new-choice-modal').classList.add('open'); });
-document.getElementById('bag-reorder-toggle').addEventListener('click',()=>{
-  bagReorderMode=!bagReorderMode;
-  const btn=document.getElementById('bag-reorder-toggle');
-  btn.textContent = bagReorderMode ? '✅ ならびかえ おわり' : '📐 ならびかえ できるようにする';
-  renderBagList();
-});
 // 旧: 単一のvacationFrom/vacationUntil → 新: 複数・名前付きのvacationPeriods配列へ移行
 // 旧from/until(範囲)方式のデータを、dates配列(個別日付)に展開する(移行処理専用)
 function expandDateRange(from, until){
@@ -7431,6 +7555,40 @@ function summarizeDates(dates){
   if(sorted.length<=3) return sorted.map(fmt).join('・');
   return `${fmt(sorted[0])} ほか ぜんぶで${sorted.length}にち`;
 }
+// 選んだ日づけを、フラットな一覧ではなくカレンダー形式(月ごとのグリッド)で見せる。
+// 選んでいない日は完全に空白（数字も出さない）。週の始まりは保護者設定(weekStartMonday)に従う。
+function renderDateCalendarGrid(dates){
+  const sorted=[...(dates||[])].sort();
+  if(!sorted.length) return '<div style="font-size: var(--fs-xs);color:var(--text-dim)">まだ 日づけが ありません</div>';
+  const mondayStart = !!data.weekStartMonday;
+  const dowLabels = mondayStart ? ['月','火','水','木','金','土','日'] : ['日','月','火','水','木','金','土'];
+  const byMonth={};
+  sorted.forEach(dk=>{
+    const ym=dk.slice(0,7);
+    if(!byMonth[ym]) byMonth[ym]=new Set();
+    byMonth[ym].add(Number(dk.slice(8,10)));
+  });
+  return Object.keys(byMonth).sort().map(ym=>{
+    const [y,m]=ym.split('-').map(Number);
+    const firstDow=new Date(y,m-1,1).getDay();
+    const leadBlank = mondayStart ? (firstDow+6)%7 : firstDow;
+    const daysInMonth=new Date(y,m,0).getDate();
+    const daySet=byMonth[ym];
+    let cells='';
+    for(let i=0;i<leadBlank;i++) cells+='<div></div>';
+    for(let d=1; d<=daysInMonth; d++){
+      const sel=daySet.has(d);
+      cells+=`<div style="text-align:center;font-size: var(--fs-xs);font-weight:800;padding:4px 0;border-radius: var(--r-sm);${sel?'background:var(--danger);color:#fff':''}">${sel?d:''}</div>`;
+    }
+    return `<div style="margin-bottom:8px">
+      <div style="font-size: var(--fs-xs);font-weight:800;color:var(--text-dim);margin-bottom:4px;text-align:center">${m}月</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px">
+        ${dowLabels.map(l=>`<div style="text-align:center;font-size:10px;font-weight:800;color:var(--text-dim)">${l}</div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">${cells}</div>
+    </div>`;
+  }).join('');
+}
 function renderVacationPeriodList(){
   const wrap=document.getElementById('vacation-period-list');
   const c=getChild();
@@ -7438,49 +7596,113 @@ function renderVacationPeriodList(){
   if(!periods.length){ wrap.innerHTML='<div style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:4px">まだ ありません。</div>'; return; }
   wrap.innerHTML='';
   periods.forEach(p=>{
-    const row=document.createElement('div');
-    row.style.cssText='background:var(--danger-light);border-radius: var(--r-sm);padding:6px 10px;margin-bottom:6px';
-    const activeCount=(p.bagIds||[]).length;
+    const row=document.createElement('button');
+    row.type='button';
+    row.style.cssText='display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--danger-light);border:1.5px solid var(--danger);border-radius: var(--r-sm);padding:10px 12px;margin-bottom:6px;cursor:pointer;min-height:44px;font-family:inherit';
+    const bagCount=(c.bags||[]).filter(b=>b.vacationPeriodId===p.id).length;
     const typeTag = p.type==='range' ? '🗓️' : '📅';
     const dateLabel = p.type==='range'
-      ? (p.rangeFrom && p.rangeUntil ? `${Number(p.rangeFrom.slice(5,7))}/${Number(p.rangeFrom.slice(8,10))}〜${Number(p.rangeUntil.slice(5,7))}/${Number(p.rangeUntil.slice(8,10))}` : '期間 未設定')
+      ? (p.rangeFrom && p.rangeUntil ? `${Number(p.rangeFrom.slice(5,7))}/${Number(p.rangeFrom.slice(8,10))}〇${Number(p.rangeUntil.slice(5,7))}/${Number(p.rangeUntil.slice(8,10))}` : '期間 未設定')
       : summarizeDates(p.dates);
-    row.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
-        <button type="button" data-editdates="${p.id}" style="flex:1;min-width:0;text-align:left;background:none;border:none;padding:2px;cursor:pointer;font-size: var(--fs-xs);font-weight:800;color:var(--danger);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${typeTag} ${p.name}（${dateLabel}）✎</button>
-        <button type="button" data-id="${p.id}" aria-label="${p.name}を けす" style="min-width:44px;min-height:36px;border:none;background:none;color:var(--danger);font-weight:900;font-size: var(--fs-md);cursor:pointer">✕</button>
+    row.innerHTML=`<div style="flex:1;min-width:0">
+        <div style="font-size: var(--fs-sm);font-weight:800;color:var(--danger);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${typeTag} ${p.name}</div>
+        <div style="font-size: var(--fs-xs);color:var(--danger);opacity:0.85">${dateLabel}${bagCount?` ／ 専用カバン ${bagCount}件`:''}</div>
       </div>
-      <button type="button" data-bagpick="${p.id}" style="width:100%;margin-top:4px;min-height:36px;border:1.5px solid var(--danger);border-radius: var(--r-sm);background:#fff;color:var(--danger);font-size: var(--fs-xs);font-weight:800;cursor:pointer">🎒 稼働させる カバン（${activeCount}件）▶</button>
-      <button type="button" data-newbag="${p.id}" style="width:100%;margin-top:4px;min-height:36px;border:1.5px dashed var(--danger);border-radius: var(--r-sm);background:#fff;color:var(--danger);font-size: var(--fs-xs);font-weight:800;cursor:pointer">＋ この きかん専用の カバンを 作る</button>`;
-    row.querySelector('button[aria-label]').addEventListener('click',()=>{
-      c.vacationPeriods = c.vacationPeriods.filter(x=>x.id!==p.id);
-      save(); tick(); renderVacationPeriodList();
-      showToast(`「${p.name}」を けしました`);
-    });
-    row.querySelector('[data-bagpick]').addEventListener('click',()=>openVacationBagPick(p.id));
-    row.querySelector('[data-newbag]').addEventListener('click',()=>{
-      document.getElementById('parent-modal').classList.remove('open');
-      openBagModal(null, null, p.id);
-    });
-    row.querySelector('[data-editdates]').addEventListener('click',()=>{
-      if(p.type==='range'){
-        // 期間指定型の編集は、作成フォームに現在値を入れ直して「書きかえる」で置き換える簡易方式
-        vacationEditingId=p.id;
-        document.getElementById('vacation-name').value=p.name;
-        vacationNewType='range'; updateVacationTypeUI();
-        setVacationRangeField('vacation-range-from-btn', p.rangeFrom||'', '開始日 えらぶ');
-        setVacationRangeField('vacation-range-until-btn', p.rangeUntil||'', '終了日 えらぶ');
-        document.getElementById('vacation-save').textContent='✎ きかんを 書きかえる';
-        showToast('内容をフォームに入れました。書きかえて保存してください');
-      } else {
-        openDatePickerMulti(p.dates||[], (newDates)=>{
-          p.dates=newDates; save(); tick(); renderVacationPeriodList();
-          showToast(`「${p.name}」の 日づけを 直しました`);
-        });
-      }
+      <div style="color:var(--danger);font-weight:900">▶</div>`;
+    row.addEventListener('click',()=>openVacationDetail(p.id));
+    wrap.appendChild(row);
+  });
+}
+let vacationDetailId=null; // 今開いているイレギュラー期間詳細のid
+function openVacationDetail(periodId){
+  const c=getChild();
+  const p=(c.vacationPeriods||[]).find(x=>x.id===periodId);
+  if(!p) return;
+  vacationDetailId=periodId;
+  const typeTag = p.type==='range' ? '🗓️' : '📅';
+  document.getElementById('vacation-detail-title').textContent=`${typeTag} ${p.name}`;
+  const dateLabel = p.type==='range'
+    ? (p.rangeFrom && p.rangeUntil ? `${p.rangeFrom.slice(0,4)}/${Number(p.rangeFrom.slice(5,7))}/${Number(p.rangeFrom.slice(8,10))} 〇 ${p.rangeUntil.slice(0,4)}/${Number(p.rangeUntil.slice(5,7))}/${Number(p.rangeUntil.slice(8,10))}` : '期間 未設定')
+    : summarizeDates(p.dates);
+  document.getElementById('vacation-detail-datelabel').textContent=dateLabel;
+  document.getElementById('vacation-detail-calendar').innerHTML = p.type==='dates' ? renderDateCalendarGrid(p.dates) : '';
+  document.getElementById('vacation-detail-bagpick-count').textContent=String((p.bagIds||[]).length);
+  renderVacationDetailBagList(periodId);
+  document.getElementById('parent-modal').classList.remove('open');
+  document.getElementById('vacation-detail-modal').classList.add('open');
+}
+// イレギュラー期間専用のカバン一覧（このページの中だけに出す。通常のカバン一覧には出さない）
+function renderVacationDetailBagList(periodId){
+  const wrap=document.getElementById('vacation-detail-bag-list');
+  const bags=getBags().filter(b=>b.vacationPeriodId===periodId);
+  if(!bags.length){ wrap.innerHTML='<div style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:4px">まだ ありません。</div>'; return; }
+  wrap.innerHTML='';
+  bags.forEach(bag=>{
+    const row=document.createElement('button');
+    row.type='button';
+    row.style.cssText=`display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:2px solid ${bag.enabled?'var(--border)':'#ddd'};border-left:4px solid ${bag.enabled?bagColor(bag.id):'#ccc'};border-radius: var(--r-md);padding:8px 10px;margin-bottom:6px;background:${bag.enabled?'var(--surface)':'var(--surface2)'};opacity:${bag.enabled?1:0.55};cursor:pointer;min-height:44px;font-family:inherit`;
+    row.innerHTML=`<div style="flex:1;min-width:0">
+        <div style="font-size: var(--fs-sm);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${bag.name}</div>
+      </div><div style="color:var(--text-dim)">✎</div>`;
+    row.addEventListener('click',()=>{
+      document.getElementById('vacation-detail-modal').classList.remove('open');
+      openBagModal(bag.id);
     });
     wrap.appendChild(row);
   });
 }
+document.getElementById('vacation-detail-close-top').addEventListener('click',()=>{
+  document.getElementById('vacation-detail-modal').classList.remove('open');
+  document.getElementById('parent-modal').classList.add('open');
+});
+document.getElementById('vacation-detail-editdates').addEventListener('click',()=>{
+  const c=getChild();
+  const p=(c.vacationPeriods||[]).find(x=>x.id===vacationDetailId);
+  if(!p) return;
+  if(p.type==='range'){
+    document.getElementById('vacation-detail-modal').classList.remove('open');
+    document.getElementById('parent-modal').classList.add('open');
+    vacationEditingId=p.id;
+    document.getElementById('vacation-name').value=p.name;
+    vacationNewType='range'; updateVacationTypeUI();
+    setVacationRangeField('vacation-range-from-btn', p.rangeFrom||'', '開始日 えらぶ');
+    setVacationRangeField('vacation-range-until-btn', p.rangeUntil||'', '終了日 えらぶ');
+    document.getElementById('vacation-save').textContent='✎ きかんを 書きかえる';
+    showToast('内容をフォームに入れました。書きかえて保存してください');
+  } else {
+    openDatePickerMulti(p.dates||[], (newDates)=>{
+      p.dates=newDates; save(); tick();
+      openVacationDetail(p.id);
+      renderVacationPeriodList();
+      showToast(`「${p.name}」の 日づけを 直しました`);
+    });
+  }
+});
+document.getElementById('vacation-detail-bagpick').addEventListener('click',()=>{
+  if(vacationDetailId) openVacationBagPick(vacationDetailId);
+});
+document.getElementById('vacation-detail-newbag').addEventListener('click',()=>{
+  if(!vacationDetailId) return;
+  document.getElementById('vacation-detail-modal').classList.remove('open');
+  openBagModal(null, null, vacationDetailId);
+});
+document.getElementById('vacation-detail-delete').addEventListener('click',()=>{
+  const c=getChild();
+  const p=(c.vacationPeriods||[]).find(x=>x.id===vacationDetailId);
+  if(!p) return;
+  const linkedBags=(c.bags||[]).filter(b=>b.vacationPeriodId===p.id);
+  const msg = linkedBags.length
+    ? `「${p.name}」と、中の専用カバン${linkedBags.length}件も いっしょに 消えます。よろしいですか？`
+    : `「${p.name}」を 削除しますか？`;
+  if(!confirm(msg)) return;
+  c.bags = (c.bags||[]).filter(b=>b.vacationPeriodId!==p.id);
+  c.vacationPeriods = (c.vacationPeriods||[]).filter(x=>x.id!==p.id);
+  save(); tick();
+  document.getElementById('vacation-detail-modal').classList.remove('open');
+  document.getElementById('parent-modal').classList.add('open');
+  renderVacationPeriodList(); renderBagList();
+  showToast(`「${p.name}」を けしました`);
+});
 // イレギュラー期間ごとに「稼働させるカバン」を選ぶ
 function openVacationBagPick(periodId){
   const c=getChild();
@@ -7488,9 +7710,10 @@ function openVacationBagPick(periodId){
   if(!period) return;
   document.getElementById('vacation-bagpick-title').textContent=`🎒 「${period.name}」中に 稼働させる カバン`;
   const listEl=document.getElementById('vacation-bagpick-list');
-  const bags=getBags();
+  // 期間専用カバン(vacationPeriodId持ち)は、そもそもこの期間の中だけで動くので候補には出さない
+  const bags=getBags().filter(b=>!b.vacationPeriodId);
   if(!bags.length){
-    listEl.innerHTML='<div style="font-size: var(--fs-sm);color:var(--text-dim)">カバンが まだ ありません。</div>';
+    listEl.innerHTML='<div style="font-size: var(--fs-sm);color:var(--text-dim)">通常のカバンが まだ ありません。</div>';
   } else {
     listEl.innerHTML=bags.map(b=>{
       const checked=(period.bagIds||[]).includes(b.id);
@@ -7507,7 +7730,8 @@ function openVacationBagPick(periodId){
         if(cb.checked){ if(!period.bagIds.includes(bagId)) period.bagIds.push(bagId); }
         else { period.bagIds=period.bagIds.filter(id=>id!==bagId); }
         save(); tick();
-        renderVacationPeriodList();
+        const countEl=document.getElementById('vacation-detail-bagpick-count');
+        if(countEl) countEl.textContent=String((period.bagIds||[]).length);
       });
     });
   }
@@ -7527,9 +7751,10 @@ function setDateFieldValue(id, val){
 // 単一選択(bag-period-from等)：タップした瞬間に1件決定して閉じる。
 // 複数選択(datepickMulti=true)：タップするたびにオン/オフをトグルし、「けってい」を押すまで閉じない。連続していない日もいくつでも選べる。
 let datepickTargetId=null, datepickYear=0, datepickMonth=0;
-let datepickMulti=false, datepickSelectedDates=new Set(), datepickOnDone=null;
+let datepickMulti=false, datepickSelectedDates=new Set(), datepickOnDone=null, datepickAllowedDates=null;
 function openDatePicker(inputId){
   datepickMulti=false;
+  datepickAllowedDates=null;
   datepickTargetId=inputId;
   const cur=getDateFieldValue(inputId);
   const base = cur ? new Date(cur+'T00:00:00') : new Date();
@@ -7540,10 +7765,13 @@ function openDatePicker(inputId){
   document.getElementById('datepick-modal').classList.add('open');
 }
 // 複数の日付をトグル選択するモードで開く。initialDates=最初から選択済みにする日付の配列、onDone(datesArray)=けってい時に呼ばれる
-function openDatePickerMulti(initialDates, onDone){
+// allowedDates を渡すと、その日付だけが選択でき、それ以外はカレンダー上で空白になる（イレギュラー期間専用カバンなど、
+// 期間の外の日を選べてしまうと矛盾するケース向け）
+function openDatePickerMulti(initialDates, onDone, allowedDates){
   datepickMulti=true;
   datepickSelectedDates=new Set(initialDates||[]);
   datepickOnDone=onDone;
+  datepickAllowedDates = allowedDates ? new Set(allowedDates) : null;
   const base = initialDates && initialDates.length ? new Date(initialDates[0]+'T00:00:00') : new Date();
   datepickYear=base.getFullYear(); datepickMonth=base.getMonth();
   document.getElementById('datepick-multi-count').style.display='block';
@@ -7555,17 +7783,27 @@ function renderDatePicker(){
   document.getElementById('datepick-label').textContent=`${datepickYear}年 ${datepickMonth+1}がつ`;
   const grid=document.getElementById('datepick-grid');
   grid.innerHTML='';
-  ['日','月','火','水','木','金','土'].forEach(w=>{
+  const mondayStart = !!data.weekStartMonday;
+  (mondayStart ? ['月','火','水','木','金','土','日'] : ['日','月','火','水','木','金','土']).forEach(w=>{
     const h=document.createElement('div');
     h.textContent=w; h.style.cssText='text-align:center;font-size: var(--fs-xs);font-weight:800;color:var(--text-dim)';
     grid.appendChild(h);
   });
-  const firstDay=new Date(datepickYear,datepickMonth,1).getDay();
+  const rawFirstDay=new Date(datepickYear,datepickMonth,1).getDay();
+  const firstDay = mondayStart ? (rawFirstDay+6)%7 : rawFirstDay; // 月曜始まりの時は月=0になるようずらす
   const daysInMonth=new Date(datepickYear,datepickMonth+1,0).getDate();
   const curVal=datepickMulti ? null : getDateFieldValue(datepickTargetId);
   for(let i=0;i<firstDay;i++) grid.appendChild(document.createElement('div'));
   for(let d=1; d<=daysInMonth; d++){
     const dk=`${datepickYear}-${String(datepickMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    // 許可日リストが指定されている時は、それ以外の日は選べないので空白のまま置く
+    // （例：イレギュラー期間専用カバンの日づけ選びは、その期間の日以外を選べてしまうと矛盾する）
+    if(datepickAllowedDates && !datepickAllowedDates.has(dk)){
+      const blank=document.createElement('div');
+      blank.style.cssText='min-height:40px';
+      grid.appendChild(blank);
+      continue;
+    }
     const isSelected = datepickMulti ? datepickSelectedDates.has(dk) : dk===curVal;
     const cell=document.createElement('button');
     cell.type='button';
@@ -7612,9 +7850,7 @@ document.getElementById('vacation-dates-btn').addEventListener('click',()=>{
     vacationNewDates=dates;
     document.getElementById('vacation-dates-btn').textContent=`📅 日づけを えらぶ（${dates.length}にち）`;
     const chipsEl=document.getElementById('vacation-dates-chips');
-    chipsEl.innerHTML = dates.map(dk=>
-      `<span style="background:var(--surface2);border:1.5px solid var(--border);border-radius: var(--r-full);padding:3px 10px;font-size: var(--fs-xs);font-weight:700">${Number(dk.slice(5,7))}/${Number(dk.slice(8,10))}</span>`
-    ).join('');
+    chipsEl.innerHTML = renderDateCalendarGrid(dates);
   });
 });
 // 期間指定型の開始日/終了日ボタン。表示テキストと同時にdataset.valueへ実際の値(YYYY-MM-DD)を持たせる
@@ -7934,10 +8170,18 @@ function updateBagRepeatDatesUI(){
   ).join('');
 }
 document.getElementById('bag-repeat-dates-btn').addEventListener('click',()=>{
+  // イレギュラー期間専用のカバンなら、親の期間の日づけ以外は選べないようにする
+  let allowedDates=null;
+  if(bagVacationPeriodId){
+    const period=(getChild().vacationPeriods||[]).find(p=>p.id===bagVacationPeriodId);
+    if(period){
+      allowedDates = period.type==='range' ? expandDateRange(period.rangeFrom, period.rangeUntil) : (period.dates||[]);
+    }
+  }
   openDatePickerMulti(bagRepeatDates, (dates)=>{
     bagRepeatDates=dates;
     updateBagRepeatDatesUI();
-  });
+  }, allowedDates);
 });
 document.getElementById('bag-repeat-weekly').addEventListener('click',()=>{ bagRepeatType='weekly'; updateBagDowUI(); });
 document.getElementById('bag-repeat-monthly').addEventListener('click',()=>{ bagRepeatType='monthly_nth'; updateBagDowUI(); });
@@ -7978,13 +8222,27 @@ document.getElementById('bag-save').addEventListener('click',()=>{
   } else {
     c.bags.push({id:Date.now().toString(),name,type:bagType,tasks:bagTasks,enabled:true,dow:dowToSave,repeatType,repeatDates:repeatDatesToSave,nthWeek,nthDow,defaultTime:dtime,defaultEndTime:dend,timeByDate:{},endByDate:{},completedByDate:{},showInLabel,labelText,labelOrder,allowFree,colorIndex:bagColorIndex,vacationPeriodId});
   }
-  save(); tick(); document.getElementById('bag-modal').classList.remove('open'); openParent(); showParentTab('bag');
+  save(); tick(); document.getElementById('bag-modal').classList.remove('open'); returnFromBagModal(vacationPeriodId);
 });
 document.getElementById('bag-delete').addEventListener('click',()=>{
   if(!editBagId||!confirm('このカバンを削除しますか？'))return;
-  const c=getChild(); c.bags=c.bags.filter(b=>b.id!==editBagId);
-  save(); tick(); document.getElementById('bag-modal').classList.remove('open'); openParent(); showParentTab('bag');
+  const c=getChild();
+  const deletedBag=c.bags.find(b=>b.id===editBagId);
+  const vacationPeriodId = deletedBag ? deletedBag.vacationPeriodId : null;
+  c.bags=c.bags.filter(b=>b.id!==editBagId);
+  save(); tick(); document.getElementById('bag-modal').classList.remove('open'); returnFromBagModal(vacationPeriodId);
 });
+// カバン編集モーダルを閉じた後、どこに戻るか。イレギュラー期間専用カバンならその期間の詳細ページへ、それ以外は通常のカバン一覧へ
+function returnFromBagModal(vacationPeriodId){
+  if(vacationPeriodId){
+    const period=(getChild().vacationPeriods||[]).find(p=>p.id===vacationPeriodId);
+    if(period){
+      openVacationDetail(vacationPeriodId);
+      return;
+    }
+  }
+  openParent(); showParentTab('bag');
+}
 document.getElementById('bag-duplicate').addEventListener('click',()=>{
   const src=getBags().find(b=>b.id===editBagId);
   if(!src) return;
@@ -7992,8 +8250,8 @@ document.getElementById('bag-duplicate').addEventListener('click',()=>{
   document.getElementById('bag-modal').classList.remove('open');
   openBagModal(null, copy);
 });
-document.getElementById('bag-cancel').addEventListener('click',()=>{document.getElementById('bag-modal').classList.remove('open');openParent();showParentTab('bag');});
-document.getElementById('bag-modal').addEventListener('click',e=>{if(e.target===e.currentTarget){document.getElementById('bag-modal').classList.remove('open');openParent();showParentTab('bag');}});
+document.getElementById('bag-cancel').addEventListener('click',()=>{document.getElementById('bag-modal').classList.remove('open');returnFromBagModal(bagVacationPeriodId);});
+document.getElementById('bag-modal').addEventListener('click',e=>{if(e.target===e.currentTarget){document.getElementById('bag-modal').classList.remove('open');returnFromBagModal(bagVacationPeriodId);}});
 
 
 // ═══ 予定編集 ═══
@@ -8659,7 +8917,7 @@ document.getElementById('book-msg-send').addEventListener('click',()=>{
   if(!t) return;
   setWeeklyMessage(t);
   inp.value='';
-  showToast('今週の「ほん」ページに のこしました');
+  showToast('今週の「そだてノート」ページに のこしました');
 });
 document.getElementById('book-msg-input').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('book-msg-send').click(); });
 
@@ -8719,7 +8977,7 @@ document.getElementById('cond-add').addEventListener('click',()=>{
 
 // ═══ 初期化 ═══
 migrateVacationPeriods();
-applyNowMarkerColor(); updateCoinBadge(); updateDevPreviewBtn();
+applyNowMarkerColor(); updateCoinBadge(); updateDevPreviewBtn(); updateDevForceSundayBtn();
 updatePendingBadge(); tick(); applyKeepAwake(); refreshWeatherIfNeeded(); applyWantPanelVisibility();
 maybeShowIntro(); // カバンが1つも無い＝初回なら「カバンとは何か」を説明する
 updateNotifyUI();
