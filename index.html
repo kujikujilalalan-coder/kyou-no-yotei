@@ -2013,7 +2013,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v159・2026-07-29</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v165・2026-07-30</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -3313,8 +3313,8 @@ function renderTimeline(){
         }
       });
     }
-    if(nowCandidateIds.length>=2){
-      // 2件以上重なった時だけ大きなカードに分割する。1件だけの時は通常の帯(全幅)のまま。
+    if(nowCandidateIds.length>=1){
+      // 1件でもあれば、左を細いタイムラインにして右に大きなチェックリストを出す
       splitMode=true;
       // 前回選んだものがまだ候補にあればそれを継続。無ければ一番開始が早いもの（先頭）にする
       splitEvId = nowCandidateIds.includes(selectedNowTaskId) ? selectedNowTaskId : nowCandidateIds[0];
@@ -3351,15 +3351,21 @@ function renderTimeline(){
 
   // ステージ（左右の余白＋中央の本体）
   const SIDE=TL_SIDE; // 左右余白の割合(%)
+  const RAIL_W_PCT = 26; // 分割時の本体（細いレール）の幅(%)
   const stage=document.createElement('div');
   stage.style.cssText=`position:relative;width:100%;height:${24*60*PX_PER_MIN}px;`;
   scroll.appendChild(stage);
   // 左右の余白に 時間帯グラデーション（朝昼夕夜）
-  // ※レール方式は廃止。splitMode中も余白の幅は変えない（本体は常にSIDE〜100-SIDEの全幅）
+  // 分割モード時：右の余白は「レール（本体）の右端 〜 画面右端」まで広げる。
+  // オンタイムカードはこの広いグラデーションの上にレイヤーされる（＝右側は全部「空」の背景になる）
+  const rgLeftPct = SIDE + RAIL_W_PCT; // 分割時：レール右端(%)
+  const rgWidthPct = 100 - rgLeftPct;  // 分割時：そこから画面右端までの幅(%)
   const lg=document.createElement('div');
   lg.style.cssText=`position:absolute;left:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;pointer-events:none;`;
   const rg=document.createElement('div');
-  rg.style.cssText = `position:absolute;right:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;pointer-events:none;`;
+  rg.style.cssText = splitMode
+    ? `position:absolute;left:${rgLeftPct}%;top:0;width:${rgWidthPct}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;pointer-events:none;`
+    : `position:absolute;right:0;top:0;width:${SIDE}%;height:100%;background:${TIMEBAND_GRADIENT};opacity:0.8;z-index:7;pointer-events:none;`;
   stage.appendChild(lg); stage.appendChild(rg);
   // 空に淡いきらめきを常時散らす（不透明度だけで質感を足す。色相は変えない）
   {
@@ -3450,30 +3456,23 @@ function renderTimeline(){
   // 「カバン由来のオンタイム予定」が「今・進行中」かつ「やること(tasks)を持ち」かつ「まだ完了していない」時だけ、
   // 大きな全幅(または等分)カードで表示する。オフタイムや、やること無し・完了済みでは今まで通りの帯のまま。
   // 同時刻に複数のオンタイムが重なっていたら、全部を候補として集め、画面をその件数ぶん均等に分ける。
-  // ※ splitMode判定はlg/rg作成前（上部）に移動済み。ここでは幅の計算だけ行う。
+  // ※ splitMode判定はlg/rg作成前（上部）に移動済み。ここでは幅の計算だけ行う。RAIL_W_PCTも上部で定義済み。
+  const LEFT_RAIL_RIGHT = splitMode ? (100-SIDE-RAIL_W_PCT) : SIDE; // 本体の右端(%)
 
-  // 内側の絶対配置コンテナ（本体・中央寄せで狭める）。レール方式は廃止したので常に通常幅。
+  // 内側の絶対配置コンテナ（本体・中央寄せで狭める）
   const inner=document.createElement('div');
-  inner.style.cssText=`position:absolute;left:${SIDE}%;right:${SIDE}%;top:0;height:${24*60*PX_PER_MIN}px;`;
+  inner.style.cssText=`position:absolute;left:${SIDE}%;right:${LEFT_RAIL_RIGHT}%;top:0;height:${24*60*PX_PER_MIN}px;`;
   stage.appendChild(inner);
 
-  // 「今」の候補ぶんだけ、画面をN等分してそれぞれに大きなカードを出す（1件なら全幅、2件なら左右2分割、3件なら3分割…）
-  // ※時間未設定カバンの昇格(promotedUntimedEv)だけでsplitModeがtrueになる場合は候補0件なので、その時は1枠だけ作る
-  let rightAreas=[];
+  // 分割モード時：右側に「いまのやること」を大きく出すためのパネル（ビューポート固定・縦中央・スクロール追従）
+  let rightPanel=null;
   if(splitMode){
-    const nCand=Math.max(1, nowCandidateIds.length);
-    const totalWidthPct = 100 - 2*SIDE; // 本体の幅
-    const gapPct = nCand>1 ? 1 : 0; // カード同士のすきま
-    const colWidthPct = totalWidthPct/nCand - gapPct;
-    for(let idx=0; idx<nCand; idx++){
-      const area=document.createElement('div');
-      area.id=`now-right-panel-${idx}`;
-      area.dataset.nowPanel='1';
-      const leftPct = SIDE + (totalWidthPct/nCand)*idx + (idx>0?gapPct/2:0);
-      area.style.cssText=`position:absolute;left:${leftPct}%;width:${colWidthPct}%;top:50%;transform:translateY(-50%);z-index:10;max-height:65vh;overflow-y:auto;`;
-      col.appendChild(area);
-      rightAreas.push(area);
-    }
+    rightPanel=document.createElement('div');
+    rightPanel.id='now-right-panel';
+    rightPanel.dataset.nowPanel='1';
+    // 左レール右端(SIDE+RAIL_W_PCT)から始め、画面右端ぎりぎりまで（＝広げた余白グラデーションの上に重ねる）
+    rightPanel.style.cssText=`position:absolute;left:${SIDE+RAIL_W_PCT+1}%;right:2%;top:50%;transform:translateY(-50%);z-index:10;max-height:65vh;overflow-y:auto;`;
+    col.appendChild(rightPanel);
   }
 
   // ── 睡眠ゾーン（背景） ──
@@ -3509,10 +3508,11 @@ function renderTimeline(){
   }
 
   // ── 起床・就寝マーカー ──
+  const markerLeft = splitMode ? 2 : 6;
   [['🌅 おきる',wake],['🌙 ねる',sleep]].forEach(([lbl,mn])=>{
     const mk=document.createElement('div');
-    mk.style.cssText=`position:absolute;left:6px;right:6px;top:${mn*PX_PER_MIN}px;height:0;display:flex;align-items:center;gap:6px;z-index:2;`;
-    mk.innerHTML=`<div style="flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--accent) 0 6px,transparent 6px 12px);opacity:0.6"></div><div style="font-size: var(--fs-xs);font-weight:800;color:#7c2d12;background:rgba(255,255,255,0.9);padding:2px 8px;border-radius: var(--r-sm);white-space:nowrap">${lbl}</div>`;
+    mk.style.cssText=`position:absolute;left:${markerLeft}px;right:6px;top:${mn*PX_PER_MIN}px;height:0;display:flex;align-items:center;gap:6px;z-index:2;`;
+    mk.innerHTML=`<div style="flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--accent) 0 6px,transparent 6px 12px);opacity:0.6"></div>${splitMode?'':`<div style="font-size: var(--fs-xs);font-weight:800;color:#7c2d12;background:rgba(255,255,255,0.9);padding:2px 8px;border-radius: var(--r-sm);white-space:nowrap">${lbl}</div>`}`;
     inner.appendChild(mk);
   });
 
@@ -3566,8 +3566,8 @@ function renderTimeline(){
     // 重なり防止：最低高さは一切かけない＝すべて実時間どおりの高さで描く。
     // 「今の予定」カードだけは、次の予定にぶつからない範囲で下に少しだけ伸ばして見やすくする。
     let h, extra=0;
-    if(nowCandidateIds.includes(ev.id)){
-      h=Math.max(naturalH,2); // どのみち帯は描かず使われないが、計算エラーを避けるため一応入れておく
+    if(splitMode){
+      h=Math.max(naturalH,2);
     } else if(isNow && !editMode){
       // 次の予定の開始位置までの余白を計算し、その範囲で最大64pxまで（上方向には伸ばさない）
       const nextStart = (i<sorted.length-1) ? toMin(sorted[i+1].time)*PX_PER_MIN : sleep*PX_PER_MIN;
@@ -3579,37 +3579,99 @@ function renderTimeline(){
 
     const block=document.createElement('div');
 
-    if(nowCandidateIds.includes(ev.id)){
+    if(splitMode){
+      // ── 分割モード：左の細い列。全予定を実時間どおりの帯で（名前のみ・時刻表記なし） ──
+      const isNowCandidate = nowCandidateIds.includes(ev.id); // 今の時間帯にかぶってる「やること」候補か
       const isOvertimeCandidate = overtimeIds.has(ev.id); // 時間切れでも居座っている「やること」か
-      if(splitMode){
-        // ── 2件以上の「今」候補：帯は描かず、rightAreas[colIdx]に大きなカードを出す(N件ならN等分の1枠) ──
-        const colIdx=nowCandidateIds.indexOf(ev.id);
-        const area=rightAreas[colIdx];
-        if(area){
-          area.innerHTML='';
-          const card=document.createElement('div');
-          card.style.cssText='position:relative;';
-          card.innerHTML=buildTaskCard(ev, isOvertimeCandidate);
-          area.appendChild(card);
-          if(isOvertimeCandidate){
-            const skipBtn=card.querySelector('#overtime-skip-btn');
-            if(skipBtn) skipBtn.addEventListener('click',e=>{
-              e.stopPropagation();
-              withTimeEditPin(()=>{
-                setBagSkipped(ev._bagId, getDisplayDate(), true);
-                showToast('きょうは とばしました');
-                tick();
-              });
-            });
-          }
-        }
+      const isLongestOvertime = isOvertimeCandidate && ev.id===longestOvertimeId; // 脈動させるのはこれだけ
+      const editable = ev._bagId && (!isPast || isOvertimeCandidate); // 時間切れでも⏰・とばすは押せる
+      const hasTasksSplit = !!(ev.tasks && ev.tasks.length>0); // 本体タップ(覗く)の表示条件
+      const pastStyle = (isPast && !isOvertimeCandidate) ? 'border-color:rgba(100,105,115,0.45);background:rgba(100,105,115,0.12)' : '';
+      const overtimeStyle = isLongestOvertime ? ' overtime-pulse' : (isOvertimeCandidate ? ' overtime-static' : '');
+      const nowHi = isOvertimeCandidate ? ''
+                  : isSplitNow ? '' // 選択中は枠線自体を残り時間の色にしているので、別の色のリングは不要(旧: accentのbox-shadow)
+                  : isNowCandidate ? 'box-shadow:0 0 0 2px var(--text-dim);' : '';
+      // 帯とカードの色を一致させる(帯だけ種類ごとの固定色、カードだけ残り時間の色、という食い違いをなくす)
+      let matchColorStyle='';
+      if(isSplitNow && !isOvertimeCandidate){
+        const mS=toMin(ev.time||'00:00'); const mE=ev.end?toMin(ev.end):mS+30;
+        const mElapsed=Math.max(0,Math.min(1,(cur-mS)/Math.max(1,mE-mS)));
+        const mBagHex = ev._bagId ? bagColor(ev._bagId) : null;
+        const mBorder = remainColorCss(1-mElapsed, null, mBagHex);
+        const mFill = remainColorCss(1-mElapsed, 0.16, mBagHex);
+        matchColorStyle = `border-color:${mBorder} !important;background:${mFill} !important;`;
+      }
+      const tooShort = naturalH < 22; // 細すぎる帯は名前・アイコンを省いて色だけ
+
+      // 同時刻に複数の予定が重なっていたら、横に並べて両方見えるようにする。
+      // 「今の候補」どうしの重なりは既存の並び順(nowCandidateIds)を優先し、それ以外の
+      // 予定どうしの重なりは一般化した重なり検出(overlapCols)で列を割り当てる。
+      let leftPos='0', widthPos='calc(100% - 2px)';
+      if(isNowCandidate && nowCandidateIds.length>1){
+        const colIdx=nowCandidateIds.indexOf(ev.id), totalCols=nowCandidateIds.length;
+        leftPos=`calc(${(100/totalCols)*colIdx}% + 1px)`;
+        widthPos=`calc(${100/totalCols}% - 3px)`;
       } else {
-        // ── 「今」候補が1件だけ：タイムラインの帯の位置に、大きなカードをそのままフル幅で埋め込む(以前の仕様) ──
-        block.style.cssText=`position:absolute;left:6px;right:14px;top:${y+2}px;z-index:10;max-height:65vh;overflow-y:auto;`;
-        block.innerHTML=buildTaskCard(ev, isOvertimeCandidate);
-        if(!editMode) bindNowCardEl(scroll, ev, block);
+        const oc=overlapCols.get(ev.id);
+        if(oc && oc.totalCols>1){
+          leftPos=`calc(${(100/oc.totalCols)*oc.col}% + 1px)`;
+          widthPos=`calc(${100/oc.totalCols}% - 3px)`;
+        }
+      }
+      block.style.cssText=`position:absolute;left:${leftPos};width:${widthPos};top:${y+2}px;height:${h}px;z-index:${isSplitNow?5:(isNowCandidate?4:3)};`;
+      if(isSplitNow){ block.dataset.connectNow='1'; block.dataset.connectId=ev.id; }
+      // ⏰アイコン：複数候補が横並びの場合は帯の上部外（top: -20px）に出して幅に関係なく押せるようにする
+      const multiCandidate = isNowCandidate && nowCandidateIds.length>1;
+      const showEditIcon = editable && !tooShort;
+      const editIconHtml = showEditIcon
+        ? (multiCandidate
+          // 複数候補：帯の上端より外に出す（absoluteで-22px上）→ 幅が細くなっても隠れない
+          ? `<button class="tl-time-edit-icon" type="button" title="じかんへんこう" aria-label="じかんを へんこうする" style="position:absolute;top:-30px;left:50%;transform:translateX(-50%);z-index:10">⏰</button>`
+          // 通常：今まで通り右下
+          : `<button class="tl-time-edit-icon" type="button" title="じかんへんこう" aria-label="じかんを へんこうする">⏰</button>`)
+        : '';
+      const useVertical = multiCandidate && data.verticalBandText;
+      const nameHtml =
+        useVertical
+          ? `<div class="tl-band-name-vertical">${ev.name}</div>`
+          : `<div class="tl-band-name">${ev.fromChild?'⭐ ':''}${ev.name}</div>`;
+      const nameWrapper = tooShort ? '' :
+        `<div style="min-width:0;${isPast?'opacity:0.75':''};${useVertical?'display:flex;align-items:center;justify-content:center;height:calc(100% - 8px);':''}">
+          ${nameHtml}
+        </div>`;
+      block.innerHTML=`<div class="tl-band ${ev.type}${overtimeStyle}" style="height:100%;width:100%;position:relative;overflow:visible;${pastStyle}${nowHi}${matchColorStyle}">
+        ${nameWrapper}
+        ${editIconHtml}
+      </div>`;
+      // 本体タップ：
+      //   ・今の候補で、まだ選ばれてない方 → タップで「これをやる」に切り替え（右のカードが変わる）
+      //   ・それ以外でやることがある予定 → 中身を覗く
+      if(isNowCandidate && !isSplitNow){
+        block.style.cursor='pointer';
+        block.addEventListener('click',()=>{ selectedNowTaskId=ev.id; renderTimeline(); });
+      } else if(hasTasksSplit && !isSplitNow){
+        block.style.cursor='pointer';
+        block.addEventListener('click',()=>{ openPeekModal(ev); });
+      }
+      // ⏰アイコン → 時刻編集（本体タップとは別。伝播を止める）
+      if(showEditIcon){
+        const icon=block.querySelector('.tl-time-edit-icon');
+        if(icon) icon.addEventListener('click',e=>{
+          e.stopPropagation();
+          withTimeEditPin(()=>openTimeModal(ev._bagId));
+        });
+      }
+      inner.appendChild(block);
+
+      // 右側：このevが「今のやること」なら、大きな固定カードを出す（時間表現はしない）
+      if(isSplitNow && rightPanel){
+        rightPanel.innerHTML='';
+        const card=document.createElement('div');
+        card.style.cssText='position:relative;';
+        card.innerHTML=buildTaskCard(ev, isOvertimeCandidate);
+        rightPanel.appendChild(card);
         if(isOvertimeCandidate){
-          const skipBtn=block.querySelector('#overtime-skip-btn');
+          const skipBtn=card.querySelector('#overtime-skip-btn');
           if(skipBtn) skipBtn.addEventListener('click',e=>{
             e.stopPropagation();
             withTimeEditPin(()=>{
@@ -3619,7 +3681,7 @@ function renderTimeline(){
             });
           });
         }
-        inner.appendChild(block);
+        nowEl=block;
       }
       return;
     }
@@ -3686,8 +3748,8 @@ function renderTimeline(){
   });
 
   // ── 時間未設定カバンの昇格カードを右パネルに出す（自由時間の代わり） ──
-  if(promotedUntimedEv && rightAreas[0]){
-    const area=rightAreas[0];
+  if(promotedUntimedEv && rightPanel){
+    const area=rightPanel;
     area.innerHTML='';
     const card=document.createElement('div');
     card.style.cssText='position:relative;';
@@ -3749,15 +3811,13 @@ function renderTimeline(){
   appJustOpened=false; // 脈動は最初の1回だけ
 
   // 通常モード：nowEvIdのカードにクリックハンドラを登録
-  // 分割モード：nowCandidateIds全員ぶん、それぞれのカードにクリックハンドラを登録する（1件だけ選ぶ方式は廃止）
+  // 分割モード：選ばれている(splitEvId)候補だけ、rightPanelにチェックリスト操作を登録する
   // 昇格した時間未設定カバン：sortedに存在しない仮想evなので、promotedUntimedEvを直接渡す
   if(promotedUntimedEv && !editMode){
-    bindNowCardEl(scroll, promotedUntimedEv, rightAreas[0]);
-  } else if(splitMode && !editMode){
-    nowCandidateIds.forEach((cid,idx)=>{
-      const cev=sorted.find(x=>x.id===cid);
-      if(cev) bindNowCardEl(scroll, cev, document.getElementById(`now-right-panel-${idx}`));
-    });
+    bindNowCardEl(scroll, promotedUntimedEv, rightPanel);
+  } else if(splitMode && !editMode && splitEvId){
+    const cev=sorted.find(x=>x.id===splitEvId);
+    if(cev) bindNowCardEl(scroll, cev, rightPanel);
   } else if(nowEvId && !editMode){
     bindNowCardEl(scroll, sorted.find(x=>x.id===nowEvId));
   }
@@ -3914,7 +3974,7 @@ function buildNowCard(ev, cur, cardH){
 
 function bindNowCardEl(scroll, ev, explicitRoot){
   if(!ev)return;
-  // 分割モードでは、このevに対応する自分専用のパネル(now-right-panel-N)だけを対象にする(他の候補のパネルは触らない)
+  // 分割モードでは、選ばれている1件だけのパネル(#now-right-panel)を対象にする
   const roots=(explicitRoot ? [scroll, explicitRoot] : [scroll, document.getElementById('now-right-panel')]).filter(Boolean);
   roots.forEach(root=>{
     root.querySelectorAll('.now-task-item').forEach(item=>{
