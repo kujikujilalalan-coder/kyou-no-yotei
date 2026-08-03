@@ -2031,7 +2031,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v170・2026-08-03</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v172・2026-08-03</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2609,11 +2609,15 @@ async function runAutoBackup(force){
     return false;
   }
   try{
+    // 手動の「書き出す」ボタンと同じ形式に統一する（旧: kodomoV6/kodomo_pending/kodomo_want という
+    // 別の形式で書き出しており、「読み込む」ボタンが期待する形式と一致せず、
+    // 自動バックアップしたファイルを読み込めないという不具合があったため）
     const payload = JSON.stringify({
-      kodomoV6: data,
-      kodomo_pending: pending,
-      kodomo_want: wantList,
-      savedAt: new Date().toISOString(),
+      version: 'kodomoV6',
+      exportedAt: new Date().toISOString(),
+      data,
+      pending,
+      wantList,
     });
     const fh = await backupDirHandle.getFileHandle('kyou-no-yotei-backup.json', { create:true });
     const w = await fh.createWritable();
@@ -4293,7 +4297,7 @@ function buildTaskCard(ev, isOvertime){
     ? `<div style="font-size: var(--fs-sm);font-weight:900;color:#fff;background:var(--danger);display:inline-block;padding:3px 12px;border-radius: var(--r-md);margin-bottom:6px">⏰ じかんが すぎたよ</div>`
     : '';
   const skipBtnHtml = isOvertime
-    ? `<button type="button" id="overtime-skip-btn" style="width:100%;margin-top:8px;padding:8px 12px;min-height:44px;border-radius: var(--r-md);border:2px solid var(--danger);background:#fff;color:var(--danger);font-weight:800;font-size: var(--fs-xs);cursor:pointer">😴 きょうは とばす</button>`
+    ? `<button type="button" id="overtime-skip-btn" style="display:block;width:auto;margin:8px auto 0;padding:6px 16px;min-height:44px;border-radius: var(--r-md);border:1.5px solid var(--danger);background:#fff;color:var(--danger);font-weight:800;font-size: var(--fs-xs);cursor:pointer">😴 きょうは とばす</button>`
     : '';
 
   return `<div class="${pulseClass.trim()}" style="background:${bgFill};border:10px solid ${borderColor};border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:72vh;overflow:hidden;transition:background 0.8s linear, border-color 0.8s linear">
@@ -6647,10 +6651,13 @@ document.getElementById('import-file').addEventListener('change',e=>{
         tick();
         e.target.value=''; return;
       }
-      // 全員分ファイル
-      if(!backup.data||!backup.data.children) throw new Error('形式が違います');
+      // 全員分ファイル（手動書き出し = data/pending/wantList、自動バックアップ = kodomoV6/kodomo_pending/kodomo_want の両方に対応）
+      const restoredData = backup.data || backup.kodomoV6;
+      const restoredPending = backup.pending || backup.kodomo_pending;
+      const restoredWant = backup.wantList || backup.kodomo_want;
+      if(!restoredData||!restoredData.children) throw new Error('形式が違います');
       if(!confirm('いまのデータを ぜんぶ うわがきします。よろしいですか？\n（読み込み前のデータは消えます）')) return;
-      data=backup.data;
+      data=restoredData;
       if(!data.parentLock) data.parentLock={enabled:false,pin:''};
       if(!data.destHistory) data.destHistory=[];
       if(!data.nightMode) data.nightMode={enabled:false,start:'21:00',end:'06:00'};
@@ -6658,8 +6665,8 @@ document.getElementById('import-file').addEventListener('change',e=>{
 // 根拠：このアプリは「タイムラインを見ながら過ごす」前提。しかも料理・抱っこ・洗濯の最中は
 //       手が濡れている/塞がっているため、消えた画面を復帰させるのが一番つらい操作になる。
 if(data.keepAwake===undefined) data.keepAwake=true;
-      pending=backup.pending||[];
-      wantList=backup.wantList||[];
+      pending=restoredPending||[];
+      wantList=restoredWant||[];
       if(backup.dlHistory) localStorage.setItem('kodomo_dl_history',JSON.stringify(backup.dlHistory));
       if(data.activeChild===undefined) data.activeChild=0;
       data.children.forEach(migrateChild);
