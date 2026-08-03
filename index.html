@@ -468,15 +468,27 @@ body.viewing-other-day #date-big { color: var(--accent); }
 #fade-bottom { bottom: 0; background: linear-gradient(0deg, #eef2f9, transparent); }
 
 /* いまに戻るボタン */
-#back-to-now {
-  position: absolute; bottom: 80px; right: 16px; left: auto; transform: none;
-  z-index: 50; background: var(--now-marker-color); color: #fff; border: none;
-  border-radius: var(--r-lg); padding: 12px 20px; font-size: var(--fs-md); font-weight: 900;
-  font-family: inherit; cursor: pointer; box-shadow: 0 4px 16px var(--now-marker-shadow);
-  display: none; min-height: 44px; align-items: center; gap: 8px;
+/* ヘッダー常設の「いま」チップ：常に現在時刻を表示し、タップで今の時間へ戻る。
+   別の日を見ている/スクロールで今から離れている時だけ縁を強調して「押せる」ことを伝える。
+   （旧: タイムライン内に浮かせた戻るボタンは、チェックリストの「ぜんぶできた」ボタンと
+   位置が重なることがあったため廃止し、常に同じ場所にあるヘッダーへ統合した） */
+.header-now-chip {
+  display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  background: var(--surface2); border: 2px solid var(--border); color: var(--text-dim);
+  border-radius: var(--r-lg); padding: 6px 14px; font-family: inherit;
+  font-size: var(--fs-md); font-weight: 900; cursor: pointer; min-height: 44px;
+  font-variant-numeric: tabular-nums;
 }
-body.fab-left #back-to-now { right: auto; left: 16px; }
-#back-to-now.show { display: flex; }
+.header-now-chip .hn-icon { font-size: var(--fs-md); }
+.header-now-chip:active { transform: scale(0.95); }
+.header-now-chip.needs-return {
+  border-color: var(--accent); color: var(--accent); background: rgba(180,83,9,0.08);
+  animation: headerNowPulse 1.6s ease-in-out infinite;
+}
+@keyframes headerNowPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(180,83,9,0.35); }
+  50%     { box-shadow: 0 0 0 6px rgba(180,83,9,0); }
+}
 
 /* 編集モードバー */
 #edit-mode-bar {
@@ -1140,14 +1152,18 @@ body.fab-left #back-to-now { right: auto; left: 16px; }
    タブを押した指のまま、そのまま届く範囲だけで操作が完結する)。左右は保護者設定で選べる。 ── */
 #quick-fab {
   position: fixed; right: 0; top: 65%; transform: translateY(-50%); z-index: 110;
-  width: 44px; height: 72px;
+  width: 15px; height: 72px;
   background: var(--surface2); border: 2px solid var(--border); border-right: none; color: var(--text-dim);
   border-radius: var(--r-md) 0 0 var(--r-md);
-  font-size: var(--fs-lg); cursor: pointer; font-family: inherit;
+  font-size: var(--fs-sm); cursor: pointer; font-family: inherit;
   display: flex; align-items: center; justify-content: center;
   box-shadow: -2px 2px 10px rgba(0,0,0,0.16);
 }
 #quick-fab span { pointer-events: none; }
+/* 見た目は細いタブだが、押せる範囲(タップ判定)は44px相当を確保する */
+#quick-fab::before {
+  content: ''; position: absolute; top: -6px; bottom: -6px; left: -25px; right: -6px;
+}
 #quick-fab:active { transform: translateY(-50%) scale(0.93); }
 /* 保護者設定で「ひだり」を選んだ場合 */
 body.fab-left #quick-fab {
@@ -1155,7 +1171,7 @@ body.fab-left #quick-fab {
   border-radius: 0 var(--r-md) var(--r-md) 0; box-shadow: 2px 2px 10px rgba(0,0,0,0.16);
 }
 #quick-sheet {
-  position: fixed; right: 46px; top: 65%; transform: translateY(-50%) scale(0.85); z-index: 130;
+  position: fixed; right: 20px; top: 65%; transform: translateY(-50%) scale(0.85); z-index: 130;
   background: var(--surface); border: 2px solid var(--border); border-radius: var(--r-lg);
   padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
   display: none; flex-direction: column; gap: 6px;
@@ -1163,7 +1179,7 @@ body.fab-left #quick-fab {
   transform-origin: right center; opacity: 0;
   transition: transform 0.15s ease-out, opacity 0.15s ease-out;
 }
-body.fab-left #quick-sheet { right: auto; left: 46px; transform-origin: left center; transform: translateY(-50%) scale(0.85); }
+body.fab-left #quick-sheet { right: auto; left: 20px; transform-origin: left center; transform: translateY(-50%) scale(0.85); }
 #quick-sheet.open { display: flex; transform: translateY(-50%) scale(1); opacity: 1; }
 body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
 #quick-sheet .qs-title { font-size: var(--fs-xs); font-weight: 900; color: var(--text-dim); margin-bottom: 0; }
@@ -1292,6 +1308,9 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
         <div id="date-big"></div>
         <button id="date-next" aria-label="つぎの日" title="つぎの日">▶</button>
       </div>
+      <button id="header-now-chip" class="header-now-chip" aria-label="いまの じかんへ うごかす" title="タップで いまの時間へ うごきます">
+        <span class="hn-icon">🕐</span><span id="header-now-time-text">--:--</span>
+      </button>
     </div>
     <div id="weather-badge" style="display:none"></div>
   </div>
@@ -1330,7 +1349,6 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       <div id="timeline-scroll"></div>
       <div id="fade-top"></div>
       <div id="fade-bottom"></div>
-      <button id="back-to-now" aria-label="いまの じかんへ うごかす"></button>
       <!-- 片手（親指）でよく使う操作に届くための、画面右下のボタン。
            抱っこ・料理・洗濯をしながらでも、持ち替えずに操作できるようにする。 -->
       <button id="quick-fab" aria-label="きょうの よていを すぐ なおす" title="きょうの予定をすぐ直す"><span>⚡</span></button>
@@ -2013,7 +2031,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v165・2026-07-30</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v170・2026-08-03</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2925,10 +2943,13 @@ function remainPieHTML(remainFrac, remainMin, color, size){
   const trackColor = 'rgba(0,0,0,0.10)';
   const numPx = Math.max(11, Math.round(size*0.30));
   const numColor = remainBadgeTextColor(remainFrac)==='#fff' ? color : 'var(--text)'; // 黄色は白背景の上で読みにくいので濃いグレーにする
+  // 円が大きい(主役サイズ)時だけ、数字の下に単位を添える。小さい隅置き用途では今まで通り数字のみ。
+  const unitHtml = size>=80 ? `<span style="font-size:${Math.round(numPx*0.38)}px;font-weight:800;color:${numColor};opacity:0.75;line-height:1;margin-top:2px">ふん</span>` : '';
   return `<div role="img" aria-label="のこり ${remainMin}ふん" style="position:relative;width:${size}px;height:${size}px;flex-shrink:0">
       <div style="width:100%;height:100%;border-radius:50%;background:conic-gradient(${color} 0% ${pct}%, ${trackColor} ${pct}% 100%);transform:rotate(-90deg);box-shadow:0 2px 6px rgba(0,0,0,0.12)"></div>
-      <div style="position:absolute;inset:${Math.round(size*0.14)}px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:${Math.round(size*0.14)}px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center">
         <span style="font-size:${numPx}px;font-weight:900;color:${numColor};font-variant-numeric:tabular-nums;line-height:1">${remainMin}</span>
+        ${unitHtml}
       </div>
     </div>`;
 }
@@ -3248,15 +3269,32 @@ function computeOverlapColumns(events){
   const visited=new Set();
   withRange.forEach(item=>{
     if(visited.has(item.id)) return;
-    // 幅優先で、繋がっている(重なっている)予定を1つのグループとしてまとめる
+    // 幅優先で、繋がっている(重なっている)予定を1つのグループ(クラスタ)としてまとめる。
+    // ※ここでの「繋がり」は鎖状でもよい(A-B, B-Cが重なっていればA-Cが重ならなくても同じクラスタ)。
+    //   クラスタ分け自体は「同じ横幅の中で列を分け合う対象」を決めるためだけに使い、
+    //   実際に何列必要かは、この下のsweep(列の使い回し)で改めて計算する。
     const group=[]; const queue=[item.id]; visited.add(item.id);
     while(queue.length){
       const cur=queue.shift(); group.push(cur);
       adj.get(cur).forEach(nb=>{ if(!visited.has(nb)){ visited.add(nb); queue.push(nb); } });
     }
     if(group.length<=1){ result.set(group[0], {col:0, totalCols:1}); return; }
-    const orderedGroup = withRange.filter(x=>group.includes(x.id)).map(x=>x.id);
-    orderedGroup.forEach((id,idx)=>{ result.set(id, {col:idx, totalCols:orderedGroup.length}); });
+    const orderedGroup = withRange.filter(x=>group.includes(x.id)); // 既にs昇順でソート済み
+    // ── 列数は「クラスタ内の予定の総数」ではなく「実際に同時刻に重なっている最大件数」で決める ──
+    // (カレンダーアプリの列詰めと同じ、開始時刻順の貪欲法。終わった予定の列は次の予定が使い回す)
+    // 根拠：A(7:00-8:00)とB(7:30-8:30)、B とC(8:15-9:00)がそれぞれ重なっていても、
+    //       AとCは同時刻には重ならない。鎖状につながっているというだけで3列に分けてしまうと、
+    //       間のBだけ削除しても列数の計算が変わらず「3分割のまま」になってしまう不具合の原因になる。
+    const colEndMin=[]; // 各列が次に空く時刻(分)
+    const colOf={};     // id -> 列番号
+    orderedGroup.forEach(it=>{
+      let col=colEndMin.findIndex(endMin=>endMin<=it.s);
+      if(col===-1){ col=colEndMin.length; colEndMin.push(it.e); }
+      else { colEndMin[col]=it.e; }
+      colOf[it.id]=col;
+    });
+    const totalCols=colEndMin.length;
+    orderedGroup.forEach(it=>{ result.set(it.id, {col:colOf[it.id], totalCols}); });
   });
   return result;
 }
@@ -3547,7 +3585,10 @@ function renderTimeline(){
 
   // ── 予定同士が時間的に重なっている場合、横に列分割して両方見えるようにする ──
   // (「今どれか選ぶ」候補どうしの重なりだけでなく、予定として時間が被っているだけの重なりも同様に扱う)
-  const overlapCols = computeOverlapColumns(sorted);
+  // 完了済み(今日の画面からは消える)は列数の計算からも除く。含めたままだと、
+  // 2件完了して残り1件になっても「まだ3件重なっている」列幅のまま戻らなくなる。
+  const overlapVisible = sorted.filter(ev => !(ev._completedAt!=null && isViewingToday() && !editMode));
+  const overlapCols = computeOverlapColumns(overlapVisible);
 
   // ── 予定の色帯（時間長ぶん・絶対配置） ──
   let nowEl=null;
@@ -3604,28 +3645,23 @@ function renderTimeline(){
       const tooShort = naturalH < 22; // 細すぎる帯は名前・アイコンを省いて色だけ
 
       // 同時刻に複数の予定が重なっていたら、横に並べて両方見えるようにする。
-      // 「今の候補」どうしの重なりは既存の並び順(nowCandidateIds)を優先し、それ以外の
-      // 予定どうしの重なりは一般化した重なり検出(overlapCols)で列を割り当てる。
+      // 列の決め方は「今の候補かどうか」で分けず、実際の時間の重なり(overlapCols)だけで統一する。
+      // （時間切れで居座っている予定どうしは、実際には時間が重なっていないことが多い。
+      //   件数だけで均等分割すると、重なっていないのに無駄に狭く分割されてしまう）
       let leftPos='0', widthPos='calc(100% - 2px)';
-      if(isNowCandidate && nowCandidateIds.length>1){
-        const colIdx=nowCandidateIds.indexOf(ev.id), totalCols=nowCandidateIds.length;
-        leftPos=`calc(${(100/totalCols)*colIdx}% + 1px)`;
-        widthPos=`calc(${100/totalCols}% - 3px)`;
-      } else {
-        const oc=overlapCols.get(ev.id);
-        if(oc && oc.totalCols>1){
-          leftPos=`calc(${(100/oc.totalCols)*oc.col}% + 1px)`;
-          widthPos=`calc(${100/oc.totalCols}% - 3px)`;
-        }
+      const oc=overlapCols.get(ev.id);
+      if(oc && oc.totalCols>1){
+        leftPos=`calc(${(100/oc.totalCols)*oc.col}% + 1px)`;
+        widthPos=`calc(${100/oc.totalCols}% - 3px)`;
       }
       block.style.cssText=`position:absolute;left:${leftPos};width:${widthPos};top:${y+2}px;height:${h}px;z-index:${isSplitNow?5:(isNowCandidate?4:3)};`;
       if(isSplitNow){ block.dataset.connectNow='1'; block.dataset.connectId=ev.id; }
-      // ⏰アイコン：複数候補が横並びの場合は帯の上部外（top: -20px）に出して幅に関係なく押せるようにする
-      const multiCandidate = isNowCandidate && nowCandidateIds.length>1;
+      // ⏰アイコン：横並びで幅が狭い場合は帯の上部外（top: -20px）に出して幅に関係なく押せるようにする
+      const multiCandidate = !!(oc && oc.totalCols>1);
       const showEditIcon = editable && !tooShort;
       const editIconHtml = showEditIcon
         ? (multiCandidate
-          // 複数候補：帯の上端より外に出す（absoluteで-22px上）→ 幅が細くなっても隠れない
+          // 横並び：帯の上端より外に出す（absoluteで-22px上）→ 幅が細くなっても隠れない
           ? `<button class="tl-time-edit-icon" type="button" title="じかんへんこう" aria-label="じかんを へんこうする" style="position:absolute;top:-30px;left:50%;transform:translateX(-50%);z-index:10">⏰</button>`
           // 通常：今まで通り右下
           : `<button class="tl-time-edit-icon" type="button" title="じかんへんこう" aria-label="じかんを へんこうする">⏰</button>`)
@@ -3840,16 +3876,19 @@ function renderTimeline(){
   // ── 時間未定トレイ ──
   renderUntimedTray();
 
-  // 別の日を見ている時は「きょうにもどる」、今日を見ている時は「いまのじかんへ」
-  // （「もどる」だと前の画面に戻ると誤解される。実際はタイムラインを今の時刻までスクロールする動作）
-  const btn=document.getElementById('back-to-now');
-  if(!isViewingToday()){
-    btn.classList.add('show');
-    btn.innerHTML=`${qsIconSvg('clock',20)}きょうに もどる`;
-  } else {
-    btn.innerHTML=`${qsIconSvg('clock',20)}いまの じかんへ`;
-    if(!userScrolledAway) btn.classList.remove('show');
-  }
+  // ヘッダーの時計チップを更新（常に現在時刻を表示。別の日を見ている/スクロールで
+  // 今から離れている時だけ、タップで戻れることが伝わるよう縁を強調する）
+  updateHeaderNowChip();
+}
+
+function updateHeaderNowChip(){
+  const chip=document.getElementById('header-now-chip');
+  if(!chip) return;
+  const textEl=document.getElementById('header-now-time-text');
+  if(textEl) textEl.textContent=fmtTimeDisp(fmtMin(nowMin()));
+  const needsReturn = !isViewingToday() || userScrolledAway;
+  chip.classList.toggle('needs-return', needsReturn);
+  chip.title = !isViewingToday() ? 'タップで きょう・いまの時間へ' : 'タップで いまの時間へ うごきます';
 }
 
 function renderUntimedTray(){
@@ -4256,17 +4295,12 @@ function buildTaskCard(ev, isOvertime){
   const skipBtnHtml = isOvertime
     ? `<button type="button" id="overtime-skip-btn" style="width:100%;margin-top:8px;padding:8px 12px;min-height:44px;border-radius: var(--r-md);border:2px solid var(--danger);background:#fff;color:var(--danger);font-weight:800;font-size: var(--fs-xs);cursor:pointer">😴 きょうは とばす</button>`
     : '';
-  // 残り時間は、隅の円グラフだけでなく大きな数字でも見せる（色は雰囲気、数字は事実、という役割分担）
-  const bigRemainHtml = isOvertime ? '' : `<div style="font-size: var(--fs-2xl);font-weight:900;color:var(--text);line-height:1;margin-bottom:2px">のこり ${remainMin}ふん</div>`;
 
   return `<div class="${pulseClass.trim()}" style="background:${bgFill};border:10px solid ${borderColor};border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:72vh;overflow:hidden;transition:background 0.8s linear, border-color 0.8s linear">
-      <div style="padding:14px 18px 0;flex-shrink:0">
+      <div style="padding:14px 18px 0;flex-shrink:0;text-align:center">
         ${overtimeTag}
-        ${bigRemainHtml}
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px">
-          <div class="now-card-name" style="font-size: var(--fs-xl)">${ev.fromChild?'⭐ ':''}${ev.name}</div>
-          ${remainPieHTML(remainFrac, remainMin, borderColor, 48)}
-        </div>
+        <div class="now-card-name" style="font-size: var(--fs-xl);margin-bottom:10px">${ev.fromChild?'⭐ ':''}${ev.name}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:8px">${remainPieHTML(remainFrac, remainMin, borderColor, 120)}</div>
       </div>
       <div class="now-scroll-area" style="flex:1;min-height:0;overflow-y:auto;padding:0 18px 74px">${tasksHtml}</div>
       <div style="padding:0 18px 14px">${btnHtml}${skipBtnHtml}</div>
@@ -4313,15 +4347,14 @@ function buildUntimedPromoCard(ev){
 
 // (旧bindNowCardEl は onNowComplete に統合済みのため削除)
 
-// スクロール検知：ユーザーが動かしたら自動追従を止め、戻るボタン表示
+// スクロール検知：ユーザーが動かしたら自動追従を止め、ヘッダーの時計チップで戻れるようにする
 document.getElementById('timeline-scroll').addEventListener('scroll',()=>{
   userScrolledAway=true;
-  document.getElementById('back-to-now').classList.add('show');
+  updateHeaderNowChip();
   clearTimeout(scrollTimer);
 });
-document.getElementById('back-to-now').addEventListener('click',()=>{
+document.getElementById('header-now-chip').addEventListener('click',()=>{
   userScrolledAway=false;
-  document.getElementById('back-to-now').classList.remove('show');
   if(displayDayOffset!==0){ displayDayOffset=0; tick(); }
   else { renderTimeline(); }
 });
@@ -4499,7 +4532,7 @@ function updateClock(){
   document.getElementById('date-big').textContent=dateText;
   updateWeatherBadge();
   // 日付送り状態
-  // (date-todayボタンは廃止。タイムライン内のback-to-nowが同じ役割を担う)
+  // (date-todayボタンは廃止。ヘッダーの時計チップ(header-now-chip)が同じ役割を担う)
   document.body.classList.toggle('viewing-other-day', !isViewingToday());
   // 子ども切り替えボタン
   const switchBtn=document.getElementById('child-switch-btn');
@@ -4519,7 +4552,7 @@ function updateClock(){
 // 日付送りボタン
 document.getElementById('date-prev').addEventListener('click',()=>{ displayDayOffset--; tick(); });
 document.getElementById('date-next').addEventListener('click',()=>{ displayDayOffset++; tick(); });
-// (date-todayボタンは廃止。back-to-now側のハンドラに統合済み)
+// (date-todayボタンは廃止。ヘッダーの時計チップ側のハンドラに統合済み)
 
 // 今日の達成状況（保護者設定の上部に出す）：何個中何個おわったか・かせいだ時間の合計
 function getTodayStats(){
