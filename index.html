@@ -153,17 +153,17 @@ body.viewing-other-day #date-big { color: var(--accent); }
 /* 時間未定トレイ */
 #untimed-tray {
   flex-shrink: 0; background: var(--surface); border-top: 3px solid var(--border);
-  padding: 10px 16px 12px; max-height: 30%; overflow-y: auto;
+  padding: 6px 16px 8px; max-height: 30%; overflow-y: auto;
 }
 #untimed-tray:empty { display: none; }
 #untimed-tray.hidden { display: none; }
 #untimed-tray.tray-collapsed { max-height: 0; padding: 0; overflow: hidden; border-top-width: 0; }
-#untimed-tray-title { font-size: var(--fs-sm); font-weight: 900; color: var(--text-dim); margin-bottom: 8px; }
+#untimed-tray-title { font-size: var(--fs-sm); font-weight: 900; color: var(--text-dim); margin-bottom: 4px; }
 #untimed-tray-list { display: flex; flex-wrap: wrap; gap: 8px; }
 .tray-card {
   display: flex; align-items: center; gap: 8px;
   background: var(--surface2); border: 2.5px dashed var(--border);
-  border-radius: var(--r-md); padding: 10px 14px; cursor: pointer; min-width: 0;
+  border-radius: var(--r-md); padding: 6px 14px; cursor: pointer; min-width: 0; min-height: 44px;
 }
 .tray-card:active { transform: scale(0.97); }
 .tray-card-overtime {
@@ -534,27 +534,35 @@ body.viewing-other-day #date-big { color: var(--accent); }
 /* 収納ボタン：横向き＝左境目の中央、縦向き＝上境目の中央 */
 #panels-collapse-btn {
   position: absolute; z-index: 20;
-  left: -16px; top: 50%; transform: translateY(-50%);
-  background: var(--surface); border: 2px solid var(--border); color: var(--text-dim);
-  width: 44px; height: 44px; border-radius: 50%; font-size: var(--fs-md); cursor: pointer;
+  left: -10px; top: 50%; transform: translateY(-50%);
+  background: var(--border); border: none; color: transparent;
+  width: 6px; height: 40px; border-radius: var(--r-full); font-size: 0; cursor: pointer;
   display: flex; align-items: center; justify-content: center; font-family: inherit;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: background 0.2s, color 0.2s;
+  box-shadow: none; transition: background 0.2s; opacity: 0.7;
 }
-#panels-collapse-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+#panels-collapse-btn::before {
+  content: ''; position: absolute; top: -18px; bottom: -18px; left: -19px; right: -19px;
+}
+#panels-collapse-btn:active, #panels-collapse-btn.active { background: var(--text-dim); opacity: 0.9; }
+/* 縦向き時：上境目に横長の細いつまみとして出す */
+#panels-collapse-btn.vertical-mode {
+  width: 40px; height: 6px; left: 50%; top: -10px; transform: translateX(-50%);
+}
+#panels-collapse-btn.vertical-mode::before { top: -19px; bottom: -19px; left: -18px; right: -18px; }
 /* 畳んだ時：パネル幅が0になるので、パネル基準(left:-16px)のままだと画面外にはみ出す。画面の右端基準に切り替える */
 #main.panels-collapsed #panels-collapse-btn { left: auto; right: 8px; }
 #main.panels-collapsed #panels-collapse-btn.vertical-mode { left: 50%; right: auto; top: -44px; }
 #want-header {
-  padding: 14px 16px 10px; border-bottom: 2px solid var(--border); flex-shrink: 0;
-  display: flex; flex-direction: column; align-items: stretch; gap: 8px;
+  padding: 8px 16px; border-bottom: 2px solid var(--border); flex-shrink: 0;
+  display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 8px;
 }
 #want-title { font-size: var(--fs-md); font-weight: 900; white-space: nowrap; }
-#want-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-/* ずかん・きろく：常時見えるボタン(以前は⚡をタップして飛び出す形だったが、⚡は保護者専用にしたため直接出す) */
+#want-actions { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; flex-shrink: 0; }
+/* ずかん・そだてノート：アイコンのみの正方形ボタン(以前は⚡をタップして飛び出す形だったが、⚡は保護者専用にしたため直接出す) */
 #child-fab-zukan, #child-fab-book {
-  display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 2px solid var(--border);
-  color: var(--text); border-radius: var(--r-sm); font-size: var(--fs-sm); font-weight: 800;
-  padding: 8px 12px; cursor: pointer; font-family: inherit; min-height: 44px; position: relative;
+  display: flex; align-items: center; justify-content: center; background: var(--surface2); border: 2px solid var(--border);
+  color: var(--text); border-radius: var(--r-sm); font-size: var(--fs-lg);
+  padding: 0; cursor: pointer; font-family: inherit; min-height: 44px; min-width: 44px; width: 44px; position: relative;
 }
 #child-fab-zukan:hover, #child-fab-book:hover { background: var(--text-dim); color: #fff; }
 /* 図鑑グリッドの各セル */
@@ -586,9 +594,10 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .zukan-color-unlock-need { font-size: var(--fs-xs); color: var(--text-dim); font-weight: 700; }
 #want-add-btn {
   background: var(--text-dim); border: none; color: #fff;
-  border-radius: var(--r-sm); font-size: var(--fs-md); font-weight: 800; padding: 7px 14px;
+  border-radius: var(--r-sm); font-size: var(--fs-lg); font-weight: 800; padding: 0;
   cursor: pointer; font-family: inherit; flex-shrink: 0;
-  min-height: 44px; min-width: 44px;
+  min-height: 44px; min-width: 44px; width: 44px;
+  display: flex; align-items: center; justify-content: center;
 }
 #want-list-area {
   flex: 1; overflow-y: auto; padding: 12px 14px 90px; scrollbar-width: thin;
@@ -1107,8 +1116,8 @@ body.viewing-other-day #date-big { color: var(--accent); }
   }
   #right-panel-scroll { max-height: 45vh; overflow-y: auto; }
   /* 縦向き：上境目に配置(左右位置はJSでドラッグ位置を反映するため、ここではtopのみ指定) */
-  #panels-collapse-btn.vertical-mode { left: 50%; top: -16px; transform: translateX(-50%); }
-  #want-header { padding: 12px 18px 10px; }
+  #panels-collapse-btn.vertical-mode { left: 50%; top: -10px; transform: translateX(-50%); }
+  #want-header { padding: 6px 18px; }
   #want-title { font-size: var(--fs-md); }
   #topbar { padding: 6px 12px; gap: 4px; }
   #date-big { font-size: var(--fs-xl); }
@@ -1375,9 +1384,9 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       <div id="want-header">
         <div id="want-title">やりたいこと</div>
         <div id="want-actions">
-          <button id="child-fab-zukan" aria-label="ずかんをみる">📚<span>ずかん</span><span id="zukan-coin-badge" style="display:none">0</span></button>
-          <button id="child-fab-book" aria-label="そだてノートを みる">🌱<span>そだてノート</span></button>
-          <button id="want-add-btn" aria-label="やりたいことを ついか">＋ ついか</button>
+          <button id="child-fab-zukan" aria-label="ずかんをみる" title="ずかん">📚<span id="zukan-coin-badge" style="display:none">0</span></button>
+          <button id="child-fab-book" aria-label="そだてノートを みる" title="そだてノート">🌱</button>
+          <button id="want-add-btn" aria-label="やりたいことを ついか" title="やりたいことを ついか">＋</button>
         </div>
       </div>
       <div id="want-list-area">
@@ -2031,7 +2040,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v172・2026-08-03</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v176・2026-08-04</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2408,7 +2417,20 @@ document.querySelectorAll('#pin-keypad .pin-key[data-d]').forEach(b=>{
 document.getElementById('pin-back').addEventListener('click',()=>{ _pinValue=_pinValue.slice(0,-1); pinRender(); });
 document.getElementById('pin-cancel').addEventListener('click',closePinPad);
 
-let data = JSON.parse(localStorage.getItem('kodomoV6')||'null') || {
+// 保存データが壊れていても(手動編集・保存の中断・容量超過等)アプリ全体が真っ白にならないようにする安全な読み込み。
+// 根拠：起動直後のJSON.parseが1つでも例外を投げると、スクリプト全体が止まり、
+//       保護者が自力で直せる手立てが何も無い画面になってしまう(実際に類似の事故が起きたため)。
+function safeParseLocal(key, fallback){
+  try{
+    const raw = localStorage.getItem(key);
+    if(raw==null) return fallback;
+    return JSON.parse(raw);
+  }catch(e){
+    try{ showToast('ほぞんデータの一部が読めなかったため、そこだけ初期状態にしました'); }catch(e2){}
+    return fallback;
+  }
+}
+let data = safeParseLocal('kodomoV6', null) || {
   activeChild: 0,
   children: [{ id:'1', name:'こどものなまえ', events:[], dayLabels:[], wakeTime:'07:00', sleepTime:'21:00', taskSets:[], gachaWon:[] }]
 };
@@ -2496,8 +2518,8 @@ data.children.forEach(c=>{
   });
 });
 if(!data._oldLabelsCleared){ data._oldLabelsCleared=true; try{ save(); }catch(e){} }
-let pending = JSON.parse(localStorage.getItem('kodomo_pending')||'[]');
-let wantList = JSON.parse(localStorage.getItem('kodomo_want')||'[]');
+let pending = safeParseLocal('kodomo_pending', []);
+let wantList = safeParseLocal('kodomo_want', []);
 
 // ═══════════════════════════════════════════════════════════════
 // 自動バックアップ
@@ -2680,11 +2702,18 @@ function welcomeBackIfNeeded(){
 }
 
 function save(){
-  localStorage.setItem('kodomoV6', JSON.stringify(data));
+  try{
+    localStorage.setItem('kodomoV6', JSON.stringify(data));
+  }catch(e){
+    // 容量オーバー等で保存に失敗しても、無言のまま進めない。
+    // 気づかないまま使い続けると、あとで変更が消えていたように見えるため。
+    showToast('⚠️ ほぞんに しっぱいしました。「データのバックアップ」から書き出しを おすすめします');
+    return;
+  }
   scheduleAutoBackup();   // 変更のたびに、まとめて数秒後にファイルへ書き出す
 }
-function savePending(){ localStorage.setItem('kodomo_pending', JSON.stringify(pending)); }
-function saveWant(){ localStorage.setItem('kodomo_want', JSON.stringify(wantList)); }
+function savePending(){ try{ localStorage.setItem('kodomo_pending', JSON.stringify(pending)); }catch(e){ showToast('⚠️ ほぞんに しっぱいしました'); } }
+function saveWant(){ try{ localStorage.setItem('kodomo_want', JSON.stringify(wantList)); }catch(e){ showToast('⚠️ ほぞんに しっぱいしました'); } }
 function markBackup(){ try{ localStorage.setItem('kodomo_last_backup', new Date().toISOString()); }catch(e){} }
 function hasMeaningfulData(){
   return (data.children||[]).some(c=>{
@@ -3498,8 +3527,8 @@ function renderTimeline(){
   // 「カバン由来のオンタイム予定」が「今・進行中」かつ「やること(tasks)を持ち」かつ「まだ完了していない」時だけ、
   // 大きな全幅(または等分)カードで表示する。オフタイムや、やること無し・完了済みでは今まで通りの帯のまま。
   // 同時刻に複数のオンタイムが重なっていたら、全部を候補として集め、画面をその件数ぶん均等に分ける。
-  // ※ splitMode判定はlg/rg作成前（上部）に移動済み。ここでは幅の計算だけ行う。RAIL_W_PCTも上部で定義済み。
-  const LEFT_RAIL_RIGHT = splitMode ? (100-SIDE-RAIL_W_PCT) : SIDE; // 本体の右端(%)
+  // ※ splitMode判定はlg/rg作成前（上部）に移動済み。ここでは幅の計算だけ行う。rgLeftPctも上部で定義済み。
+  const LEFT_RAIL_RIGHT = splitMode ? (100-rgLeftPct) : SIDE; // 本体の右端(%)
 
   // 内側の絶対配置コンテナ（本体・中央寄せで狭める）
   const inner=document.createElement('div');
@@ -3512,8 +3541,8 @@ function renderTimeline(){
     rightPanel=document.createElement('div');
     rightPanel.id='now-right-panel';
     rightPanel.dataset.nowPanel='1';
-    // 左レール右端(SIDE+RAIL_W_PCT)から始め、画面右端ぎりぎりまで（＝広げた余白グラデーションの上に重ねる）
-    rightPanel.style.cssText=`position:absolute;left:${SIDE+RAIL_W_PCT+1}%;right:2%;top:50%;transform:translateY(-50%);z-index:10;max-height:65vh;overflow-y:auto;`;
+    // 左レール右端(rgLeftPct)から始め、画面右端ぎりぎりまで（＝広げた余白グラデーションの上に重ねる）
+    rightPanel.style.cssText=`position:absolute;left:${rgLeftPct+1}%;right:2%;top:50%;transform:translateY(-50%);z-index:10;max-height:65vh;overflow-y:auto;`;
     col.appendChild(rightPanel);
   }
 
@@ -3913,8 +3942,9 @@ function renderUntimedTray(){
     const isOvertime=isViewingToday()&&endStr&&cur>toMin(endStr);
     const card=document.createElement('div');
     card.className='tray-card'+(isOvertime?' tray-card-overtime':'');
-    const hint=isOvertime?'⏰ じかんが すぎたよ　タップで あとで やる':'タップで じかんを きめる ⏰';
-    card.innerHTML=`<div class="tray-card-body"><div class="tray-card-name">${bag.name}</div><div class="tray-card-hint">${hint}</div></div>`;
+    const hint=isOvertime?'⏰ じかんが すぎたよ　タップで あとで やる':'';
+    const hintHtml = hint ? `<div class="tray-card-hint">${hint}</div>` : '';
+    card.innerHTML=`<div class="tray-card-body"><div class="tray-card-name">${bag.name}</div>${hintHtml}</div>`;
     card.addEventListener('click',()=>{
       if(isOvertime) openOvertimeTaskModal(bag.id);
       else openTimeModal(bag.id);
@@ -6142,7 +6172,7 @@ const WANT_PRESETS=[
   {name:'おそとあそび'},{name:'テレビ'},{name:'おかしタイム'}
 ];
 const LABEL_PRESETS=['学校','幼稚園','保育園','習い事','おでかけ'];
-let wantHistory=JSON.parse(localStorage.getItem('kodomo_want_history')||'[]');
+let wantHistory=safeParseLocal('kodomo_want_history', []);
 function saveWantHistory(){ localStorage.setItem('kodomo_want_history',JSON.stringify(wantHistory)); }
 function addWantHistory(name){
   wantHistory=wantHistory.filter(h=>h.name!==name);
