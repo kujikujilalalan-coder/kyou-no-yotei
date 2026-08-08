@@ -2047,7 +2047,41 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v178・2026-08-04</div>
+    <!-- 家族との連携（Firebase・開発中） -->
+    <div class="acc-section" data-acc="family" data-tab-group="settings">
+      <button class="acc-head" type="button" data-acc-toggle="family">👨‍👩‍👧 家族との連携（開発中）<span class="acc-chevron">▶</span></button>
+      <div class="acc-body">
+        <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">複数の端末で、同じ予定をリアルタイムに見られるようにする機能です（作業中）。上の「バックアップ」は、この機能とは別に今後も使えます。</p>
+        <div id="family-status" style="font-size: var(--fs-xs);font-weight:800;color:var(--text-dim);margin-bottom:10px"></div>
+
+        <!-- 家族が未作成・未参加の端末 -->
+        <div id="family-setup-block">
+          <button class="btn btn-primary" id="family-create-btn" style="width:100%;margin-bottom:12px">👨‍👩‍👧 家族をつくる（この端末が保護者になります）</button>
+          <div style="border-top:1.5px dashed var(--border);padding-top:12px">
+            <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">🔑 招待コードで参加する</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="family-join-code-input" maxlength="6" inputmode="numeric" placeholder="6桁のコード" style="flex:1;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-lg);font-weight:800;padding:9px 12px;outline:none;font-family:inherit;letter-spacing:0.1em"/>
+              <button class="btn btn-secondary" id="family-join-btn" style="flex-shrink:0">参加</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 保護者として家族を持っている端末 -->
+        <div id="family-parent-block" style="display:none">
+          <div class="field">
+            <label>招待する子ども</label>
+            <select id="family-invite-child-select" class="kid-select"></select>
+          </div>
+          <button class="btn btn-primary" id="family-invite-btn" style="width:100%">📨 招待コードを発行する</button>
+          <div id="family-invite-result"></div>
+        </div>
+
+        <!-- 招待コードで参加済みの端末 -->
+        <div id="family-child-block" style="display:none"></div>
+      </div>
+    </div>
+
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v179・2026-08-04</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2732,6 +2766,9 @@ function hasMeaningfulData(){
 }
 
 function getChild(){ return data.children[data.activeChild]||data.children[0]; }
+// Firebase連携(type="module"の別スクリプト)からアプリの data を参照するための窓口。
+// let で宣言した data は他の <script> タグから直接は見えないため、関数越しに渡す。
+function getAppData(){ return data; }
 function getBags(){ return getChild().bags||[]; }
 function dateKey(d){ return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; }
 
@@ -6742,6 +6779,7 @@ function openParent(){
   updateVerticalBandUI();
   updateSoundUI();
   updateWeatherUI();
+  if(window.renderFamilyUI) window.renderFamilyUI();
   showParentTab('pending');
   document.getElementById('parent-modal').classList.add('open');
 }
@@ -9132,11 +9170,12 @@ renderParentMessage();
      Firebase 連携（作業中）
      ・ここは本体の <script> とは完全に別のブロック(type="module")。
        予定データ(data/pending/wantList)には一切触れない。
-     ・段階①: 疎通確認のみ。テスト専用のコレクションに書き込み→読み返しができるかだけを見る。
+     ・段階①: 疎通確認 / 段階③: 認証(匿名)・役割(保護者/こども)・招待コード
      ═══════════════════════════════════════════════════════════════ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD_S9HF-eBfdnoVLiIMCX1ecjJ8Km9Tx7s",
@@ -9150,6 +9189,7 @@ renderParentMessage();
 
   const fbApp = initializeApp(firebaseConfig);
   const db = getFirestore(fbApp);
+  const auth = getAuth(fbApp);
 
   // 保護者設定の「Firebase 接続テスト」ボタンから呼ばれる。
   // 予定データには一切触れず、テスト専用の1件だけを書いて読み返す。
@@ -9176,6 +9216,149 @@ renderParentMessage();
 
   const fbTestBtn = document.getElementById('dev-firebase-test-btn');
   if(fbTestBtn) fbTestBtn.addEventListener('click', testFirebaseConnection);
+
+  // ── ③ 認証・役割・招待コード ──
+  // 端末の役割(保護者/こども)は、アプリ本体の data とは別に、この端末のlocalStorageだけに持たせる。
+  // { familyId, role:'parent'|'child', uid, childName(roleがchildの時だけ) }
+  const FAMILY_KEY = 'kyou_firebase_family';
+  function getFamilyLocal(){
+    try{ return JSON.parse(localStorage.getItem(FAMILY_KEY)||'null'); }catch(e){ return null; }
+  }
+  function setFamilyLocal(obj){
+    localStorage.setItem(FAMILY_KEY, JSON.stringify(obj));
+  }
+
+  async function ensureAnonAuth(){
+    if(auth.currentUser) return auth.currentUser;
+    const cred = await signInAnonymously(auth);
+    return cred.user;
+  }
+
+  // 家族をつくる：この端末が「保護者」になる(最初の1回だけ)
+  async function createFamily(){
+    const btn = document.getElementById('family-create-btn');
+    if(btn) btn.disabled = true;
+    try{
+      const user = await ensureAnonAuth();
+      const familyRef = doc(collection(db, 'families'));
+      await setDoc(familyRef, { parentUid: user.uid, createdAt: new Date().toISOString() });
+      setFamilyLocal({ familyId: familyRef.id, role: 'parent', uid: user.uid });
+      window.showToast && window.showToast('👨‍👩‍👧 家族をつくりました');
+      renderFamilyUI();
+    }catch(e){
+      window.showToast && window.showToast('⚠️ 家族の作成に失敗しました：' + e.message);
+    }finally{
+      if(btn) btn.disabled = false;
+    }
+  }
+
+  function genInviteCode(){
+    return String(Math.floor(100000 + Math.random()*900000));
+  }
+
+  // 招待コードを発行する：保護者の端末からのみ呼ばれる。1時間・1回だけ有効。
+  async function issueInvite(){
+    const fam = getFamilyLocal();
+    if(!fam || fam.role !== 'parent') return;
+    const sel = document.getElementById('family-invite-child-select');
+    const childName = sel ? sel.value : '';
+    const btn = document.getElementById('family-invite-btn');
+    if(btn){ btn.disabled = true; btn.textContent = '📨 はっこう しています…'; }
+    try{
+      await ensureAnonAuth();
+      const code = genInviteCode();
+      const expiresAt = new Date(Date.now() + 60*60*1000).toISOString();
+      await setDoc(doc(db, 'invites', code), {
+        familyId: fam.familyId,
+        childName,
+        expiresAt,
+        used: false,
+        createdAt: new Date().toISOString(),
+      });
+      const resultEl = document.getElementById('family-invite-result');
+      if(resultEl){
+        resultEl.innerHTML = `<div style="text-align:center;background:var(--surface2);border:2px dashed var(--border);border-radius:var(--r-md);padding:14px;margin-top:10px">
+          <div style="font-size:var(--fs-xs);color:var(--text-dim);font-weight:800;margin-bottom:4px">「${childName||'こども'}」用の招待コード（1時間だけ・1回だけ 有効）</div>
+          <div style="font-size:var(--fs-2xl);font-weight:900;letter-spacing:0.12em;font-variant-numeric:tabular-nums">${code}</div>
+        </div>`;
+      }
+    }catch(e){
+      window.showToast && window.showToast('⚠️ 発行に失敗しました：' + e.message);
+    }finally{
+      if(btn){ btn.disabled = false; btn.textContent = '📨 招待コードを発行する'; }
+    }
+  }
+
+  // 招待コードで参加する：こどもの端末から呼ばれる。
+  async function joinFamily(){
+    const input = document.getElementById('family-join-code-input');
+    const code = input ? input.value.trim() : '';
+    if(!/^\d{6}$/.test(code)){ window.showToast && window.showToast('6桁の コードを 入れてください'); return; }
+    const btn = document.getElementById('family-join-btn');
+    if(btn) btn.disabled = true;
+    try{
+      await ensureAnonAuth();
+      const inviteRef = doc(db, 'invites', code);
+      const snap = await getDoc(inviteRef);
+      if(!snap.exists()){ window.showToast && window.showToast('その コードは 見つかりませんでした'); return; }
+      const inv = snap.data();
+      if(inv.used){ window.showToast && window.showToast('その コードは もう つかわれています'); return; }
+      if(new Date(inv.expiresAt).getTime() < Date.now()){ window.showToast && window.showToast('その コードは じかんぎれです'); return; }
+      await updateDoc(inviteRef, { used: true });
+      setFamilyLocal({ familyId: inv.familyId, role: 'child', childName: inv.childName, uid: auth.currentUser.uid });
+      window.showToast && window.showToast('🎉 家族に さんかしました');
+      renderFamilyUI();
+    }catch(e){
+      window.showToast && window.showToast('⚠️ 参加に失敗しました：' + e.message);
+    }finally{
+      if(btn) btn.disabled = false;
+    }
+  }
+
+  // 保護者設定「データ」タブの見た目を、今の端末の役割に合わせて出し分ける
+  function renderFamilyUI(){
+    const fam = getFamilyLocal();
+    const setupBlock = document.getElementById('family-setup-block');
+    const parentBlock = document.getElementById('family-parent-block');
+    const childBlock = document.getElementById('family-child-block');
+    const statusEl = document.getElementById('family-status');
+    if(!setupBlock || !parentBlock || !childBlock) return; // モーダル未読み込み時は何もしない
+
+    if(!fam){
+      setupBlock.style.display = '';
+      parentBlock.style.display = 'none';
+      childBlock.style.display = 'none';
+      if(statusEl) statusEl.textContent = 'この端末は まだ 家族と つながっていません。';
+      return;
+    }
+    setupBlock.style.display = 'none';
+    if(fam.role === 'parent'){
+      parentBlock.style.display = '';
+      childBlock.style.display = 'none';
+      if(statusEl) statusEl.textContent = '✅ この端末は 保護者として 家族と つながっています。';
+      const sel = document.getElementById('family-invite-child-select');
+      if(sel){
+        const appData = window.getAppData ? window.getAppData() : null;
+        const children = (appData && appData.children) || [];
+        sel.innerHTML = children.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+      }
+    } else {
+      parentBlock.style.display = 'none';
+      childBlock.style.display = '';
+      if(statusEl) statusEl.textContent = '';
+      childBlock.innerHTML = `<div style="background:var(--surface2);border:2px solid var(--border);border-radius:var(--r-md);padding:12px 14px;font-size:var(--fs-sm);font-weight:700;color:var(--text)">✅ この端末は「${fam.childName||'こども'}」用として、家族に参加しています。</div>`;
+    }
+  }
+  window.renderFamilyUI = renderFamilyUI;
+
+  const familyCreateBtn = document.getElementById('family-create-btn');
+  if(familyCreateBtn) familyCreateBtn.addEventListener('click', createFamily);
+  const familyInviteBtn = document.getElementById('family-invite-btn');
+  if(familyInviteBtn) familyInviteBtn.addEventListener('click', issueInvite);
+  const familyJoinBtn = document.getElementById('family-join-btn');
+  if(familyJoinBtn) familyJoinBtn.addEventListener('click', joinFamily);
+
+  renderFamilyUI();
 </script>
 </body>
 </html>
