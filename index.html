@@ -2074,6 +2074,10 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
           </div>
           <button class="btn btn-primary" id="family-invite-btn" style="width:100%">📨 招待コードを発行する</button>
           <div id="family-invite-result"></div>
+          <div style="border-top:1.5px dashed var(--border);margin-top:14px;padding-top:12px">
+            <button class="btn btn-secondary" id="family-import-btn" style="width:100%">☁️ クラウドの子どもデータを 取り込む</button>
+            <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">子どもの端末が招待コードで参加して送ってくれたデータを、この端末の「子ども切替」に取り込みます。同じ名前の子どもが既にいる場合は、その内容を置き換えます。</p>
+          </div>
         </div>
 
         <!-- 招待コードで参加済みの端末 -->
@@ -2081,7 +2085,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v180・2026-08-04</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v181・2026-08-04</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -9182,7 +9186,7 @@ renderParentMessage();
      ═══════════════════════════════════════════════════════════════ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
   import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
   const firebaseConfig = {
@@ -9333,6 +9337,41 @@ renderParentMessage();
     }
   }
 
+  // 保護者の端末で、子どもの端末が送ってくれたデータをクラウドから取り込み、
+  // この端末の「子ども切替」に反映する(同名の子どもがいれば置き換え、なければ追加)。
+  async function importChildrenFromCloud(){
+    const fam = getFamilyLocal();
+    if(!fam || fam.role !== 'parent') return;
+    const btn = document.getElementById('family-import-btn');
+    if(btn){ btn.disabled = true; btn.textContent = '☁️ とりこんでいます…'; }
+    try{
+      await ensureAnonAuth();
+      const snap = await getDocs(collection(db, 'families', fam.familyId, 'childData'));
+      if(snap.empty){ window.showToast && window.showToast('まだ とどいている データが ありません'); return; }
+      const appData = window.getAppData ? window.getAppData() : null;
+      if(!appData || !appData.children){ return; }
+      let importedCount = 0;
+      snap.forEach(d=>{
+        const payload = d.data();
+        const childData = payload && payload.data;
+        if(!childData || !Array.isArray(childData.children)) return;
+        childData.children.forEach(c=>{
+          if(window.migrateChild){ try{ window.migrateChild(c); }catch(e){} }
+          const idx = appData.children.findIndex(existing => existing.name === c.name);
+          if(idx >= 0) appData.children[idx] = c; else appData.children.push(c);
+          importedCount++;
+        });
+      });
+      if(importedCount > 0 && window.save) window.save();
+      if(window.tick) window.tick();
+      window.showToast && window.showToast(importedCount > 0 ? `☁️ ${importedCount}人分の データを 取り込みました` : 'とりこめる データが ありませんでした');
+    }catch(e){
+      window.showToast && window.showToast('⚠️ 取り込みに失敗しました：' + e.message);
+    }finally{
+      if(btn){ btn.disabled = false; btn.textContent = '☁️ クラウドの子どもデータを 取り込む'; }
+    }
+  }
+
   // 保護者設定「データ」タブの見た目を、今の端末の役割に合わせて出し分ける
   function renderFamilyUI(){
     const fam = getFamilyLocal();
@@ -9375,6 +9414,8 @@ renderParentMessage();
   if(familyInviteBtn) familyInviteBtn.addEventListener('click', issueInvite);
   const familyJoinBtn = document.getElementById('family-join-btn');
   if(familyJoinBtn) familyJoinBtn.addEventListener('click', joinFamily);
+  const familyImportBtn = document.getElementById('family-import-btn');
+  if(familyImportBtn) familyImportBtn.addEventListener('click', importChildrenFromCloud);
 
   renderFamilyUI();
 </script>
