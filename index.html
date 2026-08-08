@@ -2081,7 +2081,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v179・2026-08-04</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v180・2026-08-04</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -6488,6 +6488,14 @@ document.body.addEventListener('click', e=>{
   btn.setAttribute('aria-expanded', open?'true':'false');
 });
 document.getElementById('parent-btn').addEventListener('click',()=>{
+  // Firebase家族連携：招待コードで参加した「こども」役割の端末では、保護者設定そのものを開かせない
+  try{
+    const fam = JSON.parse(localStorage.getItem('kyou_firebase_family')||'null');
+    if(fam && fam.role === 'child'){
+      showToast('この端末は こども用の端末です。設定は 保護者の端末から おこなってください');
+      return;
+    }
+  }catch(e){}
   const lock=data.parentLock;
   if(lock && lock.enabled && lock.pin){
     openPinPad('暗証番号を入力してください', pin=>{
@@ -9306,7 +9314,17 @@ renderParentMessage();
       if(new Date(inv.expiresAt).getTime() < Date.now()){ window.showToast && window.showToast('その コードは じかんぎれです'); return; }
       await updateDoc(inviteRef, { used: true });
       setFamilyLocal({ familyId: inv.familyId, role: 'child', childName: inv.childName, uid: auth.currentUser.uid });
-      window.showToast && window.showToast('🎉 家族に さんかしました');
+      // 参加した瞬間、この端末に今ある予定データを、そのままクラウドへ吸い上げる(初回のみ・子→クラウド方向)。
+      // これ以降(次の段階)は逆に、保護者機からこの端末へデータが降りてくる形にする予定。
+      const appData = window.getAppData ? window.getAppData() : null;
+      if(appData){
+        await setDoc(doc(db, 'families', inv.familyId, 'childData', auth.currentUser.uid), {
+          childName: inv.childName,
+          data: appData,
+          uploadedAt: new Date().toISOString(),
+        });
+      }
+      window.showToast && window.showToast('🎉 家族に さんかし、いまのデータを クラウドへ おくりました');
       renderFamilyUI();
     }catch(e){
       window.showToast && window.showToast('⚠️ 参加に失敗しました：' + e.message);
