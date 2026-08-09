@@ -715,35 +715,6 @@ body.viewing-other-day #date-big { color: var(--accent); }
 #app-toast .toast-undo:active { transform: scale(0.95); }
 #app-toast .toast-msg { flex: 1; min-width: 0; }
 
-/* 保護者ロック PINテンキー */
-#pin-overlay {
-  display: none; position: fixed; inset: 0; z-index: 9000;
-  align-items: center; justify-content: center;
-  background: rgba(0,0,0,0.55); backdrop-filter: blur(6px);
-}
-#pin-overlay.show { display: flex; }
-#pin-card {
-  background: var(--surface); border: 2px solid var(--border); border-radius: var(--r-lg);
-  padding: 26px 24px; width: min(330px, 92vw); text-align: center;
-}
-#pin-card.shake { animation: pinShake 0.4s; }
-@keyframes pinShake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-9px)} 40%,80%{transform:translateX(9px)} }
-#pin-title { font-size: var(--fs-md); font-weight: 900; color: var(--text); margin-bottom: 18px; }
-#pin-dots { display: flex; justify-content: center; gap: 16px; margin-bottom: 22px; }
-.pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid var(--border); background: transparent; }
-.pin-dot.filled { background: var(--accent); border-color: var(--accent); }
-#pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.pin-key {
-  background: var(--bg); border: 2px solid var(--border); border-radius: var(--r-md);
-  font-size: var(--fs-xl); font-weight: 800; font-family: inherit; color: var(--text);
-  padding: 16px 0; cursor: pointer;
-}
-.pin-key:active { background: var(--surface2); }
-.pin-key.pin-fn { font-size: var(--fs-md); font-weight: 800; color: var(--text-dim); }
-#pin-cancel {
-  margin-top: 16px; background: none; border: none; color: var(--text-dim);
-  font-family: inherit; font-size: var(--fs-md); font-weight: 800; cursor: pointer; padding: 6px 14px;
-}
 /* ナイトモード（焼き付き・省電力対策） */
 #night-overlay {
   display: none; position: fixed; inset: 0; z-index: 8500; background: #000;
@@ -1928,25 +1899,6 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <!-- 保護者ロック -->
-    <div class="acc-section" data-acc="lock" data-tab-group="settings">
-      <button class="acc-head" type="button" data-acc-toggle="lock">🔒 保護者ロック<span class="acc-chevron">▶</span></button>
-      <div class="acc-body">
-        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-15" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-15" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">ロックをかけると、この⚙️設定を開くときに暗証番号（4桁）が必要になります。子どもが勝手に設定を変えるのを防げます。</p>
-        <div class="type-toggle" id="lock-toggle">
-          <button class="type-btn" id="lock-on" style="flex:1">ロックを使う</button>
-          <button class="type-btn" id="lock-off" style="flex:1">使わない</button>
-        </div>
-        <button class="btn btn-secondary" id="lock-change-btn" style="width:100%;margin-top:10px;font-size: var(--fs-sm);display:none">🔑 暗証番号を変更</button>
-        <div style="margin-top:14px;padding-top:14px;border-top:2px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-sm);font-weight:800;color:var(--text);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>⏰ 時刻変更アイコンにも暗証番号を要求する</span><button type="button" class="info-toggle" data-info-toggle="info-16" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-16" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.4">タイムラインの予定についている⏰アイコンを押した時にも、暗証番号を求めます。暗証番号自体は保護者ロックと共通です。</p>
-          <div class="type-toggle" id="timeedit-lock-toggle">
-            <button class="type-btn" id="timeeditlock-on" style="flex:1">要求する</button>
-            <button class="type-btn" id="timeeditlock-off" style="flex:1">要求しない</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- ナイトモード -->
     <!-- 通知：習慣化に唯一欠けていた「きっかけ」を作る -->
@@ -2057,6 +2009,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
         <!-- 家族が未作成・未参加の端末 -->
         <div id="family-setup-block">
           <button class="btn btn-primary" id="family-create-btn" style="width:100%;margin-bottom:12px">👨‍👩‍👧 家族をつくる（この端末が保護者になります）</button>
+          <button class="btn btn-secondary" id="family-recover-btn" style="width:100%;margin-bottom:12px">🔑 保護者として ログインし直す（機種変更・復旧用）</button>
           <div style="border-top:1.5px dashed var(--border);padding-top:12px">
             <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">🔑 招待コードで参加する</label>
             <div style="display:flex;gap:8px">
@@ -2085,7 +2038,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v181・2026-08-04</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v185・2026-08-04</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2357,29 +2310,6 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
 
 <div id="night-overlay"><div id="night-clock">0:00</div></div>
 
-<!-- 保護者ロック PINテンキー -->
-<div id="pin-overlay">
-  <div id="pin-card">
-    <div id="pin-title">暗証番号を入力してください</div>
-    <div id="pin-dots"></div>
-    <div id="pin-keypad">
-      <button class="pin-key" data-d="1">1</button>
-      <button class="pin-key" data-d="2">2</button>
-      <button class="pin-key" data-d="3">3</button>
-      <button class="pin-key" data-d="4">4</button>
-      <button class="pin-key" data-d="5">5</button>
-      <button class="pin-key" data-d="6">6</button>
-      <button class="pin-key" data-d="7">7</button>
-      <button class="pin-key" data-d="8">8</button>
-      <button class="pin-key" data-d="9">9</button>
-      <button class="pin-key pin-fn" id="pin-back">けす</button>
-      <button class="pin-key" data-d="0">0</button>
-      <span></span>
-    </div>
-    <button id="pin-cancel">とじる</button>
-  </div>
-</div>
-
 <script>
 const EMOJIS = ['🌅','🌙','🍳','🥛','📚','✏️','🎒','🏫','🏠','⚽','🎮','🛁','😴','💤','❤️','✅'];
 const ON_COL='#4338CA', OFF_COL='#206679';
@@ -2417,51 +2347,6 @@ function showToast(msg, onUndo){
 }
 
 // ═══ 保護者ロック（PINテンキー） ═══
-let _pinValue='', _pinComplete=null;
-function pinRender(){
-  const dots=document.getElementById('pin-dots'); dots.innerHTML='';
-  for(let i=0;i<4;i++){ const d=document.createElement('span'); d.className='pin-dot'+(i<_pinValue.length?' filled':''); dots.appendChild(d); }
-}
-function openPinPad(title, onComplete){
-  _pinValue=''; _pinComplete=onComplete;
-  document.getElementById('pin-title').textContent=title;
-  pinRender();
-  document.getElementById('pin-overlay').classList.add('show');
-}
-function closePinPad(){ document.getElementById('pin-overlay').classList.remove('show'); _pinComplete=null; _pinValue=''; }
-function pinShakeReset(msg){
-  const c=document.getElementById('pin-card');
-  c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
-  _pinValue=''; pinRender();
-  if(msg) document.getElementById('pin-title').textContent=msg;
-}
-function pinPush(d){
-  if(_pinValue.length>=4) return;
-  _pinValue+=d; pinRender();
-  if(_pinValue.length===4){ const v=_pinValue; setTimeout(()=>{ if(_pinComplete) _pinComplete(v); }, 130); }
-}
-// あたらしい暗証番号を2回入力で設定
-function setNewPin(onDone){
-  openPinPad('新しい暗証番号（4桁）', p1=>{
-    openPinPad('もういちど かくにん', p2=>{
-      if(p1===p2){ onDone(p1); }
-      else { showToast('ちがいます。もういちど さいしょから'); setNewPin(onDone); }
-    });
-  });
-}
-// いまの暗証番号を確認してからonOk
-function requireCurrentPin(onOk){
-  openPinPad('現在の暗証番号', pin=>{
-    if(pin===(data.parentLock&&data.parentLock.pin)){ onOk(); }
-    else { pinShakeReset('暗証番号が違います。もう一度入力してください'); }
-  });
-}
-document.querySelectorAll('#pin-keypad .pin-key[data-d]').forEach(b=>{
-  b.addEventListener('click',()=>pinPush(b.dataset.d));
-});
-document.getElementById('pin-back').addEventListener('click',()=>{ _pinValue=_pinValue.slice(0,-1); pinRender(); });
-document.getElementById('pin-cancel').addEventListener('click',closePinPad);
-
 // 保存データが壊れていても(手動編集・保存の中断・容量超過等)アプリ全体が真っ白にならないようにする安全な読み込み。
 // 根拠：起動直後のJSON.parseが1つでも例外を投げると、スクリプト全体が止まり、
 //       保護者が自力で直せる手立てが何も無い画面になってしまう(実際に類似の事故が起きたため)。
@@ -2756,7 +2641,20 @@ function save(){
     return;
   }
   scheduleAutoBackup();   // 変更のたびに、まとめて数秒後にファイルへ書き出す
+  if(window.scheduleFamilyPush) window.scheduleFamilyPush(); // 保護者機なら、まとめて数秒後にクラウドへも送る
 }
+// Firebase家族連携(子機側)から、クラウドの最新内容をこの端末に反映するための窓口
+function replaceActiveChildFromCloud(childObj){
+  if(!childObj || !childObj.name) return;
+  if(typeof migrateChild==='function'){ try{ migrateChild(childObj); }catch(e){} }
+  const idx = data.children.findIndex(c=>c.name===childObj.name);
+  if(idx>=0) data.children[idx]=childObj; else data.children.push(childObj);
+  data.activeChild = idx>=0 ? idx : data.children.length-1;
+  localStorage.setItem('kodomoV6', JSON.stringify(data)); // クラウドから来た内容はそのまま保存(再度クラウドへ送り返す必要はない)
+  scheduleAutoBackup();
+  tick();
+}
+window.replaceActiveChildFromCloud = replaceActiveChildFromCloud;
 function savePending(){ try{ localStorage.setItem('kodomo_pending', JSON.stringify(pending)); }catch(e){ showToast('⚠️ ほぞんに しっぱいしました'); } }
 function saveWant(){ try{ localStorage.setItem('kodomo_want', JSON.stringify(wantList)); }catch(e){ showToast('⚠️ ほぞんに しっぱいしました'); } }
 function markBackup(){ try{ localStorage.setItem('kodomo_last_backup', new Date().toISOString()); }catch(e){} }
@@ -2831,41 +2729,14 @@ function setBagSkipped(bagId, date, skipped){
   save();
 }
 
-// ── 時刻編集のPIN：一度入れたら5分間は聞き直さない ──
-// 根拠：朝の忙しい時間に、予定を直すたびPINを打つのは現実的でない。
-//       一方で子どもが勝手に変える余地は残したくないので、短時間だけ記憶する。
-const PIN_GRACE_MS = 5*60*1000;
-let _pinOkUntil = 0;
-// PINが要るなら聞いてから、猶予時間内なら聞かずに onOk を実行する
-function withTimeEditPin(onOk){
-  const needsPin = data.requireTimeEditPin && data.parentLock && data.parentLock.pin;
-  if(!needsPin || Date.now() < _pinOkUntil){ onOk(); return; }
-  openPinPad('暗証番号を入力してください', pin=>{
-    if(pin===data.parentLock.pin){
-      _pinOkUntil = Date.now() + PIN_GRACE_MS; // 5分間は聞き直さない
-      closePinPad();
-      onOk();
-    } else {
-      pinShakeReset('暗証番号が違います。もう一度入力してください');
-    }
-  });
-}
-// ── 子ども切り替えのPIN：保護者ロックがオンの時だけ要求する ──
-// 根拠：子どもが自分で兄弟に切り替えられてしまう問題への対応。
-//       時刻編集と同じ猶予(_pinOkUntil)を共有し、直前にPINを入れていれば聞き直さない。
-function withChildSwitchPin(onOk){
-  const needsPin = data.parentLock && data.parentLock.enabled && data.parentLock.pin;
-  if(!needsPin || Date.now() < _pinOkUntil){ onOk(); return; }
-  openPinPad('暗証番号を入力してください', pin=>{
-    if(pin===data.parentLock.pin){
-      _pinOkUntil = Date.now() + PIN_GRACE_MS;
-      closePinPad();
-      onOk();
-    } else {
-      pinShakeReset('暗証番号が違います。もう一度入力してください');
-    }
-  });
-}
+// ── 保護者ロックのPIN機能は廃止(2026-08-04) ──
+// 根拠：Firebase連携により、保護者かどうかは端末側のPIN入力ではなく、
+//       Firebase Auth側の役割(role)で厳格に管理されるようになった。招待コードで
+//       参加した「こども」役割の端末には、そもそも保護者設定を開く権限自体が
+//       与えられないため、同一端末内でPINによって画面を触り分ける必要が無くなった。
+// (Firebase連携をまだ設定していない場合は、保護者設定へのアクセス制限自体が無い状態になる点に注意)
+function withTimeEditPin(onOk){ onOk(); }
+function withChildSwitchPin(onOk){ onOk(); }
 // カバンのその日の時刻を返す（日付上書き→基本時刻→空）
 function bagTimeOn(bag, date){
   const dk=dateKey(date);
@@ -6500,13 +6371,7 @@ document.getElementById('parent-btn').addEventListener('click',()=>{
       return;
     }
   }catch(e){}
-  const lock=data.parentLock;
-  if(lock && lock.enabled && lock.pin){
-    openPinPad('暗証番号を入力してください', pin=>{
-      if(pin===lock.pin){ closePinPad(); openParent(); }
-      else { pinShakeReset('暗証番号が違います。もう一度入力してください'); }
-    });
-  } else { openParent(); }
+  openParent(); // 保護者ロックPINは廃止済み(2026-08-04)。Firebase Authの役割で管理する
 });
 document.getElementById('parent-close').addEventListener('click',()=>document.getElementById('parent-modal').classList.remove('open'));
 document.getElementById('parent-close-top').addEventListener('click',()=>document.getElementById('parent-modal').classList.remove('open'));
@@ -6779,8 +6644,6 @@ function openParent(){
   renderVacationPeriodList();
   document.getElementById('show-switch-toggle').checked=!!data.showChildSwitch;
   document.getElementById('child-edit-field').style.display='none';
-  updateLockUI();
-  updateTimeEditLockUI();
   updateBackupReminder();
   updateNightUI();
   updateAwakeUI();
@@ -6932,46 +6795,7 @@ function updateBackupReminder(){
   badge.style.display=show?'':'none';
   const tabBadge=document.getElementById('settings-tab-badge'); if(tabBadge) tabBadge.style.display=show?'':'none';
 }
-function updateLockUI(){
-  const on=!!(data.parentLock&&data.parentLock.enabled);
-  document.getElementById('lock-on').className='type-btn'+(on?' active-on':'');
-  document.getElementById('lock-off').className='type-btn'+(!on?' active-on':'');
-  document.getElementById('lock-change-btn').style.display=on?'':'none';
-}
-document.getElementById('lock-on').addEventListener('click',()=>{
-  if(data.parentLock&&data.parentLock.enabled) return; // すでにオン
-  setNewPin(pin=>{
-    data.parentLock={enabled:true,pin}; save(); closePinPad(); updateLockUI();
-    showToast('ロックを かけました 🔒');
-  });
-});
-document.getElementById('lock-off').addEventListener('click',()=>{
-  if(!(data.parentLock&&data.parentLock.enabled)) return; // すでにオフ
-  requireCurrentPin(()=>{
-    data.parentLock.enabled=false; save(); closePinPad(); updateLockUI();
-    showToast('ロックを はずしました');
-  });
-});
-document.getElementById('lock-change-btn').addEventListener('click',()=>{
-  requireCurrentPin(()=>{
-    setNewPin(pin=>{
-      data.parentLock.pin=pin; save(); closePinPad(); updateLockUI();
-      showToast('暗証番号を変更しました 🔑');
-    });
-  });
-});
-function updateTimeEditLockUI(){
-  const on=!!data.requireTimeEditPin;
-  document.getElementById('timeeditlock-on').className='type-btn'+(on?' active-on':'');
-  document.getElementById('timeeditlock-off').className='type-btn'+(!on?' active-on':'');
-}
-document.getElementById('timeeditlock-on').addEventListener('click',()=>{
-  if(!(data.parentLock&&data.parentLock.pin)){ showToast('先に「保護者ロック」で暗証番号を設定してください'); return; }
-  data.requireTimeEditPin=true; save(); updateTimeEditLockUI();
-});
-document.getElementById('timeeditlock-off').addEventListener('click',()=>{
-  data.requireTimeEditPin=false; save(); updateTimeEditLockUI();
-});
+// (保護者ロックPIN機能は廃止(2026-08-04)。updateLockUI/updateTimeEditLockUIおよび関連イベントリスナーは削除済み)
 document.getElementById('show-switch-toggle').addEventListener('change',e=>{
   data.showChildSwitch=e.target.checked; save(); tick();
 });
@@ -9186,8 +9010,8 @@ renderParentMessage();
      ═══════════════════════════════════════════════════════════════ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, updateDoc, getDocs, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+  import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD_S9HF-eBfdnoVLiIMCX1ecjJ8Km9Tx7s",
@@ -9209,6 +9033,7 @@ renderParentMessage();
     const btn = document.getElementById('dev-firebase-test-btn');
     if(btn){ btn.disabled = true; btn.textContent = '☁️ 接続を 確認しています…'; }
     try{
+      await ensureAnonAuth(); // セキュリティルールで認証必須にしたため、先にログインしておく
       const testDoc = doc(db, 'connectivity_test', 'ping');
       const sentAt = new Date().toISOString();
       await setDoc(testDoc, { sentAt });
@@ -9241,26 +9066,81 @@ renderParentMessage();
   }
 
   async function ensureAnonAuth(){
+    await auth.authStateReady(); // ページ再読み込み直後、復元中の認証状態を待ってから判定する
     if(auth.currentUser) return auth.currentUser;
     const cred = await signInAnonymously(auth);
     return cred.user;
   }
+  // 保護者専用の操作で使う。保護者はGoogleログイン済みのはずなので、匿名ログインへは倒さず、
+  // 復元中の認証状態を待つだけにする(でないと、まだ復元前にauth.currentUserが空だと
+  // 誤って匿名アカウントを新しく作ってしまい、parentUidの一致チェックに失敗する)。
+  async function waitAuthReady(){
+    await auth.authStateReady();
+    return auth.currentUser;
+  }
 
-  // 家族をつくる：この端末が「保護者」になる(最初の1回だけ)
+  // 家族をつくる：この端末が「保護者」になる(最初の1回だけ)。
+  // 保護者は匿名ではなくGoogleアカウントでログインする。
+  // 理由：スマホを紛失・機種変更した時、同じGoogleアカウントで別の端末からログインし直せば
+  //       同じ人だとFirestore側が認識でき、保護者として復旧できるようにするため。
   async function createFamily(){
     const btn = document.getElementById('family-create-btn');
     if(btn) btn.disabled = true;
     try{
-      const user = await ensureAnonAuth();
-      const familyRef = doc(collection(db, 'families'));
-      await setDoc(familyRef, { parentUid: user.uid, createdAt: new Date().toISOString() });
-      setFamilyLocal({ familyId: familyRef.id, role: 'parent', uid: user.uid });
-      window.showToast && window.showToast('👨‍👩‍👧 家族をつくりました');
+      sessionStorage.setItem('kyou_pending_create_family', '1');
+      await signInWithRedirect(auth, new GoogleAuthProvider());
+      // ここでGoogleのログイン画面へ移動するため、続きは戻ってきた後(下のhandleAuthRedirect)で行う
+    }catch(e){
+      sessionStorage.removeItem('kyou_pending_create_family');
+      window.showToast && window.showToast('⚠️ 家族の作成に失敗しました：' + e.message);
+      if(btn) btn.disabled = false;
+    }
+  }
+
+  // 保護者として、別の端末からログインし直して復旧する(スマホの紛失・機種変更用)。
+  // 同じGoogleアカウントでログインし、そのアカウントが保護者になっている家族を探す。
+  async function recoverParent(){
+    const btn = document.getElementById('family-recover-btn');
+    if(btn) btn.disabled = true;
+    try{
+      sessionStorage.setItem('kyou_pending_recover_parent', '1');
+      await signInWithRedirect(auth, new GoogleAuthProvider());
+    }catch(e){
+      sessionStorage.removeItem('kyou_pending_recover_parent');
+      window.showToast && window.showToast('⚠️ 復旧に失敗しました：' + e.message);
+      if(btn) btn.disabled = false;
+    }
+  }
+
+  // Googleログイン画面から戻ってきた直後に呼ばれる。何のためにログインしたか(作成/復旧)を見て、続きの処理をする。
+  async function handleAuthRedirect(){
+    try{
+      const result = await getRedirectResult(auth);
+      if(!result) return;
+      const user = result.user;
+      const pendingCreate = sessionStorage.getItem('kyou_pending_create_family');
+      const pendingRecover = sessionStorage.getItem('kyou_pending_recover_parent');
+      if(pendingCreate){
+        sessionStorage.removeItem('kyou_pending_create_family');
+        const familyRef = doc(collection(db, 'families'));
+        await setDoc(familyRef, { parentUid: user.uid, createdAt: new Date().toISOString() });
+        setFamilyLocal({ familyId: familyRef.id, role: 'parent', uid: user.uid });
+        window.showToast && window.showToast('👨‍👩‍👧 家族をつくりました');
+      } else if(pendingRecover){
+        sessionStorage.removeItem('kyou_pending_recover_parent');
+        const snap = await getDocs(query(collection(db, 'families'), where('parentUid','==', user.uid)));
+        if(snap.empty){
+          window.showToast && window.showToast('この Googleアカウントに 家族が 見つかりませんでした');
+        } else {
+          const fdoc = snap.docs[0];
+          setFamilyLocal({ familyId: fdoc.id, role: 'parent', uid: user.uid });
+          window.showToast && window.showToast('👨‍👩‍👧 保護者として 復旧しました');
+        }
+      }
       renderFamilyUI();
     }catch(e){
-      window.showToast && window.showToast('⚠️ 家族の作成に失敗しました：' + e.message);
-    }finally{
-      if(btn) btn.disabled = false;
+      console.error('Googleログインの結果処理に失敗:', e);
+      window.showToast && window.showToast('⚠️ ログインの確認に失敗しました：' + e.message);
     }
   }
 
@@ -9277,7 +9157,8 @@ renderParentMessage();
     const btn = document.getElementById('family-invite-btn');
     if(btn){ btn.disabled = true; btn.textContent = '📨 はっこう しています…'; }
     try{
-      await ensureAnonAuth();
+      const user = await waitAuthReady();
+      if(!user){ window.showToast && window.showToast('⚠️ ログインが切れています。「保護者として ログインし直す」から やり直してください'); return; }
       const code = genInviteCode();
       const expiresAt = new Date(Date.now() + 60*60*1000).toISOString();
       await setDoc(doc(db, 'invites', code), {
@@ -9330,6 +9211,7 @@ renderParentMessage();
       }
       window.showToast && window.showToast('🎉 家族に さんかし、いまのデータを クラウドへ おくりました');
       renderFamilyUI();
+      startChildSync(); // 次の起動を待たず、参加した瞬間から保護者機の更新を見張り始める
     }catch(e){
       window.showToast && window.showToast('⚠️ 参加に失敗しました：' + e.message);
     }finally{
@@ -9345,7 +9227,8 @@ renderParentMessage();
     const btn = document.getElementById('family-import-btn');
     if(btn){ btn.disabled = true; btn.textContent = '☁️ とりこんでいます…'; }
     try{
-      await ensureAnonAuth();
+      const user = await waitAuthReady();
+      if(!user){ window.showToast && window.showToast('⚠️ ログインが切れています。「保護者として ログインし直す」から やり直してください'); return; }
       const snap = await getDocs(collection(db, 'families', fam.familyId, 'childData'));
       if(snap.empty){ window.showToast && window.showToast('まだ とどいている データが ありません'); return; }
       const appData = window.getAppData ? window.getAppData() : null;
@@ -9370,6 +9253,55 @@ renderParentMessage();
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = '☁️ クラウドの子どもデータを 取り込む'; }
     }
+  }
+
+  // ── 運用開始後：保護者機→子機への継続的な反映 ──
+  // 保護者が編集するたび(save()のたび)に、少し待ってからまとめて、子ども1人ずつの「正本」をクラウドへ送る。
+  // 子どもの端末は、自分の名前の「正本」を常時見張り(onSnapshot)、変化があれば自動で取り込む。
+  let _familyPushTimer = null;
+  function scheduleFamilyPush(){
+    const fam = getFamilyLocal();
+    if(!fam || fam.role !== 'parent') return; // 保護者機だけが送る
+    clearTimeout(_familyPushTimer);
+    _familyPushTimer = setTimeout(pushChildrenToCloud, 3000);
+  }
+  window.scheduleFamilyPush = scheduleFamilyPush;
+
+  async function pushChildrenToCloud(){
+    const fam = getFamilyLocal();
+    if(!fam || fam.role !== 'parent') return;
+    try{
+      const user = await waitAuthReady();
+      if(!user) return; // 自動送信のため、無言でスキップ(ログインが切れているだけなら次回また試みる)
+      const appData = window.getAppData ? window.getAppData() : null;
+      if(!appData || !Array.isArray(appData.children)) return;
+      for(const c of appData.children){
+        if(!c || !c.name) continue;
+        await setDoc(doc(db, 'families', fam.familyId, 'canonicalChildren', c.name), {
+          child: c,
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    }catch(e){
+      console.error('家族へのクラウド送信に失敗:', e);
+    }
+  }
+
+  let _childUnsub = null;
+  function startChildSync(){
+    const fam = getFamilyLocal();
+    if(!fam || fam.role !== 'child' || !fam.childName) return;
+    if(_childUnsub) _childUnsub(); // 二重購読の防止
+    _childUnsub = onSnapshot(
+      doc(db, 'families', fam.familyId, 'canonicalChildren', fam.childName),
+      snap=>{
+        if(!snap.exists()) return; // 保護者がまだ一度も送っていない場合は何もしない
+        const payload = snap.data();
+        if(!payload || !payload.child) return;
+        if(window.replaceActiveChildFromCloud) window.replaceActiveChildFromCloud(payload.child);
+      },
+      err=>{ console.error('子機のクラウド購読に失敗:', err); }
+    );
   }
 
   // 保護者設定「データ」タブの見た目を、今の端末の役割に合わせて出し分ける
@@ -9403,13 +9335,15 @@ renderParentMessage();
       parentBlock.style.display = 'none';
       childBlock.style.display = '';
       if(statusEl) statusEl.textContent = '';
-      childBlock.innerHTML = `<div style="background:var(--surface2);border:2px solid var(--border);border-radius:var(--r-md);padding:12px 14px;font-size:var(--fs-sm);font-weight:700;color:var(--text)">✅ この端末は「${fam.childName||'こども'}」用として、家族に参加しています。</div>`;
+      childBlock.innerHTML = `<div style="background:var(--surface2);border:2px solid var(--border);border-radius:var(--r-md);padding:12px 14px;font-size:var(--fs-sm);font-weight:700;color:var(--text)">✅ この端末は「${fam.childName||'こども'}」用として、家族に参加しています。<br><span style="font-size:var(--fs-xs);font-weight:700;color:var(--text-dim)">保護者機で変更があると、この端末にも自動で反映されます。</span></div>`;
     }
   }
   window.renderFamilyUI = renderFamilyUI;
 
   const familyCreateBtn = document.getElementById('family-create-btn');
   if(familyCreateBtn) familyCreateBtn.addEventListener('click', createFamily);
+  const familyRecoverBtn = document.getElementById('family-recover-btn');
+  if(familyRecoverBtn) familyRecoverBtn.addEventListener('click', recoverParent);
   const familyInviteBtn = document.getElementById('family-invite-btn');
   if(familyInviteBtn) familyInviteBtn.addEventListener('click', issueInvite);
   const familyJoinBtn = document.getElementById('family-join-btn');
@@ -9418,6 +9352,15 @@ renderParentMessage();
   if(familyImportBtn) familyImportBtn.addEventListener('click', importChildrenFromCloud);
 
   renderFamilyUI();
+  handleAuthRedirect(); // Googleのログイン画面から戻ってきた直後なら、続きの処理をする
+
+  // 起動時：この端末が子機として家族に参加済みなら、保護者機からの更新を見張り始める
+  (async()=>{
+    const fam = getFamilyLocal();
+    if(fam && fam.role === 'child'){
+      try{ await ensureAnonAuth(); startChildSync(); }catch(e){ console.error('子機の初期購読に失敗:', e); }
+    }
+  })();
 </script>
 </body>
 </html>
