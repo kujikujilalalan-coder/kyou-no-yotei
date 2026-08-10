@@ -1841,29 +1841,30 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
     <div class="acc-section" data-acc="display" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="display">画面・タイムラインの 見え方<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
+        <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">🧒＝子どもを切り替えると、その子の設定に変わります。📱＝この端末だけの設定で、子どもを切り替えても変わりません。</p>
         <div>
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>「やりたいこと」パネル 🎈</span><button type="button" class="info-toggle" data-info-toggle="info-30" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-30" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">タイマー・ずかん・きろく・やりたいことの入力欄をまとめたパネルです。小さい子には不要なら消せます（申請の記録データは消えません）。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>🧒 「やりたいこと」パネル 🎈</span><button type="button" class="info-toggle" data-info-toggle="info-30" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-30" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">タイマー・ずかん・きろく・やりたいことの入力欄をまとめたパネルです。小さい子には不要なら消せます（申請の記録データは消えません）。</p>
           <div class="type-toggle" id="wantpanel-toggle">
             <button class="type-btn" id="wantpanel-on" style="flex:1">出す</button>
             <button class="type-btn" id="wantpanel-off" style="flex:1">出さない</button>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">カレンダーの 週のはじまり 📅</label>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">🧒 カレンダーの 週のはじまり 📅</label>
           <div class="type-toggle" id="weekstart-toggle">
             <button class="type-btn" id="weekstart-sun" style="flex:1">にちようび</button>
             <button class="type-btn" id="weekstart-mon" style="flex:1">げつようび</button>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>画面を消さない 📱</span><button type="button" class="info-toggle" data-info-toggle="info-10" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-10" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">アプリを開いている間、画面が消えないようにします（時計のようにつけっぱなしにしたい場合）。※対応していない端末では効かないことがあります。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>📱 画面を消さない 📱</span><button type="button" class="info-toggle" data-info-toggle="info-10" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-10" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">アプリを開いている間、画面が消えないようにします（時計のようにつけっぱなしにしたい場合）。※対応していない端末では効かないことがあります。</p>
           <div class="type-toggle" id="awake-toggle">
             <button class="type-btn" id="awake-on" style="flex:1">消さない</button>
             <button class="type-btn" id="awake-off" style="flex:1">通常</button>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>タイムラインの間隔 📏</span><button type="button" class="info-toggle" data-info-toggle="info-11" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-11" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">1時間分の縦の長さを調整します。広くすると見やすくなりますが、スクロール量が増えます。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>🧒 タイムラインの間隔 📏</span><button type="button" class="info-toggle" data-info-toggle="info-11" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-11" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">1時間分の縦の長さを調整します。広くすると見やすくなりますが、スクロール量が増えます。</p>
           <div class="type-toggle" id="zoom-toggle">
             <button class="type-btn" id="zoom-narrow" style="flex:1">コンパクト</button>
             <button class="type-btn" id="zoom-normal" style="flex:1">通常</button>
@@ -1871,7 +1872,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>現在時刻のマーカー 🕐</span><button type="button" class="info-toggle" data-info-toggle="info-12" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-12" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">タイムライン上の「現在」の線につけるマーカーを選びます。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>🧒 現在時刻のマーカー 🕐</span><button type="button" class="info-toggle" data-info-toggle="info-12" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-12" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">タイムライン上の「現在」の線につけるマーカーを選びます。</p>
           <div class="type-toggle" id="nowmarker-toggle">
             <button class="type-btn" id="nowmarker-digital" style="flex:1">デジタル時計</button>
             <button class="type-btn" id="nowmarker-analog" style="flex:1">アナログ時計</button>
@@ -1883,14 +1884,14 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>同時刻の予定が重なった時の表示 📋</span><button type="button" class="info-toggle" data-info-toggle="info-13" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-13" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">同じ時間帯に複数の予定が重なって帯が細くなった時、予定名を縦書きにすると読みやすくなります。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>🧒 同時刻の予定が重なった時の表示 📋</span><button type="button" class="info-toggle" data-info-toggle="info-13" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-13" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">同じ時間帯に複数の予定が重なって帯が細くなった時、予定名を縦書きにすると読みやすくなります。</p>
           <div class="type-toggle" id="vertical-band-toggle">
             <button class="type-btn" id="vertical-band-off" style="flex:1">横書き（通常）</button>
             <button class="type-btn" id="vertical-band-on" style="flex:1">縦書き</button>
           </div>
         </div>
         <div style="margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)">
-          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>通知音 🔔</span><button type="button" class="info-toggle" data-info-toggle="info-14" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-14" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">オフタイムに切り替わった時・「ぜんぶおわった」を押した時・次の予定の5分前に、やさしい音を鳴らします。</p>
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px"><span>🧒 通知音 🔔</span><button type="button" class="info-toggle" data-info-toggle="info-14" aria-label="せつめいを みる"></button></label><p class="info-text" id="info-14" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">オフタイムに切り替わった時・「ぜんぶおわった」を押した時・次の予定の5分前に、やさしい音を鳴らします。</p>
           <div class="type-toggle" id="sound-toggle">
             <button class="type-btn" id="sound-on" style="flex:1">鳴らす</button>
             <button class="type-btn" id="sound-off" style="flex:1">鳴らさない</button>
@@ -2038,7 +2039,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v185・2026-08-04</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v187・2026-08-04</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2390,6 +2391,19 @@ if(!data.weather) data.weather={region:'', lat:null, lon:null, cache:null, cache
 data.children.forEach(c=>{
   if(!c.wakeTime) c.wakeTime='07:00';
   if(!c.sleepTime) c.sleepTime='21:00';
+  // 画面・タイムラインの見え方(タイムラインの間隔・マーカー・縦書き・通知音・やりたいことパネル・週の始まり)を
+  // 子どもごとの設定にする。既存の子どもには、今その端末で使われている値をそのまま初期値として引き継ぐ
+  // (アップデートの瞬間に見た目が変わって驚かせないため)。
+  if(!c.displaySettings) c.displaySettings = {
+    timelineZoom: data.timelineZoom,
+    nowMarkerStyle: data.nowMarkerStyle,
+    nowMarkerSize: data.nowMarkerSize,
+    nowMarkerColor: data.nowMarkerColor,
+    verticalBandText: !!data.verticalBandText,
+    soundEnabled: data.soundEnabled!==false,
+    wantPanelEnabled: data.wantPanelEnabled!==false,
+    weekStartMonday: !!data.weekStartMonday,
+  };
   // 🌱木を育てる機能：初めて開いた時に種を1つだけ無料でプレゼントする（2本目以降はコインで買う）
   if(!c.seedsGranted){ c.seeds=(c.seeds||0)+1; c.seedsGranted=true; }
   if(c.seeds===undefined) c.seeds=0;
@@ -4923,7 +4937,7 @@ function renderZukanColor(){
     if(isOwned){
       cell.innerHTML=`<div class="gacha-marker-preview" style="background:${mc.color}"></div>${isSelected?`<div style="font-size: var(--fs-lg)">✔️</div>`:''}<div class="zukan-color-name">${kanji?mc.name.kanji:mc.name.hira}</div>`;
       cell.addEventListener('click',()=>{
-        data.nowMarkerColor=mc.id; save();
+        setChildDS('nowMarkerColor', mc.id); save();
         applyNowMarkerColor(); renderTimeline(); renderZukanColor();
       });
     } else {
@@ -6254,7 +6268,26 @@ function renderChildSwitcherTop(){
   });
   wrap.appendChild(row);
 }
-function switchChild(idx){ data.activeChild=idx; save(); tick(); renderChildSwitcher(); document.getElementById('child-edit-field').style.display='none'; }
+function switchChild(idx){
+  data.activeChild=idx; save();
+  applyChildDisplaySettings(); // 切り替えた子の画面設定(タイムラインの間隔・マーカー等)を反映する
+  tick(); renderChildSwitcher(); document.getElementById('child-edit-field').style.display='none';
+}
+// 子どもごとの表示設定を、今の端末の表示に反映する(切り替え時・起動時に呼ぶ)
+function applyChildDisplaySettings(){
+  const c=getChild(); if(!c || !c.displaySettings) return;
+  const ds=c.displaySettings;
+  data.timelineZoom=ds.timelineZoom; PX_PER_MIN=ds.timelineZoom;
+  data.nowMarkerStyle=ds.nowMarkerStyle;
+  data.nowMarkerSize=ds.nowMarkerSize;
+  data.nowMarkerColor=ds.nowMarkerColor;
+  data.verticalBandText=ds.verticalBandText;
+  data.soundEnabled=ds.soundEnabled;
+  data.wantPanelEnabled=ds.wantPanelEnabled;
+  data.weekStartMonday=ds.weekStartMonday;
+  applyNowMarkerColor();
+  applyWantPanelVisibility();
+}
 
 // 単一の時刻プルダウン（時：分5分刻み）を指定コンテナに作る
 function buildTimeSelect(containerId, value, onChange, allowEmpty, c){
@@ -6316,7 +6349,8 @@ document.getElementById('pname-del-btn').addEventListener('click',()=>{
   save(); tick(); renderChildSwitcher(); document.getElementById('child-edit-field').style.display='none';
 });
 document.getElementById('add-child-btn').addEventListener('click',()=>{
-  data.children.push({id:Date.now().toString(),name:'あたらしいこども',events:[],dayLabels:[],wakeTime:'07:00',sleepTime:'21:00',routine:{breakfast:'',lunch:'',dinner:'',bath:'',leaveByDow:{},returnByDow:{}},routineOverrides:{},bags:[],gachaWon:[]});
+  data.children.push({id:Date.now().toString(),name:'あたらしいこども',events:[],dayLabels:[],wakeTime:'07:00',sleepTime:'21:00',routine:{breakfast:'',lunch:'',dinner:'',bath:'',leaveByDow:{},returnByDow:{}},routineOverrides:{},bags:[],gachaWon:[],
+    displaySettings:{ timelineZoom:data.timelineZoom, nowMarkerStyle:data.nowMarkerStyle, nowMarkerSize:data.nowMarkerSize, nowMarkerColor:data.nowMarkerColor, verticalBandText:!!data.verticalBandText, soundEnabled:data.soundEnabled!==false, wantPanelEnabled:data.wantPanelEnabled!==false, weekStartMonday:!!data.weekStartMonday }});
   save(); openChildEdit(data.children.length-1); renderChildSwitcher();
 });
 
@@ -6488,7 +6522,7 @@ document.getElementById('dev-reset-btn').addEventListener('click',function(){
   c.gachaWon=[]; c.gachaWonLog=[];
   c.creatures={}; c.creatureLog=[];
   c.headerColor='default'; c.headerGlassStyle=null;
-  data.nowMarkerColor='marker-gray';
+  setChildDS('nowMarkerColor', 'marker-gray');
   save();
   updateClock(); updateCoinBadge(); tick();
   showToast('リセットしました');
@@ -6533,6 +6567,17 @@ function migrateChild(c){
   if(!c.wakeTime)c.wakeTime='07:00'; if(!c.sleepTime)c.sleepTime='21:00';
   if(!c.freeLabel)c.freeLabel='じゆうじかん';
   if(!c.events)c.events=[]; if(!c.dayLabels)c.dayLabels=[];
+  // 画面・タイムラインの見え方は子どもごとの設定。無ければ、この端末の今の値を初期値にする
+  if(!c.displaySettings) c.displaySettings = {
+    timelineZoom: data.timelineZoom || 3.4,
+    nowMarkerStyle: data.nowMarkerStyle || 'analog',
+    nowMarkerSize: data.nowMarkerSize || 'm',
+    nowMarkerColor: data.nowMarkerColor || 'marker-gray',
+    verticalBandText: !!data.verticalBandText,
+    soundEnabled: data.soundEnabled!==false,
+    wantPanelEnabled: data.wantPanelEnabled!==false,
+    weekStartMonday: !!data.weekStartMonday,
+  };
   // 🌱木を育てる機能：初めて開いた時に種を1つだけ無料でプレゼントする（2本目以降はコインで買う）
   if(!c.seedsGranted){ c.seeds=(c.seeds||0)+1; c.seedsGranted=true; }
   if(c.seeds===undefined) c.seeds=0;
@@ -6688,14 +6733,14 @@ function updateWantPanelToggleUI(){
 function applyWantPanelVisibility(){
   document.getElementById('main').classList.toggle('want-panel-disabled', data.wantPanelEnabled===false);
 }
-document.getElementById('wantpanel-on').addEventListener('click',()=>{ data.wantPanelEnabled=true; save(); updateWantPanelToggleUI(); applyWantPanelVisibility(); });
-document.getElementById('wantpanel-off').addEventListener('click',()=>{ data.wantPanelEnabled=false; save(); updateWantPanelToggleUI(); applyWantPanelVisibility(); });
+document.getElementById('wantpanel-on').addEventListener('click',()=>{ setChildDS('wantPanelEnabled',true); save(); updateWantPanelToggleUI(); applyWantPanelVisibility(); });
+document.getElementById('wantpanel-off').addEventListener('click',()=>{ setChildDS('wantPanelEnabled',false); save(); updateWantPanelToggleUI(); applyWantPanelVisibility(); });
 function updateWeekStartToggleUI(){
   document.getElementById('weekstart-sun').className='type-btn'+(!data.weekStartMonday?' active-on':'');
   document.getElementById('weekstart-mon').className='type-btn'+(data.weekStartMonday?' active-on':'');
 }
-document.getElementById('weekstart-sun').addEventListener('click',()=>{ data.weekStartMonday=false; save(); updateWeekStartToggleUI(); });
-document.getElementById('weekstart-mon').addEventListener('click',()=>{ data.weekStartMonday=true; save(); updateWeekStartToggleUI(); });
+document.getElementById('weekstart-sun').addEventListener('click',()=>{ setChildDS('weekStartMonday',false); save(); updateWeekStartToggleUI(); });
+document.getElementById('weekstart-mon').addEventListener('click',()=>{ setChildDS('weekStartMonday',true); save(); updateWeekStartToggleUI(); });
 document.getElementById('awake-on').addEventListener('click',()=>{ data.keepAwake=true; save(); updateAwakeUI(); applyKeepAwake(); });
 document.getElementById('awake-off').addEventListener('click',()=>{ data.keepAwake=false; save(); updateAwakeUI(); applyKeepAwake(); });
 function updateZoomUI(){
@@ -6705,7 +6750,9 @@ function updateZoomUI(){
   document.getElementById('zoom-wide').className='type-btn'+(z===3.4?' active-on':'');
 }
 function setZoom(z){
-  data.timelineZoom=z; PX_PER_MIN=z; save(); updateZoomUI();
+  data.timelineZoom=z; PX_PER_MIN=z;
+  const c=getChild(); if(c && c.displaySettings) c.displaySettings.timelineZoom=z; // 子どもごとの設定にも反映
+  save(); updateZoomUI();
   userScrolledAway=false; // ズーム変更後は今の位置に自動で戻す
   tick();
 }
@@ -6721,25 +6768,30 @@ function updateNowMarkerUI(){
     document.getElementById('nowmarker-size-'+k).className='type-btn'+(sz===k?' active-on':'');
   });
 }
-document.getElementById('nowmarker-digital').addEventListener('click',()=>{ data.nowMarkerStyle='digital'; save(); updateNowMarkerUI(); tick(); });
-document.getElementById('nowmarker-analog').addEventListener('click',()=>{ data.nowMarkerStyle='analog'; save(); updateNowMarkerUI(); tick(); });
+// 画面・タイムラインの見え方の設定は子どもごとに持つ。dataとgetChild().displaySettingsの両方に書き込む共通処理
+function setChildDS(key, value){
+  data[key]=value;
+  const c=getChild(); if(c && c.displaySettings) c.displaySettings[key]=value;
+}
+document.getElementById('nowmarker-digital').addEventListener('click',()=>{ setChildDS('nowMarkerStyle','digital'); save(); updateNowMarkerUI(); tick(); });
+document.getElementById('nowmarker-analog').addEventListener('click',()=>{ setChildDS('nowMarkerStyle','analog'); save(); updateNowMarkerUI(); tick(); });
 ['s','m','l'].forEach(k=>{
-  document.getElementById('nowmarker-size-'+k).addEventListener('click',()=>{ data.nowMarkerSize=k; save(); updateNowMarkerUI(); tick(); });
+  document.getElementById('nowmarker-size-'+k).addEventListener('click',()=>{ setChildDS('nowMarkerSize',k); save(); updateNowMarkerUI(); tick(); });
 });
 function updateVerticalBandUI(){
   const on=!!data.verticalBandText;
   document.getElementById('vertical-band-on').className='type-btn'+(on?' active-on':'');
   document.getElementById('vertical-band-off').className='type-btn'+(!on?' active-on':'');
 }
-document.getElementById('vertical-band-on').addEventListener('click',()=>{ data.verticalBandText=true; save(); updateVerticalBandUI(); renderTimeline(); });
-document.getElementById('vertical-band-off').addEventListener('click',()=>{ data.verticalBandText=false; save(); updateVerticalBandUI(); renderTimeline(); });
+document.getElementById('vertical-band-on').addEventListener('click',()=>{ setChildDS('verticalBandText',true); save(); updateVerticalBandUI(); renderTimeline(); });
+document.getElementById('vertical-band-off').addEventListener('click',()=>{ setChildDS('verticalBandText',false); save(); updateVerticalBandUI(); renderTimeline(); });
 function updateSoundUI(){
   const on=data.soundEnabled!==false;
   document.getElementById('sound-on').className='type-btn'+(on?' active-on':'');
   document.getElementById('sound-off').className='type-btn'+(!on?' active-on':'');
 }
-document.getElementById('sound-on').addEventListener('click',()=>{ data.soundEnabled=true; save(); updateSoundUI(); });
-document.getElementById('sound-off').addEventListener('click',()=>{ data.soundEnabled=false; save(); updateSoundUI(); });
+document.getElementById('sound-on').addEventListener('click',()=>{ setChildDS('soundEnabled',true); save(); updateSoundUI(); });
+document.getElementById('sound-off').addEventListener('click',()=>{ setChildDS('soundEnabled',false); save(); updateSoundUI(); });
 function updateWeatherUI(){
   const w=data.weather||{};
   const input=document.getElementById('weather-region-input');
@@ -8988,6 +9040,7 @@ document.getElementById('cond-add').addEventListener('click',()=>{
 
 // ═══ 初期化 ═══
 migrateVacationPeriods();
+applyChildDisplaySettings(); // 起動時：今アクティブな子どもの画面設定(タイムラインの間隔等)を反映する
 applyNowMarkerColor(); updateCoinBadge(); updateDevPreviewBtn(); updateDevForceSundayBtn();
 updatePendingBadge(); tick(); applyKeepAwake(); refreshWeatherIfNeeded(); applyWantPanelVisibility();
 maybeShowIntro(); // カバンが1つも無い＝初回なら「カバンとは何か」を説明する
@@ -9237,13 +9290,20 @@ renderParentMessage();
       snap.forEach(d=>{
         const payload = d.data();
         const childData = payload && payload.data;
-        if(!childData || !Array.isArray(childData.children)) return;
-        childData.children.forEach(c=>{
-          if(window.migrateChild){ try{ window.migrateChild(c); }catch(e){} }
-          const idx = appData.children.findIndex(existing => existing.name === c.name);
-          if(idx >= 0) appData.children[idx] = c; else appData.children.push(c);
-          importedCount++;
-        });
+        if(!childData || !Array.isArray(childData.children) || !childData.children.length) return;
+        // その端末で実際に使われていた子ども1人ぶんだけを取り込む(無ければ先頭)。
+        // 統合の基準は、招待コード発行時に「保護者が指定した名前」(payload.childName)を使う。
+        // 端末側が内部に持っている名前(c.name)は、子ども自身が名前を変えていなかったり
+        // 初期値のままだったりして他の子と一致してしまうことがあり、それを基準にすると
+        // 別の子ども同士が同じ名前として扱われ、片方がもう片方を上書きしてしまう事故が起きるため。
+        const idxInDevice = childData.activeChild!=null ? childData.activeChild : 0;
+        const c = childData.children[idxInDevice] || childData.children[0];
+        if(!c) return;
+        if(payload.childName) c.name = payload.childName;
+        if(window.migrateChild){ try{ window.migrateChild(c); }catch(e){} }
+        const idx = appData.children.findIndex(existing => existing.name === c.name);
+        if(idx >= 0) appData.children[idx] = c; else appData.children.push(c);
+        importedCount++;
       });
       if(importedCount > 0 && window.save) window.save();
       if(window.tick) window.tick();
