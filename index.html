@@ -2039,7 +2039,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v187・2026-08-04</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v188・2026-08-11</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -6396,12 +6396,30 @@ document.body.addEventListener('click', e=>{
   const open = target.classList.toggle('info-open');
   btn.setAttribute('aria-expanded', open?'true':'false');
 });
+let _parentBtnLongPressTimer=null, _parentBtnLongPressed=false;
+document.getElementById('parent-btn').addEventListener('pointerdown',()=>{
+  _parentBtnLongPressed=false;
+  _parentBtnLongPressTimer=setTimeout(()=>{
+    _parentBtnLongPressed=true;
+    showToast('🔓 保護者として ひらきます');
+    openParent();
+  }, 1200);
+});
+['pointerup','pointercancel','pointerleave'].forEach(evt=>{
+  document.getElementById('parent-btn').addEventListener(evt,()=>{
+    if(_parentBtnLongPressTimer){ clearTimeout(_parentBtnLongPressTimer); _parentBtnLongPressTimer=null; }
+  });
+});
 document.getElementById('parent-btn').addEventListener('click',()=>{
-  // Firebase家族連携：招待コードで参加した「こども」役割の端末では、保護者設定そのものを開かせない
+  // 長押しで既に開いた場合は、続けて発火する通常クリックは無視する(二重処理・二重トースト防止)
+  if(_parentBtnLongPressed){ _parentBtnLongPressed=false; return; }
+  // Firebase家族連携：招待コードで参加した「こども」役割の端末では、ふつうにタップしただけでは開かせない。
+  // ただし、保護者がその端末を直接手に取って操作したい場面(データ復旧など)のため、
+  // ⚙️を1.2秒以上長押しすれば開ける(上のpointerdown側で処理)。
   try{
     const fam = JSON.parse(localStorage.getItem('kyou_firebase_family')||'null');
     if(fam && fam.role === 'child'){
-      showToast('この端末は こども用の端末です。設定は 保護者の端末から おこなってください');
+      showToast('この端末は こども用の端末です。長押しすると 保護者として ひらけます');
       return;
     }
   }catch(e){}
