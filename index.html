@@ -2039,7 +2039,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v188・2026-08-11</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v189・2026-08-11</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -9290,6 +9290,30 @@ renderParentMessage();
     }
   }
 
+  // 既に参加済みの端末が、今の(復元し直した等の)データをもう一度クラウドへ送り直す。
+  // 参加時の初回アップロードと同じ場所(childData)に、上書きで書き込む。
+  async function repushChildDataToCloud(){
+    const fam = getFamilyLocal();
+    if(!fam || fam.role !== 'child') return;
+    const btn = document.getElementById('family-repush-btn');
+    if(btn){ btn.disabled = true; btn.textContent = '🔄 おくっています…'; }
+    try{
+      await ensureAnonAuth();
+      const appData = window.getAppData ? window.getAppData() : null;
+      if(!appData){ window.showToast && window.showToast('⚠️ データが 見つかりませんでした'); return; }
+      await setDoc(doc(db, 'families', fam.familyId, 'childData', fam.uid || auth.currentUser.uid), {
+        childName: fam.childName,
+        data: appData,
+        uploadedAt: new Date().toISOString(),
+      });
+      window.showToast && window.showToast('🔄 いまのデータを クラウドへ おくりました');
+    }catch(e){
+      window.showToast && window.showToast('⚠️ 送信に失敗しました：' + e.message);
+    }finally{
+      if(btn){ btn.disabled = false; btn.textContent = '🔄 今のデータを クラウドに 送り直す'; }
+    }
+  }
+
   // 保護者の端末で、子どもの端末が送ってくれたデータをクラウドから取り込み、
   // この端末の「子ども切替」に反映する(同名の子どもがいれば置き換え、なければ追加)。
   async function importChildrenFromCloud(){
@@ -9413,7 +9437,11 @@ renderParentMessage();
       parentBlock.style.display = 'none';
       childBlock.style.display = '';
       if(statusEl) statusEl.textContent = '';
-      childBlock.innerHTML = `<div style="background:var(--surface2);border:2px solid var(--border);border-radius:var(--r-md);padding:12px 14px;font-size:var(--fs-sm);font-weight:700;color:var(--text)">✅ この端末は「${fam.childName||'こども'}」用として、家族に参加しています。<br><span style="font-size:var(--fs-xs);font-weight:700;color:var(--text-dim)">保護者機で変更があると、この端末にも自動で反映されます。</span></div>`;
+      childBlock.innerHTML = `<div style="background:var(--surface2);border:2px solid var(--border);border-radius:var(--r-md);padding:12px 14px;font-size:var(--fs-sm);font-weight:700;color:var(--text)">✅ この端末は「${fam.childName||'こども'}」用として、家族に参加しています。<br><span style="font-size:var(--fs-xs);font-weight:700;color:var(--text-dim)">保護者機で変更があると、この端末にも自動で反映されます。</span></div>
+        <button class="btn btn-secondary" id="family-repush-btn" style="width:100%;margin-top:10px">🔄 今のデータを クラウドに 送り直す</button>
+        <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">この端末のデータを復元した後など、保護者機に最新の内容を反映したい時に使います。</p>`;
+      const repushBtn = document.getElementById('family-repush-btn');
+      if(repushBtn) repushBtn.addEventListener('click', repushChildDataToCloud);
     }
   }
   window.renderFamilyUI = renderFamilyUI;
