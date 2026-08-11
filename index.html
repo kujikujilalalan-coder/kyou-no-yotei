@@ -954,6 +954,15 @@ body.viewing-other-day #date-big { color: var(--accent); }
   z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px);
 }
 .modal-overlay.open { display: flex; }
+/* こども用の限定表示モード：⚙️を軽くタップした時、画面の見た目の設定だけを見せる(それ以外は隠す)。
+   長押し(openParent直呼び)の時はこのクラスを付けないので、今まで通り全部見える。 */
+#parent-modal.limited-mode #parent-tab-bar,
+#parent-modal.limited-mode [data-tab-group]:not([data-acc="display"]) {
+  display: none !important;
+}
+#parent-modal.limited-mode [data-acc="display"] {
+  display: block !important;
+}
 .modal {
   background: var(--surface); border: 2px solid var(--border); border-radius: var(--r-lg);
   padding: 24px 28px; width: min(540px, 94vw); max-height: 88vh; overflow-y: auto; scrollbar-width: thin;
@@ -1679,6 +1688,14 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
         <div id="pending-list"></div>
       </div>
     </div>
+    <!-- 押し間違い等で完了してしまったカバンを、今日だけ元に戻す -->
+    <div class="acc-section" data-acc="undo-complete" data-tab-group="pending">
+      <button class="acc-head" type="button" data-acc-toggle="undo-complete">↩️ きょう おわらせたのを 取り消す<span class="acc-chevron">▶</span></button>
+      <div class="acc-body">
+        <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">押し間違い等で「おわった」にしてしまったカバンを、今日の分だけ未完了に戻します。もらったコイン等はそのままです。</p>
+        <div id="undo-complete-list"></div>
+      </div>
+    </div>
     <!-- 【20】保護者から子どもへ一言。誰かが見てくれている実感が、いちばん続く理由になる。 -->
     <div class="acc-section open" data-acc="message" data-tab-group="pending">
       <button class="acc-head" type="button" data-acc-toggle="message">💬 こどもに ひとこと おくる<span class="acc-chevron">▶</span></button>
@@ -2039,7 +2056,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v189・2026-08-11</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v191・2026-08-11</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -5275,6 +5292,23 @@ function incrementCombo(){
 }
 // メッセージ（漢字＝文字多め・ひらがな＝みじかく絵中心。名前があれば頭につける）
 
+// 保護者からの一言を、完了演出のsummary要素に差し込む。フル演出・簡易演出のどちらからも共通で使う。
+// 【20】どんな終わらせ方(時間内・時間切れ・時刻未設定)でも、同じように届くようにするため。
+function showParentMessageIfAny(child, summaryEl){
+  // すぐ届く一言 が無ければ、条件を満たした「予約メッセージ」を探す
+  const pm = child.parentMessage || pickConditionalMessage();
+  if(!pm) return;
+  const el=document.createElement('div');
+  el.innerHTML = `<div style="font-size: var(--fs-xs);font-weight:800;opacity:0.85;margin-bottom:3px">おうちの人から</div>
+    <div style="font-size: var(--fs-lg);font-weight:900;line-height:1.4">💬 ${pm.text}</div>`;
+  el.style.cssText='background:#fff;color:var(--warn-text);border:3px solid var(--warn);border-radius: var(--r-lg);padding:12px 16px;text-align:center;width:100%;max-width:340px;box-sizing:border-box;box-shadow:0 6px 20px rgba(180,83,9,0.3);';
+  summaryEl.appendChild(el);
+  // 一度見せたら消す（同じ言葉が何度も出ると価値が下がる）
+  // ※条件つきの方は pickConditionalMessage() の中で既に fired 済み
+  if(child.parentMessage){ delete child.parentMessage; }
+  save();
+  renderParentMessage();
+}
 function showRewardAnimation(reward){
   const savedMin = (reward&&reward.min)||0;
   const bagType = (reward&&reward.type)||'on';
@@ -5330,6 +5364,7 @@ function showRewardAnimation(reward){
       msg.style.cssText='font-size: var(--fs-md);font-weight:800;color:var(--text);text-align:center;';
       msg.textContent = kanji ? '最後まで おわらせたね！' : 'さいごまで おわらせたね！';
       sm.appendChild(msg);
+      showParentMessageIfAny(child, sm); // 【20】保護者からの一言：時間切れ・時刻未設定の完了でも同じく届ける
     };
     const simpleTimer=setTimeout(finishSimple, walkDurMs);
     _skipReward=finishSimple; // タップで即スキップできる
@@ -5462,20 +5497,7 @@ function showRewardAnimation(reward){
 
     // ⓪ 【20】保護者からの一言。どんな報酬よりも先に出す。
     //     「誰かが見てくれている」は、ガチャや演出と違って飽きない。相手が生きているから。
-    // すぐ届く一言 が無ければ、条件を満たした「予約メッセージ」を探す
-    const pm = child.parentMessage || pickConditionalMessage();
-    if(pm){
-      const el=document.createElement('div');
-      el.innerHTML = `<div style="font-size: var(--fs-xs);font-weight:800;opacity:0.85;margin-bottom:3px">おうちの人から</div>
-        <div style="font-size: var(--fs-lg);font-weight:900;line-height:1.4">💬 ${pm.text}</div>`;
-      el.style.cssText='background:#fff;color:var(--warn-text);border:3px solid var(--warn);border-radius: var(--r-lg);padding:12px 16px;text-align:center;width:100%;max-width:340px;box-sizing:border-box;box-shadow:0 6px 20px rgba(180,83,9,0.3);';
-      summary.appendChild(el);
-      // 一度見せたら消す（同じ言葉が何度も出ると価値が下がる）
-      // ※条件つきの方は pickConditionalMessage() の中で既に fired 済み
-      if(child.parentMessage){ delete child.parentMessage; }
-      save();
-      renderParentMessage();
-    }
+    showParentMessageIfAny(child, summary);
 
     // ① あたらしいなかま（最も稀・最優先）
     if(pendingNewCreatures.length){
@@ -5591,6 +5613,29 @@ document.getElementById('switch-modal').addEventListener('click',e=>{if(e.target
 // 親指が届く右下から、同じ操作に到達できるようにする。
 function openQuickSheet(){
   const body=document.getElementById('quick-sheet-body');
+  // Firebase家族連携：こども役割の端末では、時刻変更・スキップ・保護者設定など大人向けの操作は出さず、
+  // 画面の みため の調整だけを出す(⚙️の軽いタップと同じ行き先に統一)。
+  let isChild=false;
+  try{
+    const fam = JSON.parse(localStorage.getItem('kyou_firebase_family')||'null');
+    isChild = !!(fam && fam.role === 'child');
+  }catch(e){}
+  if(isChild){
+    body.innerHTML = `<div class="qs-grid">
+      <button class="qs-icon-btn qs-wide" data-qs="display"><span class="qs-icon">${qsIconSvg('gear')}</span><span class="qs-label">がめんの みため を ちょうせいする</span></button>
+      <button class="qs-icon-btn" data-qs="hand"><span class="qs-icon">${qsIconSvg('swap')}</span><span class="qs-label">ボタン いどう</span></button>
+    </div>`;
+    body.querySelectorAll('[data-qs]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const act=btn.dataset.qs;
+        if(act==='hand'){ toggleFabSide(); closeQuickSheet(); return; }
+        if(act==='display'){ closeQuickSheet(); openChildDisplaySettings(); return; }
+      });
+    });
+    document.getElementById('quick-sheet').classList.add('open');
+    document.getElementById('quick-sheet').setAttribute('aria-hidden','false');
+    return;
+  }
   const cur=nowMin();
   // いま進行中／次に来る「カバン由来の予定」を対象にする
   const evs=getTodayEvents().filter(e=>e._bagId && e._completedAt==null);
@@ -6386,6 +6431,40 @@ function renderPendingList(){
   });
 }
 
+// 今日「おわった」扱いになっているカバンの一覧を出し、押し間違いを取り消せるようにする
+function renderUndoCompleteList(){
+  const wrap=document.getElementById('undo-complete-list'); if(!wrap) return;
+  const today=dateKey(getDisplayDate());
+  const bags=getBags().filter(b=>b.completedByDate && b.completedByDate[today]!=null);
+  if(!bags.length){ wrap.innerHTML='<p style="font-size: var(--fs-xs);color:var(--text-dim);margin:0">きょう「おわった」ものは まだ ありません。</p>'; return; }
+  wrap.innerHTML='';
+  bags.forEach(b=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)';
+    row.innerHTML=`<span style="font-weight:800;font-size: var(--fs-sm)">${b.name}</span>`;
+    const btn=document.createElement('button');
+    btn.type='button'; btn.className='btn btn-secondary';
+    btn.style.cssText='font-size: var(--fs-xs);padding:6px 12px;flex-shrink:0';
+    btn.textContent='↩️ 取り消す';
+    btn.addEventListener('click',()=>{ undoBagComplete(b.id); });
+    row.appendChild(btn);
+    wrap.appendChild(row);
+  });
+}
+// 今日1日分の「おわった」を取り消す(コイン等の報酬はそのまま。完了記録だけを未完了に戻す)
+function undoBagComplete(bagId){
+  const bag=getBags().find(b=>b.id===bagId); if(!bag) return;
+  const today=dateKey(getDisplayDate());
+  if(bag.completedByDate) delete bag.completedByDate[today];
+  if(bag.taskDoneByDate && bag.taskDoneByDate[today]){
+    bag.taskDoneByDate[today]=(bag.tasks||[]).map(()=>false);
+  }
+  save();
+  renderUndoCompleteList();
+  tick();
+  showToast('「'+bag.name+'」を きょうだけ 未完了に もどしました');
+}
+
 // ═══ 保護者モーダル ═══
 // ⓘ ボタンで説明文を開閉する（保護者向けの説明は普段畳んでおき、必要な時だけ開く）
 document.body.addEventListener('click', e=>{
@@ -6413,20 +6492,32 @@ document.getElementById('parent-btn').addEventListener('pointerdown',()=>{
 document.getElementById('parent-btn').addEventListener('click',()=>{
   // 長押しで既に開いた場合は、続けて発火する通常クリックは無視する(二重処理・二重トースト防止)
   if(_parentBtnLongPressed){ _parentBtnLongPressed=false; return; }
-  // Firebase家族連携：招待コードで参加した「こども」役割の端末では、ふつうにタップしただけでは開かせない。
-  // ただし、保護者がその端末を直接手に取って操作したい場面(データ復旧など)のため、
-  // ⚙️を1.2秒以上長押しすれば開ける(上のpointerdown側で処理)。
+  // Firebase家族連携：招待コードで参加した「こども」役割の端末では、
+  // 軽くタップしただけでは「画面の みため の設定」だけが開く(案X)。
+  // カバン編集・バックアップ・家族連携などの大人専用機能は、1.2秒以上の長押し(pointerdown側)でのみ開ける。
   try{
     const fam = JSON.parse(localStorage.getItem('kyou_firebase_family')||'null');
     if(fam && fam.role === 'child'){
-      showToast('この端末は こども用の端末です。長押しすると 保護者として ひらけます');
+      openChildDisplaySettings();
       return;
     }
   }catch(e){}
   openParent(); // 保護者ロックPINは廃止済み(2026-08-04)。Firebase Authの役割で管理する
 });
-document.getElementById('parent-close').addEventListener('click',()=>document.getElementById('parent-modal').classList.remove('open'));
-document.getElementById('parent-close-top').addEventListener('click',()=>document.getElementById('parent-modal').classList.remove('open'));
+// こども役割の端末向け：画面の見た目の設定だけを開く(限定表示モード)
+function openChildDisplaySettings(){
+  updateZoomUI(); updateNowMarkerUI(); updateVerticalBandUI(); updateSoundUI();
+  updateWantPanelToggleUI(); updateWeekStartToggleUI();
+  const modal=document.getElementById('parent-modal');
+  modal.classList.add('limited-mode');
+  showParentTab('settings');
+  document.querySelectorAll('#parent-modal .acc-section').forEach(sec=>{
+    if(sec.dataset.acc==='display') sec.classList.add('open');
+  });
+  modal.classList.add('open');
+}
+document.getElementById('parent-close').addEventListener('click',()=>document.getElementById('parent-modal').classList.remove('open','limited-mode'));
+document.getElementById('parent-close-top').addEventListener('click',()=>document.getElementById('parent-modal').classList.remove('open','limited-mode'));
 // アコーディオンの開閉
 document.querySelectorAll('[data-acc-toggle]').forEach(btn=>{
   btn.addEventListener('click',()=>{
@@ -6698,10 +6789,12 @@ if(data.keepAwake===undefined) data.keepAwake=true;
 });
 // 保護者設定は誤操作で閉じないよう、外側タップでは閉じない（明示的に閉じるボタンのみ）
 function openParent(){
+  document.getElementById('parent-modal').classList.remove('limited-mode'); // 常にフル表示で開く
   // 初回ガイドが開いたままだと、保護者設定より前面に重なって隠れてしまうため、必ず閉じる
   document.getElementById('intro-modal')?.classList.remove('open');
   bagSelectMode=false; bagSelectedIds.clear();
   renderChildSwitcher(); renderPendingList(); updatePendingBadge();
+  renderUndoCompleteList();
   renderBagList();
   migrateVacationPeriods();
   renderVacationPeriodList();
