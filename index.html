@@ -2100,7 +2100,9 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v210・2026-08-16</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v211・2026-08-16</div>
+    <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
+    <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -6568,6 +6570,9 @@ function openChildDisplaySettings(){
   modal.classList.add('open');
 }
 document.getElementById('parent-close').addEventListener('click',()=>document.getElementById('parent-modal').classList.remove('open','limited-mode'));
+document.getElementById('force-update-btn').addEventListener('click',()=>{
+  if(confirm('さいしんばんに 更新しますか？(保存済みのデータは 消えません)')) forceUpdateApp();
+});
 document.getElementById('parent-close-top').addEventListener('click',()=>document.getElementById('parent-modal').classList.remove('open','limited-mode'));
 // アコーディオンの開閉
 document.querySelectorAll('[data-acc-toggle]').forEach(btn=>{
@@ -8929,6 +8934,33 @@ if('serviceWorker' in navigator){
       .then(reg=>{ swReg=reg; scheduleTodayNotifications(); })
       .catch(()=>{ /* file:// で開いている等。通知以外の機能は問題なく動く */ });
   });
+}
+
+// ── 最新版に強制更新する(2026-08-16) ──
+// GitHubにアップロードした後、端末側のブラウザが古いService Worker/キャッシュを
+// 握ったままになり、更新できたりできなかったりして不安定だったための対策。
+// 「ホーム画面に追加」の待機・自動更新に頼らず、ボタン1つで確実に最新版を取りに行く。
+async function forceUpdateApp(){
+  const btn=document.getElementById('force-update-btn');
+  if(btn){ btn.disabled=true; btn.textContent='🔄 さいしんばんを さがしています…'; }
+  try{
+    // ① 今のService Workerの登録を解除する(古いキャッシュを配っている張本人)
+    if('serviceWorker' in navigator){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for(const r of regs){ await r.unregister(); }
+    }
+    // ② ブラウザ内に溜まっているキャッシュ(HTML・アイコン等)を全部消す
+    if('caches' in window){
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k=>caches.delete(k)));
+    }
+  }catch(e){
+    console.error('強制更新の準備に失敗:', e);
+  }
+  // ③ キャッシュを無視して、今のURLを新しいクエリ付きで開き直す(確実に新しいHTMLを取りに行かせる)
+  const url = new URL(location.href);
+  url.searchParams.set('_freshen', Date.now().toString());
+  location.href = url.toString();
 }
 
 // ── 通知の許可 ──
