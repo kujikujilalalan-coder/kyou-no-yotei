@@ -90,6 +90,11 @@ body {
 .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto; }
 #date-big { font-size: var(--fs-2xl); color: var(--text-dim); font-weight: 900; white-space: nowrap; }
 #weather-badge { display: flex; align-items: center; gap: 4px; font-size: var(--fs-md); font-weight: 800; color: var(--text-dim); margin-left: 6px; }
+#offline-badge {
+  display: flex; align-items: center; gap: 4px; margin-left: 6px;
+  font-size: var(--fs-xs); font-weight: 900; color: var(--warn-text);
+  background: var(--warn-light); border-radius: var(--r-full); padding: 3px 10px;
+}
 #weather-badge .w-emoji { font-size: var(--fs-lg); }
 #child-switch-btn { flex-shrink: 0; text-align: right; font-size: var(--fs-lg); font-weight: 900; min-width: 60px; min-height: 44px; background: none; border: none; color: var(--text); font-family: inherit; cursor: pointer; padding: 4px 8px; border-radius: var(--r-md); }
 #child-switch-btn.switchable:hover { background: var(--surface2); }
@@ -238,7 +243,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
   white-space: nowrap; text-overflow: ellipsis;
   letter-spacing: 0.05em;
 }
-.tl-band-tag { font-size: var(--fs-sm); font-weight: 700; color: var(--text-dim); }
+.tl-band-tag { font-size: var(--fs-md); font-weight: 800; color: var(--text); }
 .tl-band.on  .tl-band-tag { color: var(--on-color); }
 .tl-band.off .tl-band-tag { color: var(--off-color); }
 
@@ -586,6 +591,12 @@ body.viewing-other-day #date-big { color: var(--accent); }
 }
 .zukan-cell .zukan-name { font-size: var(--fs-xs); font-weight: 800; color: var(--text-dim); text-align: center; }
 .zukan-cell.locked .zukan-name { color: var(--text-dim); }
+/* 進化：同じ生き物が3匹以上集まると、金色の後光をつけて特別感を出す */
+.zukan-cell.evolved { border-color: var(--gold); background: linear-gradient(135deg, rgba(245,158,11,0.10), rgba(245,158,11,0.02)); }
+.zukan-cell.evolved .zukan-count { background: linear-gradient(135deg, var(--gold), var(--accent)); }
+.zukan-cell.evolved .zukan-creature-glow { position:absolute; inset:0; border-radius:50%; background: radial-gradient(circle, rgba(245,158,11,0.35), transparent 70%); animation: zukanEvolveGlow 2.4s ease-in-out infinite; }
+@keyframes zukanEvolveGlow { 0%,100%{ opacity:0.6; transform:scale(0.9); } 50%{ opacity:1; transform:scale(1.08); } }
+.zukan-cell .zukan-evolve-label { font-size: 9px; font-weight:900; color: var(--gold); margin-top:-2px; }
 .zukan-q { font-size: var(--fs-2xl); line-height: 1; opacity: 0.3; }
 .zukan-color-cell {
   border-radius: var(--r-md); border: 3px solid var(--border);
@@ -861,6 +872,10 @@ body.viewing-other-day #date-big { color: var(--accent); }
   width: 100%; max-width: 340px; box-sizing: border-box;
 }
 .bf-newfriend.show { opacity: 1; transform: scale(1); }
+/* しんか演出：あたらしいなかまと同じ土台に、金色の後光を追加して特別感を出す */
+.bf-evolve { box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 0 3px var(--gold); }
+.bf-evolve .bf-nf-label { color: var(--gold); }
+.bf-evolve .bf-nf-icons svg { filter: drop-shadow(0 0 8px rgba(245,158,11,0.6)); }
 .bf-nf-label { font-size: var(--fs-md); font-weight: 900; color: var(--on-color); margin-bottom: 8px; }
 .bf-nf-icons { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 6px; }
 .bf-nf-icons svg { animation: popIn 0.5s 0.2s both cubic-bezier(0.34,1.56,0.64,1); }
@@ -1008,9 +1023,9 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .acc-head .pending-badge { margin-left: 6px; }
 .parent-header {
   position: sticky; top: -24px; z-index: 5; background: var(--surface);
-  display: flex; align-items: center; gap: 10px;
-  margin: -24px -28px 16px; padding: 18px 24px 14px; border-bottom: 2px solid var(--border);
+  margin: -24px -28px 16px; padding: 18px 24px 10px; border-bottom: 2px solid var(--border);
 }
+.parent-header-title-row { display: flex; align-items: center; gap: 10px; }
 .parent-header h2 { margin: 0; flex: 1; }
 .parent-header-close {
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-dim);
@@ -1039,7 +1054,13 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .emoji-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(38px,1fr)); gap: 4px; max-height: 110px; overflow-y: auto; }
 .emoji-opt { font-size: var(--fs-lg); text-align: center; padding: 4px; border-radius: var(--r-sm); cursor: pointer; border: 2px solid transparent; background: var(--bg); }
 .emoji-opt.selected { border-color: var(--accent); background: rgba(180,83,9,0.1); }
-.modal-actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+.modal-actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+  position: sticky; bottom: -24px; z-index: 5;
+  background: var(--surface);
+  margin: 16px -28px -24px; padding: 12px 28px 20px;
+  border-top: 2px solid var(--border);
+}
 /* すべてのボタンに最小タップ領域を保証する。
    個別に指定し忘れると、子どもや抱っこ中の親が押せなくなるため。
    44pxは「最低ライン」であって「標準」ではない → 標準は --btn-md(52px)。 */
@@ -1307,6 +1328,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </button>
     </div>
     <div id="weather-badge" style="display:none"></div>
+    <div id="offline-badge" style="display:none">🔌 オフライン</div>
   </div>
   <div id="topbar-row2">
     <div id="day-label-badge"></div>
@@ -1521,7 +1543,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       <div style="text-align:center;font-size: var(--fs-md);font-weight:900;color:var(--gold);margin-bottom:6px">🪙 <span id="zukan-coin-count-inline">0</span></div>
       <div id="zukan-color-progress" style="font-size: var(--fs-sm);font-weight:700;color:var(--text-dim);margin-bottom:14px;text-align:center"></div>
       <div id="zukan-color-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:8px"></div>
-      <p style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:8px;line-height:1.5">🔒のマスをタップすると、🪙5こで すきな いろ・すりガラスと こうかんできるよ！</p>
+      <p style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:8px;line-height:1.5">🔒のマスをタップすると、🪙5こで すきな いろと こうかんできるよ！</p>
     </div>
     <div class="modal-actions"><button class="btn btn-secondary" id="zukan-close">とじる</button></div>
   </div>
@@ -1667,13 +1689,16 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
 <div class="modal-overlay" role="dialog" aria-modal="true" id="parent-modal">
   <div class="modal">
     <div class="parent-header">
-      <h2>⚙️ 保護者設定</h2>
-      <button class="parent-header-close" id="parent-close-top" type="button" aria-label="閉じる">✕</button>
+      <div class="parent-header-title-row">
+        <h2>⚙️ 保護者設定</h2>
+        <button class="parent-header-close" id="parent-close-top" type="button" aria-label="閉じる">✕</button>
+      </div>
+      <div id="child-switcher-top"></div>
     </div>
-    <div id="child-switcher-top" style="padding:10px 18px 4px"></div>
-    <div id="parent-tab-bar" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 18px 12px">
+    <div id="parent-tab-bar" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;padding:0 18px 12px">
       <button class="ptab-btn" type="button" data-tab="pending">📨 今日<span class="pending-badge" id="pending-count-tab" style="display:none">0</span></button>
-      <button class="ptab-btn" type="button" data-tab="bag">カバン</button>
+      <button class="ptab-btn" type="button" data-tab="bag">🎒 カバン</button>
+      <button class="ptab-btn" type="button" data-tab="child">👶 子ども</button>
       <button class="ptab-btn" type="button" data-tab="settings">⚙️ 設定<span id="settings-tab-badge" style="display:none;background:var(--accent);color:#fff;font-size: var(--fs-xs);font-weight:900;padding:1px 6px;border-radius: var(--r-sm)">！</span></button>
     </div>
 
@@ -1747,21 +1772,6 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <!-- 🧪 開発用: 実際に使い始める前に削除する。常設機能と混同しないよう、目立たない位置・控えめな見た目にする -->
-    <div data-tab-group="pending" style="margin:10px 18px 0;padding-top:10px;border-top:1px dashed var(--border)">
-      <button type="button" id="dev-reset-toggle" style="background:none;border:none;padding:2px 0;font-family:inherit;font-size: var(--fs-xs);color:var(--text-dim);opacity:0.7;cursor:pointer">🧪 開発用（実際に使い始める前に削除する）▾</button>
-      <div id="dev-reset-body" style="display:none;margin-top:6px">
-        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-4" aria-label="せつめいを みる"></button></div>
-        <p class="info-text" id="info-4" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">動作確認でためた コイン・ガチャ結果・なかま・ヘッダー設定を全部リセットします。</p>
-        <button class="btn" id="dev-reset-btn" style="width:100%;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🗑️ 色・ガチャ・コインを リセット</button>
-        <button class="btn" id="dev-preview-unlock-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🔓 ずかんを ぜんぶ プレビュー：OFF</button>
-        <p class="info-text" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">見た目だけ全部解禁して見せます。コインやガチャの記録は変わりません（実際の交換はしません）。</p>
-        <button class="btn" id="dev-force-sunday-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🧪 きょうを にちようび として あつかう：OFF</button>
-        <p class="info-text" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">木を育てる機能のテスト用。ONにすると、実際の曜日に関係なく「そだてノート」で先週分の水やりができます（種は本当に1つ消費します）。</p>
-        <button class="btn" id="dev-firebase-test-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">☁️ Firebase 接続テスト</button>
-        <p class="info-text" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">連携作業の確認用。予定データには一切触れず、テスト専用の小さなデータを書き込んで読み返せるかだけを確認します。</p>
-      </div>
-    </div>
 
     <!-- ── カバンタブ ── -->
     <div class="acc-section open" data-acc="bag" data-tab-group="bag">
@@ -1794,6 +1804,13 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
         </div>
         <div id="bag-list"></div>
         <button class="btn btn-purple" id="drag-mode-btn" style="width:100%;margin-top:8px;font-size: var(--fs-sm)">✋ タイムラインで 予定を動かす</button>
+        <div style="border-top:1.5px dashed var(--border);margin-top:14px;padding-top:12px">
+          <button type="button" id="bag-trash-toggle" style="background:none;border:none;padding:2px 0;font-family:inherit;font-size: var(--fs-xs);color:var(--text-dim);cursor:pointer;font-weight:800">🗑️ けした カバンを もどす ▾</button>
+          <div id="bag-trash-body" style="display:none;margin-top:8px">
+            <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">削除してから30日以内のカバンだけ、ここから元に戻せます。</p>
+            <div id="bag-trash-list"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1804,7 +1821,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       <div style="font-size: var(--fs-xs);font-weight:900;color:var(--text-dim);letter-spacing:0.04em">ときどき 見直すもの</div>
       <div style="font-size: var(--fs-xs);color:var(--text-dim);opacity:0.85;margin-top:1px">こどもの成長にあわせて変える</div>
     </div>
-    <div class="acc-section" data-acc="child" data-tab-group="settings">
+    <div class="acc-section" data-acc="child" data-tab-group="child">
       <button class="acc-head" type="button" data-acc-toggle="child">子ども設定<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
         <div id="child-switcher"></div>
@@ -1855,7 +1872,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       <div style="font-size: var(--fs-xs);font-weight:900;color:var(--text-dim);letter-spacing:0.04em">さいしょに 決めるもの</div>
       <div style="font-size: var(--fs-xs);color:var(--text-dim);opacity:0.85;margin-top:1px">一度決めたら、ほとんど触りません</div>
     </div>
-    <div class="acc-section" data-acc="display" data-tab-group="settings">
+    <div class="acc-section" data-acc="display" data-tab-group="child">
       <button class="acc-head" type="button" data-acc-toggle="display">画面・タイムラインの 見え方<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
         <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">🧒＝子どもを切り替えると、その子の設定に変わります。📱＝この端末だけの設定で、子どもを切り替えても変わりません。</p>
@@ -2056,7 +2073,34 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v191・2026-08-11</div>
+    <!-- 🧪 開発用: 実際に使い始める前に削除する。常設機能と混同しないよう、目立たない位置・控えめな見た目にする -->
+    <div data-tab-group="settings" style="margin:10px 18px 0;padding-top:10px;border-top:1px dashed var(--border)">
+      <button type="button" id="dev-reset-toggle" style="background:none;border:none;padding:2px 0;font-family:inherit;font-size: var(--fs-xs);color:var(--text-dim);opacity:0.7;cursor:pointer">🧪 開発用（実際に使い始める前に削除する）▾</button>
+      <div id="dev-reset-body" style="display:none;margin-top:6px">
+        <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-4" aria-label="せつめいを みる"></button></div>
+        <p class="info-text" id="info-4" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">動作確認でためた コイン・ガチャ結果・なかま・ヘッダー設定を全部リセットします。</p>
+        <button class="btn" id="dev-reset-btn" style="width:100%;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🗑️ 色・ガチャ・コインを リセット</button>
+        <button class="btn" id="dev-preview-unlock-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🔓 ずかんを ぜんぶ プレビュー：OFF</button>
+        <p class="info-text" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">見た目だけ全部解禁して見せます。コインやガチャの記録は変わりません（実際の交換はしません）。</p>
+        <button class="btn" id="dev-force-sunday-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🧪 きょうを にちようび として あつかう：OFF</button>
+        <p class="info-text" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">木を育てる機能のテスト用。ONにすると、実際の曜日に関係なく「そだてノート」で先週分の水やりができます（種は本当に1つ消費します）。</p>
+        <button class="btn" id="dev-firebase-test-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">☁️ Firebase 接続テスト</button>
+        <p class="info-text" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">連携作業の確認用。予定データには一切触れず、テスト専用の小さなデータを書き込んで読み返せるかだけを確認します。</p>
+        <div style="margin-top:8px">
+          <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;line-height:1.5">木の成長段階を、実際に水やりを待たずにワンタップで確認できます。</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+            <button class="btn" id="dev-tree-seed" type="button" style="font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🌱 たね</button>
+            <button class="btn" id="dev-tree-sprout" type="button" style="font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🌿 め</button>
+            <button class="btn" id="dev-tree-young" type="button" style="font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🌳 わかぎ</button>
+            <button class="btn" id="dev-tree-flower" type="button" style="font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🌸 はな+実3</button>
+            <button class="btn" id="dev-tree-fruit" type="button" style="font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🍎 み+実3</button>
+            <button class="btn" id="dev-tree-fruit6" type="button" style="font-size: var(--fs-xs);border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim)">🍎 み+実6</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v210・2026-08-16</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="parent-close">閉じる</button>
     </div>
@@ -2157,7 +2201,10 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
     <div class="field"><label>カバンの名前</label><input type="text" id="bag-name" placeholder="例：学校のしゅくだい" maxlength="14"/></div>
     <div class="field"><label>いろ（きろくのカレンダーで見分ける色です）</label><div id="bag-color-picker" style="display:flex;gap:10px"></div></div>
     <div class="field" id="bag-tasks-field">
-      <label>カバンの中身（やること）</label>
+      <label style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <span>カバンの中身（やること）</span>
+        <button type="button" id="bag-task-sort-toggle" style="background:var(--surface2);border:1.5px solid var(--border);border-radius: var(--r-sm);color:var(--text-dim);font-size: var(--fs-xs);font-weight:800;padding:5px 10px;font-family:inherit;cursor:pointer;min-height:36px">≡ ならびかえ：OFF</button>
+      </label>
       <!-- 名前から「やること」を提案する。手入力が最も重い箇所を1タップで済ませる -->
       <div id="bag-task-suggest" style="display:none;margin-bottom:8px"></div>
       <div id="bag-task-list"></div>
@@ -2278,8 +2325,24 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
     <p class="info-text" id="info-27" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:14px;line-height:1.5">どうやって作りますか？</p>
     <div class="modal-actions" style="flex-direction:column">
       <button class="btn btn-primary" id="bag-choice-blank" style="width:100%;margin-bottom:8px">📄 白紙から作る</button>
+      <button class="btn" id="bag-choice-preset" style="width:100%;margin-bottom:8px;background:var(--leaf);color:#fff">🗂️ テンプレートから作る</button>
       <button class="btn btn-purple" id="bag-choice-copy" style="width:100%">📋 コピーして作る</button>
       <button class="btn btn-secondary" id="bag-choice-cancel" style="width:100%;margin-top:8px">戻る</button>
+    </div>
+  </div>
+</div>
+
+<!-- テンプレートから作る：選択肢一覧 -->
+<div class="modal-overlay" role="dialog" aria-modal="true" id="bag-preset-modal">
+  <div class="modal">
+    <div class="parent-header" style="margin:-24px -28px 8px;padding:18px 24px 14px">
+      <h2 style="margin:0">🗂️ テンプレートを えらぶ</h2>
+      <button type="button" class="parent-header-close" id="bag-preset-close-top" aria-label="とじる">✕</button>
+    </div>
+    <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">よくある「やること」の一覧から選ぶと、名前とチェックリストが自動で入ります（あとで自由に変更できます）。</p>
+    <div id="bag-preset-list"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="bag-preset-cancel">戻る</button>
     </div>
   </div>
 </div>
@@ -2673,6 +2736,7 @@ function save(){
   }
   scheduleAutoBackup();   // 変更のたびに、まとめて数秒後にファイルへ書き出す
   if(window.scheduleFamilyPush) window.scheduleFamilyPush(); // 保護者機なら、まとめて数秒後にクラウドへも送る
+  if(window.scheduleChildProgressPush) window.scheduleChildProgressPush(); // 子機なら、完了状況などをまとめて数秒後にクラウドへ送る
 }
 // Firebase家族連携(子機側)から、クラウドの最新内容をこの端末に反映するための窓口
 function replaceActiveChildFromCloud(childObj){
@@ -3035,7 +3099,18 @@ const CREATURE_SVG={
   crab:     '<ellipse cx="12" cy="14" rx="7" ry="4.5" fill="#e05030"/><g stroke="#e05030" stroke-width="2.2" stroke-linecap="round"><line x1="5.5" y1="12" x2="2.5" y2="8.5"/><line x1="5.5" y1="15.5" x2="2.5" y2="17.5"/><line x1="18.5" y1="12" x2="21.5" y2="8.5"/><line x1="18.5" y1="15.5" x2="21.5" y2="17.5"/></g><g stroke="#e05030" stroke-width="1.6" stroke-linecap="round"><line x1="8" y1="18.5" x2="7" y2="21"/><line x1="11" y1="19" x2="11" y2="22"/><line x1="14" y1="18.5" x2="15" y2="21"/></g><circle cx="9" cy="12.5" r="1.5" fill="#fff"/><circle cx="15" cy="12.5" r="1.5" fill="#fff"/><circle cx="9" cy="12.5" r="0.65" fill="#1a0a0a"/><circle cx="15" cy="12.5" r="0.65" fill="#1a0a0a"/>',
   spider:   '<g stroke="#3a2a1a" stroke-width="1.4" stroke-linecap="round"><line x1="12" y1="14" x2="3.5" y2="9"/><line x1="12" y1="14" x2="5" y2="15"/><line x1="12" y1="14" x2="5" y2="20"/><line x1="12" y1="14" x2="20.5" y2="9"/><line x1="12" y1="14" x2="19" y2="15"/><line x1="12" y1="14" x2="19" y2="20"/></g><ellipse cx="12" cy="10.5" rx="3" ry="3.2" fill="#5a4a3a"/><ellipse cx="12" cy="16" rx="4" ry="3.2" fill="#4a3a2a"/><g fill="#e8d8c0"><circle cx="10.5" cy="9.5" r="0.7"/><circle cx="13.5" cy="9.5" r="0.7"/><circle cx="10.2" cy="11.5" r="0.6"/><circle cx="13.8" cy="11.5" r="0.6"/></g>',
   hedgehog: '<ellipse cx="12" cy="17" rx="7" ry="4.5" fill="#8a7050"/><path d="M7 15 q-1.5-7 3.5-9 q3-1.5 7 0 q4 2.5 1.5 9z" fill="#5a4030"/><g stroke="#8a7050" stroke-width="1.3" stroke-linecap="round"><line x1="8" y1="12" x2="6.5" y2="9"/><line x1="10" y1="10" x2="9" y2="7"/><line x1="12.5" y1="9" x2="12.5" y2="6"/><line x1="15" y1="10" x2="16" y2="7"/><line x1="17" y1="12" x2="18.5" y2="9.5"/></g><circle cx="9" cy="16" r="1.2" fill="#fff"/><circle cx="9" cy="16" r="0.5" fill="#1a0a0a"/><circle cx="8" cy="18" r="0.8" fill="#1a0a0a"/>',
-  duck:     '<ellipse cx="13" cy="16" rx="6.5" ry="5" fill="#f0f0e0"/><circle cx="9" cy="10.5" r="4" fill="#f0f0e0"/><path d="M5.5 10.5 q-2 0.3-1.5 1.5 q1 1.5 3.5 0.8z" fill="#f4a030"/><g stroke="#e8c840" stroke-width="2.6" stroke-linecap="round"><line x1="9" y1="21" x2="8" y2="23"/><line x1="15" y1="22" x2="15" y2="24"/></g><circle cx="8.5" cy="10" r="0.9" fill="#fff"/><circle cx="8.5" cy="10" r="0.45" fill="#1a1a0a"/>'
+  duck:     '<ellipse cx="13" cy="16" rx="6.5" ry="5" fill="#f0f0e0"/><circle cx="9" cy="10.5" r="4" fill="#f0f0e0"/><path d="M5.5 10.5 q-2 0.3-1.5 1.5 q1 1.5 3.5 0.8z" fill="#f4a030"/><g stroke="#e8c840" stroke-width="2.6" stroke-linecap="round"><line x1="9" y1="21" x2="8" y2="23"/><line x1="15" y1="22" x2="15" y2="24"/></g><circle cx="8.5" cy="10" r="0.9" fill="#fff"/><circle cx="8.5" cy="10" r="0.45" fill="#1a1a0a"/>',
+  // 追加10種（2026-08-11）
+  kitsune:  '<path d="M7 6 L4 2 L6 8z" fill="#e8823a"/><path d="M17 6 L20 2 L18 8z" fill="#e8823a"/><ellipse cx="12" cy="13.5" rx="6.5" ry="6" fill="#e8823a"/><ellipse cx="12" cy="15" rx="3.5" ry="3" fill="#fff3e0"/><circle cx="9.5" cy="11.5" r="0.9" fill="#2a1a0a"/><circle cx="14.5" cy="11.5" r="0.9" fill="#2a1a0a"/><path d="M11 14.5 L13 14.5 L12 15.8z" fill="#3a2010"/>',
+  kuma:     '<ellipse cx="12" cy="14" rx="7" ry="6.5" fill="#8a5a3a"/><circle cx="6" cy="6.5" r="2.3" fill="#8a5a3a"/><circle cx="18" cy="6.5" r="2.3" fill="#8a5a3a"/><circle cx="12" cy="10" r="5.5" fill="#8a5a3a"/><ellipse cx="12" cy="12" rx="2.8" ry="2.2" fill="#c8a880"/><circle cx="9.5" cy="9" r="0.9" fill="#2a1a0a"/><circle cx="14.5" cy="9" r="0.9" fill="#2a1a0a"/><ellipse cx="12" cy="11.5" rx="1" ry="0.7" fill="#2a1a0a"/>',
+  panda:    '<ellipse cx="12" cy="14" rx="7" ry="6.5" fill="#f5f5f0"/><circle cx="6" cy="6.5" r="2.3" fill="#2a2a2a"/><circle cx="18" cy="6.5" r="2.3" fill="#2a2a2a"/><circle cx="12" cy="10" r="5.5" fill="#f5f5f0"/><ellipse cx="9" cy="9.5" rx="1.8" ry="2.2" fill="#2a2a2a"/><ellipse cx="15" cy="9.5" rx="1.8" ry="2.2" fill="#2a2a2a"/><circle cx="9" cy="9.8" r="0.7" fill="#fff"/><circle cx="15" cy="9.8" r="0.7" fill="#fff"/><ellipse cx="12" cy="11.5" rx="1" ry="0.7" fill="#1a1a1a"/>',
+  inu:      '<ellipse cx="12" cy="14.5" rx="6.5" ry="6" fill="#d4a26a"/><path d="M5 8 q-2 4 0 8 q2-1 2.5-4z" fill="#a87840"/><path d="M19 8 q2 4 0 8 q-2-1-2.5-4z" fill="#a87840"/><circle cx="12" cy="10.5" r="5" fill="#d4a26a"/><ellipse cx="12" cy="13" rx="2.5" ry="2" fill="#f0d8b8"/><circle cx="9.8" cy="9.5" r="0.9" fill="#2a1a0a"/><circle cx="14.2" cy="9.5" r="0.9" fill="#2a1a0a"/><ellipse cx="12" cy="12.3" rx="0.9" ry="0.6" fill="#1a0a00"/>',
+  neko:     '<path d="M7 7 L5 2.5 L9.5 6z" fill="#c89860"/><path d="M17 7 L19 2.5 L14.5 6z" fill="#c89860"/><circle cx="12" cy="11" r="6" fill="#c89860"/><ellipse cx="12" cy="13" rx="2.8" ry="2.2" fill="#f0dcc0"/><circle cx="9.3" cy="10" r="0.9" fill="#2a1a0a"/><circle cx="14.7" cy="10" r="0.9" fill="#2a1a0a"/><path d="M12 12.3 q-0.8 0.8-1.6 0.3 M12 12.3 q0.8 0.8 1.6 0.3" stroke="#8a6030" stroke-width="0.8" fill="none"/><g stroke="#a88050" stroke-width="0.6"><line x1="6" y1="12" x2="2.5" y2="11.5"/><line x1="6" y1="13.5" x2="2.5" y2="14"/><line x1="18" y1="12" x2="21.5" y2="11.5"/><line x1="18" y1="13.5" x2="21.5" y2="14"/></g>',
+  uma:      '<ellipse cx="12" cy="16" rx="6" ry="4.5" fill="#8a5a30"/><path d="M9 14 q-1-9 3-11.5 q4-1.5 5 2 q0.5 3-2 4.5 q3 2 3 6z" fill="#8a5a30"/><ellipse cx="8" cy="4.5" rx="1.7" ry="2.5" fill="#8a5a30"/><g fill="#4a3020"><ellipse cx="10.5" cy="3" rx="1" ry="2.5" transform="rotate(-20 10.5 3)"/><ellipse cx="13" cy="3" rx="1" ry="2.5" transform="rotate(10 13 3)"/></g><circle cx="8.5" cy="6.5" r="0.9" fill="#1a0a00"/><ellipse cx="6.5" cy="9" rx="1" ry="1.4" fill="#4a2a10"/>',
+  hitsuji:  '<g fill="#f5f0e8"><circle cx="7" cy="10" r="3.2"/><circle cx="12" cy="8" r="3.5"/><circle cx="17" cy="10" r="3.2"/><circle cx="9" cy="13" r="3.2"/><circle cx="15" cy="13" r="3.2"/></g><ellipse cx="12" cy="14.5" rx="3.5" ry="3.8" fill="#4a3a2a"/><ellipse cx="9.5" cy="6" rx="1.3" ry="2" fill="#4a3a2a"/><ellipse cx="14.5" cy="6" rx="1.3" ry="2" fill="#4a3a2a"/><circle cx="10.7" cy="14" r="0.7" fill="#fff"/><circle cx="13.3" cy="14" r="0.7" fill="#fff"/><circle cx="10.7" cy="14" r="0.35" fill="#1a1005"/><circle cx="13.3" cy="14" r="0.35" fill="#1a1005"/>',
+  zou:      '<ellipse cx="11" cy="14" rx="6.5" ry="6" fill="#9a9aa0"/><path d="M6 13 q-3 2-3 6 q2 1 3.5-1 q1-3 1-5z" fill="#9a9aa0"/><ellipse cx="6" cy="9.5" rx="3.5" ry="4.5" fill="#8a8a90"/><ellipse cx="17" cy="9.5" rx="3.5" ry="4.5" fill="#8a8a90"/><circle cx="11" cy="10" r="5" fill="#9a9aa0"/><circle cx="9" cy="9" r="0.9" fill="#1a1a1a"/><circle cx="13" cy="9" r="0.9" fill="#1a1a1a"/>',
+  kirin:    '<ellipse cx="12" cy="19" rx="6" ry="3.5" fill="#f0c860"/><path d="M9 20 q-2-10 1-16 q1-2 4-2 q1 2-1 4 q-2 8 0 14z" fill="#f0c860"/><circle cx="10.5" cy="3.5" r="3" fill="#f0c860"/><g fill="#a87830"><circle cx="9" cy="1.5" r="0.9"/><circle cx="12" cy="1.5" r="0.9"/></g><circle cx="9.3" cy="3" r="0.6" fill="#5a3a10"/><g fill="#d8983a"><ellipse cx="8" cy="8" rx="1" ry="1.4"/><ellipse cx="11" cy="12" rx="1.1" ry="1.3"/><ellipse cx="14" cy="18" rx="1.2" ry="1"/></g>',
+  tako:     '<ellipse cx="12" cy="10" rx="7" ry="6.5" fill="#e8608a"/><g stroke="#e8608a" stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M7 15 q-2 4-1 7"/><path d="M10 16 q-1 4 0.5 7"/><path d="M14 16 q1 4-0.5 7"/><path d="M17 15 q2 4 1 7"/></g><circle cx="9" cy="9" r="1.1" fill="#fff"/><circle cx="15" cy="9" r="1.1" fill="#fff"/><circle cx="9" cy="9" r="0.55" fill="#1a0510"/><circle cx="15" cy="9" r="0.55" fill="#1a0510"/>'
 };
 // ゲットする順番（易しい→珍しい）＋ 出やすい時間帯
 const CREATURE_ORDER=[
@@ -3058,7 +3133,18 @@ const CREATURE_ORDER=[
   {key:'spider',     name:{kanji:'くも',          hira:'くも'},         band:'evening'},
   {key:'bat',        name:{kanji:'こうもり',      hira:'こうもり'},     band:'night'},
   {key:'firefly',    name:{kanji:'ホタル',        hira:'ほたる'},       band:'night'},
-  {key:'owl',        name:{kanji:'ふくろう',      hira:'ふくろう'},     band:'night'}
+  {key:'owl',        name:{kanji:'ふくろう',      hira:'ふくろう'},     band:'night'},
+  // 追加10種（2026-08-11）
+  {key:'inu',        name:{kanji:'いぬ',          hira:'いぬ'},         band:'morning'},
+  {key:'neko',       name:{kanji:'ねこ',          hira:'ねこ'},         band:'any'},
+  {key:'panda',      name:{kanji:'パンダ',        hira:'ぱんだ'},       band:'day'},
+  {key:'uma',        name:{kanji:'うま',          hira:'うま'},         band:'morning'},
+  {key:'hitsuji',    name:{kanji:'ひつじ',        hira:'ひつじ'},       band:'day'},
+  {key:'kitsune',    name:{kanji:'きつね',        hira:'きつね'},       band:'evening'},
+  {key:'kuma',       name:{kanji:'くま',          hira:'くま'},         band:'any'},
+  {key:'zou',        name:{kanji:'ぞう',          hira:'ぞう'},         band:'day'},
+  {key:'kirin',      name:{kanji:'キリン',        hira:'きりん'},       band:'day'},
+  {key:'tako',       name:{kanji:'たこ',          hira:'たこ'},         band:'any'}
 ];
 const CREATURE_SKY_MAX=8; // 空に同時に出す上限（スマホ目安）
 function creatureSvg(key,size){
@@ -3080,16 +3166,20 @@ function creatureTotalOwned(child){
   if(!child.creatures) return 0;
   return Object.values(child.creatures).reduce((a,b)=>a+(b||0),0);
 }
-// 合計がしきい値を超えていたら、足りないぶんを順番どおりに付与。新しくゲットしたキー配列を返す
+// 合計がしきい値を超えていたら、足りないぶんを順番どおりに付与。
+// { gained: 新しくゲットしたキー配列, evolved: ちょうど3匹目に到達して「しんか」したキー配列 } を返す
 function grantCreaturesIfEarned(child){
   if(!child.creatures) child.creatures={};
   const earned=creaturesEarnedFromMin(child.totalBonusMin||0);
   const owned=creatureTotalOwned(child);
   const gained=[];
+  const evolved=[];
   for(let i=owned;i<earned;i++){
     const sp=CREATURE_ORDER[i % CREATURE_ORDER.length].key; // 一周したら最初に戻る（同じ種が増える＝将来の進化用）
-    child.creatures[sp]=(child.creatures[sp]||0)+1;
+    const before=child.creatures[sp]||0;
+    child.creatures[sp]=before+1;
     gained.push(sp);
+    if(before+1===3) evolved.push(sp); // ちょうど3匹目に到達した瞬間だけ「しんか」扱い
   }
   // 「その週に何を手に入れたか」を絵本ページで見せるための記録(ts=取得時刻)。90日超は自動削除。
   if(gained.length){
@@ -3099,7 +3189,7 @@ function grantCreaturesIfEarned(child){
     const cutoff=Date.now()-90*24*60*60*1000;
     child.creatureLog=child.creatureLog.filter(e=>new Date(e.ts).getTime()>=cutoff);
   }
-  return gained;
+  return {gained, evolved};
 }
 // 今の時間帯の名前
 function currentSkyBand(){
@@ -3178,6 +3268,16 @@ async function fetchWeather(lat,lon){
   }
   return null;
 }
+// ネット接続の有無を表示する。電波が無い間もアプリは今まで通り使え(localStorageは常に効く)、
+// Firebase家族連携の変更だけが「復帰したら自動で送る」形で一旦保留される。それを保護者・子どもの
+// どちらにも分かるようにするための、ごく簡単な表示。
+function updateOfflineBadge(){
+  const badge=document.getElementById('offline-badge');
+  if(!badge) return;
+  badge.style.display = navigator.onLine ? 'none' : 'flex';
+}
+window.addEventListener('online', ()=>{ updateOfflineBadge(); showToast('🔌 つながったよ。へんこうを おくります'); });
+window.addEventListener('offline', ()=>{ updateOfflineBadge(); showToast('🔌 オフラインに なりました（へんこうは あとで おくられます）'); });
 // 起動時など：地域があれば天気を更新（1日1回）。失敗しても静かに無視（空の見た目は出る）
 async function refreshWeatherIfNeeded(){
   const w=data.weather;
@@ -4494,19 +4594,6 @@ function updateClock(){
   const hTheme=HEADER_THEMES.find(t=>t.id===(getChild()&&getChild().headerColor))||HEADER_THEMES[0];
   const topbarEl=document.getElementById('topbar');
   topbarEl.style.background = hTheme.bg.startsWith('var(') ? '' : hTheme.bg;
-  // ── ヘッダーのすりガラス（ガチャで解禁したものだけ選べる、色とは別系統） ──
-  const child=getChild();
-  const glassId = child && child.headerGlassStyle;
-  const glassStyle = glassId ? GLASS_STYLES.find(g=>g.id===glassId) : null;
-  if(glassStyle){
-    topbarEl.style.setProperty('background', glassStyle.tint, 'important');
-    topbarEl.style.backdropFilter = `blur(${glassStyle.blur}px)`;
-    topbarEl.style.webkitBackdropFilter = `blur(${glassStyle.blur}px)`;
-  } else {
-    topbarEl.style.backdropFilter = '';
-    topbarEl.style.webkitBackdropFilter = '';
-    topbarEl.style.background = hTheme.bg.startsWith('var(') ? '' : hTheme.bg;
-  }
   const kanji=!!(getChild()&&getChild().kanjiMode);
   const days = kanji ? ['日','月','火','水','木','金','土'] : ['にち','げつ','か','すい','もく','きん','ど'];
   const dd=getDisplayDate();
@@ -4869,13 +4956,18 @@ function renderZukanCreature(){
   CREATURE_ORDER.forEach(c=>{
     const count=owned[c.key]||0;
     const isOwned=count>0;
+    const evolved=count>=3; // 同じ生き物が3匹以上集まったら「進化」扱い
     const cell=document.createElement('div');
-    cell.className='zukan-cell'+(isOwned?' owned':' locked');
+    cell.className='zukan-cell'+(isOwned?' owned':' locked')+(evolved?' evolved':'');
     if(isOwned){
       cell.innerHTML=`
-        ${count>1?`<div class="zukan-count">×${count}</div>`:''}
-        ${creatureSvg(c.key,48)}
+        ${count>1?`<div class="zukan-count">${evolved?'✨':''}×${count}</div>`:''}
+        <div style="position:relative;width:48px;height:48px;display:flex;align-items:center;justify-content:center">
+          ${evolved?'<div class="zukan-creature-glow"></div>':''}
+          <div style="position:relative">${creatureSvg(c.key,48)}</div>
+        </div>
         <div class="zukan-name">${kanji?c.name.kanji:c.name.hira}</div>
+        ${evolved?`<div class="zukan-evolve-label">${kanji?'進化':'しんか'}</div>`:''}
       `;
     } else {
       cell.innerHTML=`
@@ -4962,40 +5054,6 @@ function renderZukanColor(){
     }
     grid.appendChild(cell);
   });
-
-  // ── ヘッダーのすりガラス：複数種から選ぶ(v62)。ガチャで解禁したものだけ選べる ──
-  const gLabel=document.createElement('div');
-  gLabel.style.cssText='grid-column:1/-1;font-size: var(--fs-xs);font-weight:800;color:var(--text-dim);margin-top:12px';
-  gLabel.textContent='🪟 ヘッダーの すりガラス';
-  grid.appendChild(gLabel);
-
-  const currentGlassId = child.headerGlassStyle || null;
-  // 「なし」は常に選べる
-  const offCell=document.createElement('div');
-  offCell.className='zukan-color-cell'+(!currentGlassId?' selected':'');
-  offCell.innerHTML=`${!currentGlassId?`<div style="font-size: var(--fs-lg)">✔️</div>`:''}<div class="zukan-color-name">なし</div>`;
-  offCell.addEventListener('click',()=>{
-    child.headerGlassStyle=null; save();
-    updateClock(); renderZukanColor();
-  });
-  grid.appendChild(offCell);
-
-  GLASS_STYLES.forEach(g=>{
-    const isOwned = won.includes(g.id);
-    const isSelected = g.id===currentGlassId;
-    const cell=document.createElement('div');
-    cell.className='zukan-color-cell'+(isSelected?' selected':'')+(isOwned?'':' locked');
-    if(isOwned){
-      cell.innerHTML=`${isSelected?`<div style="font-size: var(--fs-lg)">✔️</div>`:''}<div class="zukan-color-name">${kanji?g.name.kanji:g.name.hira}</div>`;
-      cell.addEventListener('click',()=>{
-        child.headerGlassStyle=g.id; save();
-        updateClock(); renderZukanColor();
-      });
-    } else {
-      wireUnlockCell(cell, g.id);
-    }
-    grid.appendChild(cell);
-  });
 }
 // ずかんのタブ切替（3タブぶん同じ処理が並んでいたので共通化）
 // 「しくみ」はタブでなく、なかまタブ内のⓘ開閉に変更済み(zukan-howto-toggle)。
@@ -5078,6 +5136,7 @@ function milestoneText(totalMin){
 }
 let pendingMilestoneText=null;
 let pendingNewCreatures=[]; // ごほうび演出の最後に見せる「あたらしいなかま」
+let pendingEvolvedCreatures=[]; // ごほうび演出の最後に見せる「しんかした なかま」(累計3匹に到達した瞬間)
 function addBonusMinAndCheckMilestone(child, addMin, bagType, bagId, scheduledMin){
   if(addMin<=0) return;
   if(!child.totalBonusMin) child.totalBonusMin=0;
@@ -5089,8 +5148,9 @@ function addBonusMinAndCheckMilestone(child, addMin, bagType, bagId, scheduledMi
     if(prevTotal<m && newTotal>=m && !child.milestonesHit.includes(m)){ child.milestonesHit.push(m); pendingMilestoneText=milestoneText(newTotal); break; }
   }
   // 生き物のゲット判定
-  const gained=grantCreaturesIfEarned(child);
+  const {gained, evolved}=grantCreaturesIfEarned(child);
   if(gained.length) pendingNewCreatures=pendingNewCreatures.concat(gained);
+  if(evolved.length) pendingEvolvedCreatures=pendingEvolvedCreatures.concat(evolved);
   // コイン付与（5分節約で1コイン、旧レートの2割減。端数はcoinBufferに積む）
   // 根拠：addMinを0.8倍してから貯めることで、端数繰り越し方式のまま長期的に正確な2割減になる
   if(!child.coinBuffer) child.coinBuffer=0;
@@ -5156,13 +5216,12 @@ const MARKER_COLORS=[
   {id:'marker-brown',  color:'#1a613d', shadow:'rgba(26,97,61,0.45)',  name:{kanji:'もりみどり',hira:'もりみどり'}, price:10},
 ];
 
-// ─── トークン交換プール（ヘッダー色 + マーカー色 + すりガラス。わくは廃止済み） ───
-// defaultを除いたヘッダーテーマ + defaultを除いたマーカー + すりガラス全種
+// ─── トークン交換プール（ヘッダー色 + マーカー色。すりガラス・わくは廃止済み） ───
+// defaultを除いたヘッダーテーマ + defaultを除いたマーカー
 function buildGachaPool(){
   const hp=HEADER_THEMES.filter(t=>t.id!=='default').map(t=>({id:t.id,type:'header',name:t.name,bg:t.bg,price:t.price}));
   const mp=MARKER_COLORS.filter(m=>!m.default).map(m=>({id:m.id,type:'marker',name:m.name,color:m.color,price:m.price}));
-  const gp=GLASS_STYLES.map(g=>({id:g.id,type:'glass',name:g.name,price:g.price}));
-  return [...hp,...mp,...gp];
+  return [...hp,...mp];
 }
 
 // ─── 現在地マーカーカラーをCSS変数に反映 ───
@@ -5508,6 +5567,15 @@ function showRewardAnimation(reward){
       summary.appendChild(nf);
       requestAnimationFrame(()=>nf.classList.add('show'));
     }
+    // ①.5 しんか（同じなかまが3匹以上あつまった瞬間だけの特別演出）
+    if(pendingEvolvedCreatures.length){
+      const uniqEv=[...new Set(pendingEvolvedCreatures)];
+      const ev=document.createElement('div'); ev.className='bf-newfriend bf-evolve';
+      ev.innerHTML=`<div class="bf-nf-label">🌟 しんか した！</div>
+        <div class="bf-nf-icons">${uniqEv.map(k=>creatureSvg(k,72)).join('')}</div>`;
+      summary.appendChild(ev);
+      requestAnimationFrame(()=>ev.classList.add('show'));
+    }
 
     // ② 次の解放ヒント
     const nextUp=getNextUnlock(child);
@@ -5565,6 +5633,7 @@ document.getElementById('blockfall-close').addEventListener('click',()=>{
   pendingNewCreatures=[];
   const hint=document.getElementById('blockfall-next-hint'); if(hint) hint.remove();
   pendingNewCreatures=[];
+  pendingEvolvedCreatures=[];
 
   // B: 閉じた直後にもトーストで次のアンロックを通知
   const nextUp=getNextUnlock(getChild());
@@ -5734,23 +5803,11 @@ function openQuickSheet(){
           };
           if(!bag.timeByDate) bag.timeByDate={};
           if(!bag.endByDate) bag.endByDate={};
-          // 取り消し用に、変更前の状態(その日の上書きがあったかどうかも含めて)を覚えておく
-          const hadTime = Object.prototype.hasOwnProperty.call(bag.timeByDate, dk);
-          const hadEnd  = Object.prototype.hasOwnProperty.call(bag.endByDate, dk);
-          const prevTime = bag.timeByDate[dk];
-          const prevEnd  = bag.endByDate[dk];
-
           bag.timeByDate[dk]=shift(bagTimeOn(bag,d));
           const en=bagEndOn(bag,d); if(en) bag.endByDate[dk]=shift(en);
           save();
           closeQuickSheet();
-          showToast(`「${bag.name}」を ${Math.abs(mins)}ぷん ${mins>0?'うしろ':'まえ'}に ずらしました`, ()=>{
-            // 誤タップしても戻せる（元々その日の上書きが無かったなら、上書き自体を消す）
-            if(hadTime) bag.timeByDate[dk]=prevTime; else delete bag.timeByDate[dk];
-            if(hadEnd)  bag.endByDate[dk]=prevEnd;   else delete bag.endByDate[dk];
-            save(); tick();
-          });
-          tick();
+          tick(); // タイムラインの時刻表示がすぐ更新されるので、それ自体を結果の合図にする(通知ポップアップは出さない)
         });
       }
       if(act==='extend'){
@@ -5762,16 +5819,10 @@ function openQuickSheet(){
           let tot=Math.max(toMin(bagTimeOn(bag,d))+5, Math.min(23*60+55, toMin(curEnd)+mins)); // 開始より5分未満にはしない
           const newEnd=`${String(Math.floor(tot/60)).padStart(2,'0')}:${String(tot%60).padStart(2,'0')}`;
           if(!bag.endByDate) bag.endByDate={};
-          const hadEnd = Object.prototype.hasOwnProperty.call(bag.endByDate, dk);
-          const prevEnd = bag.endByDate[dk];
           bag.endByDate[dk]=newEnd;
           save();
           closeQuickSheet();
-          showToast(`「${bag.name}」の じかんを ${Math.abs(mins)}ぷん ${mins>0?'のばしました':'ちぢめました'}`, ()=>{
-            if(hadEnd) bag.endByDate[dk]=prevEnd; else delete bag.endByDate[dk];
-            save(); tick();
-          });
-          tick();
+          tick(); // タイムラインの時刻表示がすぐ更新されるので、それ自体を結果の合図にする(通知ポップアップは出さない)
         });
       }
     });
@@ -6132,7 +6183,13 @@ function renderWantList(){
     prevInOff=inOff;
   }
   list.innerHTML='';
-  if(!wantList.length){ list.innerHTML='<div style="color:var(--text-dim);font-size: var(--fs-md);padding:8px 0;font-weight:600">まだ ありません。<br>ついかしてみよう！</div>'; return; }
+  if(!wantList.length){
+    // やりたいことが1つも無い時は、パネルの表示自体を消して、タイムラインの幅を広げる。
+    // 何か追加された瞬間、自動でパネルを元に戻す(下のelse側)。
+    if(!panelsCollapsed){ panelsCollapsed=true; applyPanelsCollapsed(); }
+    return;
+  }
+  if(panelsCollapsed){ panelsCollapsed=false; applyPanelsCollapsed(); }
   wantList.forEach((item,i)=>{
     const row=document.createElement('div'); row.className='want-item';
     row.innerHTML=`<span class="want-name">${item.name}</span>
@@ -6238,50 +6295,44 @@ const FACE_SVG={
 const HEADER_THEMES = [
   // 無彩色・デフォルト（unlockMin:0〜30）
   {id:'default', name:{kanji:'そら',    hira:'そら'},     bg:'var(--surface)',                                                       unlockMin:0, price:0},
-  {id:'sakura',  name:{kanji:'さくら',  hira:'さくら'},   bg:'linear-gradient(135deg,#fde8f0,#fdf0cc)',                             unlockMin:30, price:3},
+  {id:'sakura',  name:{kanji:'さくら',  hira:'さくら'},   bg:'linear-gradient(135deg,#fee7f0,#fff1ca)',                             unlockMin:30, price:3},
   // 寒色系（unlockMin:60〜130）
-  {id:'sora',    name:{kanji:'あおぞら',hira:'あおぞら'}, bg:'linear-gradient(135deg,#d7ecf7,#e8f4ff)',                             unlockMin:60, price:5},
-  {id:'midori',  name:{kanji:'みどり',  hira:'みどり'},   bg:'linear-gradient(135deg,#dcf3df,#d7f0e8)',                             unlockMin:100, price:5},
-  {id:'umi',     name:{kanji:'うみ',    hira:'うみ'},     bg:'linear-gradient(135deg,#c8eaf7,#d4f0e8)',                             unlockMin:130, price:5},
+  {id:'sora',    name:{kanji:'あおぞら',hira:'あおぞら'}, bg:'linear-gradient(135deg,#d5edf9,#e8f4ff)',                             unlockMin:60, price:5},
+  {id:'midori',  name:{kanji:'みどり',  hira:'みどり'},   bg:'linear-gradient(135deg,#dbf4de,#d6f1e8)',                             unlockMin:100, price:5},
+  {id:'umi',     name:{kanji:'うみ',    hira:'うみ'},     bg:'linear-gradient(135deg,#c6ebf9,#d3f1e9)',                             unlockMin:130, price:5},
   // 暖色系（unlockMin:160〜250）
-  {id:'yuuhi',   name:{kanji:'ゆうやけ',hira:'ゆうやけ'}, bg:'linear-gradient(135deg,#fde8cc,#fdd8cc)',                             unlockMin:160, price:8},
-  {id:'himawari',name:{kanji:'ひまわり',hira:'ひまわり'}, bg:'linear-gradient(135deg,#fff3c0,#fde8a0)',                             unlockMin:190, price:8},
-  {id:'tomato',  name:{kanji:'あか',    hira:'あか'},     bg:'linear-gradient(135deg,#fde0e0,#fcd4d4)',                             unlockMin:220, price:8},
-  {id:'aki',     name:{kanji:'あき',    hira:'あき'},     bg:'linear-gradient(135deg,#fde4cc,#fdd8a8)',                             unlockMin:250, price:8},
+  {id:'yuuhi',   name:{kanji:'ゆうやけ',hira:'ゆうやけ'}, bg:'linear-gradient(135deg,#ffe8ca,#ffd7ca)',                             unlockMin:160, price:8},
+  {id:'himawari',name:{kanji:'ひまわり',hira:'ひまわり'}, bg:'linear-gradient(135deg,#fff3c0,#ffe99e)',                             unlockMin:190, price:8},
+  {id:'tomato',  name:{kanji:'あか',    hira:'あか'},     bg:'linear-gradient(135deg,#fedfdf,#fed2d2)',                             unlockMin:220, price:8},
+  {id:'aki',     name:{kanji:'あき',    hira:'あき'},     bg:'linear-gradient(135deg,#ffe4ca,#ffd8a6)',                             unlockMin:250, price:8},
   // 紫・夜系（unlockMin:290〜370）
-  {id:'yoru',    name:{kanji:'よる',    hira:'よる'},     bg:'linear-gradient(135deg,#d8d4f0,#c8d8f0)',                             unlockMin:290, price:12},
-  {id:'momo',    name:{kanji:'もも',    hira:'もも'},     bg:'linear-gradient(135deg,#f7d7e8,#f0d4f7)',                             unlockMin:330, price:12},
-  {id:'hoshi',   name:{kanji:'ほしぞら',hira:'ほしぞら'}, bg:'linear-gradient(135deg,#c0c8e8,#b8c0e0)',                             unlockMin:370, price:12},
+  {id:'yoru',    name:{kanji:'よる',    hira:'よる'},     bg:'linear-gradient(135deg,#d7d3f1,#c6d8f2)',                             unlockMin:290, price:12},
+  {id:'momo',    name:{kanji:'もも',    hira:'もも'},     bg:'linear-gradient(135deg,#f9d5e8,#f1d2f9)',                             unlockMin:330, price:12},
+  {id:'hoshi',   name:{kanji:'ほしぞら',hira:'ほしぞら'}, bg:'linear-gradient(135deg,#bec7ea,#b6bfe2)',                             unlockMin:370, price:12},
   // 季節スペシャル（unlockMin:410〜480）
-  {id:'fuyu',    name:{kanji:'ふゆ',    hira:'ふゆ'},     bg:'linear-gradient(135deg,#e8f0f8,#f0f4fc)',                             unlockMin:410, price:16},
-  {id:'natsu',   name:{kanji:'なつ',    hira:'なつ'},     bg:'linear-gradient(135deg,#c8f0d8,#d0f0f8)',                             unlockMin:450, price:16},
-  {id:'kouyo',   name:{kanji:'こうよう',hira:'こうよう'}, bg:'linear-gradient(135deg,#fdd8b0,#fce0c0)',                             unlockMin:490, price:16},
+  {id:'fuyu',    name:{kanji:'ふゆ',    hira:'ふゆ'},     bg:'linear-gradient(135deg,#e7f0f9,#eff4fd)',                             unlockMin:410, price:16},
+  {id:'natsu',   name:{kanji:'なつ',    hira:'なつ'},     bg:'linear-gradient(135deg,#c6f2d8,#cef1fa)',                             unlockMin:450, price:16},
+  {id:'kouyo',   name:{kanji:'こうよう',hira:'こうよう'}, bg:'linear-gradient(135deg,#ffd8ae,#ffe0bd)',                             unlockMin:490, price:16},
   // レア（unlockMin:540）
-  {id:'niji',    name:{kanji:'にじ',    hira:'にじ'},     bg:'linear-gradient(135deg,#fde8cc,#dcf3df,#d7ecf7,#e3dcf7)',            unlockMin:540, price:25},
+  {id:'niji',    name:{kanji:'にじ',    hira:'にじ'},     bg:'linear-gradient(135deg,#ffe8ca,#dbf4de,#d5edf9,#e2dbf8)',            unlockMin:540, price:25},
   // ── ここから追加15種（v62・アイテム倍増） ──
-  {id:'ichigo',  name:{kanji:'いちご',  hira:'いちご'},   bg:'linear-gradient(135deg,#fde0ea,#fdeaf5)',                             unlockMin:40, price:3},
-  {id:'mizu',    name:{kanji:'みずたま',hira:'みずたま'}, bg:'linear-gradient(135deg,#e0f2fe,#dbeafe)',                             unlockMin:70, price:5},
-  {id:'hasu',    name:{kanji:'はすいけ',hira:'はすいけ'}, bg:'linear-gradient(135deg,#d1fae5,#ccfbf1)',                             unlockMin:110, price:5},
-  {id:'sango',   name:{kanji:'さんご',  hira:'さんご'},   bg:'linear-gradient(135deg,#cffafe,#e0f2fe)',                             unlockMin:140, price:5},
-  {id:'remon',   name:{kanji:'れもん',  hira:'れもん'},   bg:'linear-gradient(135deg,#fef9c3,#fef3c7)',                             unlockMin:170, price:8},
-  {id:'orenji',  name:{kanji:'オレンジ',hira:'おれんじ'}, bg:'linear-gradient(135deg,#ffedd5,#fed7aa)',                             unlockMin:200, price:8},
-  {id:'ichou',   name:{kanji:'いちょう',hira:'いちょう'}, bg:'linear-gradient(135deg,#fef08a,#fde68a)',                             unlockMin:230, price:8},
-  {id:'budou',   name:{kanji:'ぶどう',  hira:'ぶどう'},   bg:'linear-gradient(135deg,#ede9fe,#e9d5ff)',                             unlockMin:260, price:8},
-  {id:'rakuda',  name:{kanji:'すなはま',hira:'すなはま'}, bg:'linear-gradient(135deg,#fef3c7,#fde68a)',                             unlockMin:300, price:12},
-  {id:'ajisai',  name:{kanji:'あじさい',hira:'あじさい'}, bg:'linear-gradient(135deg,#ddd6fe,#c7d2fe)',                             unlockMin:340, price:12},
-  {id:'tuki',    name:{kanji:'まんげつ',hira:'まんげつ'}, bg:'linear-gradient(135deg,#e0e7ff,#c7d2fe)',                             unlockMin:380, price:12},
-  {id:'sakuranbo',name:{kanji:'さくらんぼ',hira:'さくらんぼ'},bg:'linear-gradient(135deg,#fecdd3,#fda4af)',                          unlockMin:420, price:16},
-  {id:'ame',     name:{kanji:'あまやどり',hira:'あまやどり'},bg:'linear-gradient(135deg,#cbd5e1,#e2e8f0)',                          unlockMin:460, price:16},
-  {id:'hanabi',  name:{kanji:'はなび',  hira:'はなび'},   bg:'linear-gradient(135deg,#fecaca,#fef08a,#bfdbfe)',                     unlockMin:500, price:20},
-  {id:'oorora',  name:{kanji:'オーロラ',hira:'おーろら'}, bg:'linear-gradient(135deg,#a7f3d0,#bfdbfe,#e9d5ff)',                     unlockMin:560, price:25},
+  {id:'ichigo',  name:{kanji:'いちご',  hira:'いちご'},   bg:'linear-gradient(135deg,#fedfea,#fee9f5)',                             unlockMin:40, price:3},
+  {id:'mizu',    name:{kanji:'みずたま',hira:'みずたま'}, bg:'linear-gradient(135deg,#dff2ff,#daeaff)',                             unlockMin:70, price:5},
+  {id:'hasu',    name:{kanji:'はすいけ',hira:'はすいけ'}, bg:'linear-gradient(135deg,#cffce5,#cafdf2)',                             unlockMin:110, price:5},
+  {id:'sango',   name:{kanji:'さんご',  hira:'さんご'},   bg:'linear-gradient(135deg,#cefbff,#dff2ff)',                             unlockMin:140, price:5},
+  {id:'remon',   name:{kanji:'れもん',  hira:'れもん'},   bg:'linear-gradient(135deg,#fffac2,#fff4c6)',                             unlockMin:170, price:8},
+  {id:'orenji',  name:{kanji:'オレンジ',hira:'おれんじ'}, bg:'linear-gradient(135deg,#ffedd5,#ffd7a9)',                             unlockMin:200, price:8},
+  {id:'ichou',   name:{kanji:'いちょう',hira:'いちょう'}, bg:'linear-gradient(135deg,#fff189,#ffe788)',                             unlockMin:230, price:8},
+  {id:'budou',   name:{kanji:'ぶどう',  hira:'ぶどう'},   bg:'linear-gradient(135deg,#ece8ff,#e9d5ff)',                             unlockMin:260, price:8},
+  {id:'rakuda',  name:{kanji:'すなはま',hira:'すなはま'}, bg:'linear-gradient(135deg,#fff4c6,#ffe788)',                             unlockMin:300, price:12},
+  {id:'ajisai',  name:{kanji:'あじさい',hira:'あじさい'}, bg:'linear-gradient(135deg,#dcd5ff,#c6d1ff)',                             unlockMin:340, price:12},
+  {id:'tuki',    name:{kanji:'まんげつ',hira:'まんげつ'}, bg:'linear-gradient(135deg,#e0e7ff,#c6d1ff)',                             unlockMin:380, price:12},
+  {id:'sakuranbo',name:{kanji:'さくらんぼ',hira:'さくらんぼ'},bg:'linear-gradient(135deg,#ffccd2,#ffa2ad)',                          unlockMin:420, price:16},
+  {id:'ame',     name:{kanji:'あまやどり',hira:'あまやどり'},bg:'linear-gradient(135deg,#cad5e2,#e1e8f1)',                          unlockMin:460, price:16},
+  {id:'hanabi',  name:{kanji:'はなび',  hira:'はなび'},   bg:'linear-gradient(135deg,#ffc9c9,#fff189,#bedbff)',                     unlockMin:500, price:20},
+  {id:'oorora',  name:{kanji:'オーロラ',hira:'おーろら'}, bg:'linear-gradient(135deg,#a3f7d0,#bedbff,#e9d5ff)',                     unlockMin:560, price:25},
 ];
 const HEADER_COLORS = HEADER_THEMES.map(t=>t.id); // 後方互換用
-// ─── ヘッダーのすりガラス効果。色とは別系統で解禁(v62でバリエーション追加) ───
-const GLASS_UNLOCK_ID = 'glass';
-const GLASS_STYLES = [
-  {id:'glass',      name:{kanji:'すりガラス',    hira:'すりがらす'}, price:20, blur:10, tint:'rgba(255,255,255,0.55)'},
-  {id:'glass-dark', name:{kanji:'くろすりガラス',hira:'くろすりがらす'}, price:28, blur:12, tint:'rgba(30,27,75,0.45)'},
-];
 
 function renderChildSwitcher(){
   const wrap=document.getElementById('child-switcher'); wrap.innerHTML='';
@@ -6301,7 +6352,7 @@ function renderChildSwitcherTop(){
   wrap.innerHTML='';
   if(data.children.length<2) return;
   const row=document.createElement('div');
-  row.style.cssText='display:flex;gap:8px;flex-wrap:wrap;padding-bottom:10px;border-bottom:2px solid var(--border)';
+  row.style.cssText='display:flex;gap:8px;flex-wrap:wrap;padding-top:8px';
   data.children.forEach((child,i)=>{
     const isActive=i===data.activeChild;
     const chip=document.createElement('button');
@@ -6510,7 +6561,7 @@ function openChildDisplaySettings(){
   updateWantPanelToggleUI(); updateWeekStartToggleUI();
   const modal=document.getElementById('parent-modal');
   modal.classList.add('limited-mode');
-  showParentTab('settings');
+  showParentTab('child');
   document.querySelectorAll('#parent-modal .acc-section').forEach(sec=>{
     if(sec.dataset.acc==='display') sec.classList.add('open');
   });
@@ -6607,6 +6658,13 @@ document.getElementById('dev-reset-toggle').addEventListener('click',function(){
   body.style.display=open?'none':'block';
   this.textContent='🧪 開発用（実際に使い始める前に削除する）'+(open?'▾':'▴');
 });
+document.getElementById('bag-trash-toggle').addEventListener('click',function(){
+  const body=document.getElementById('bag-trash-body');
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  this.textContent='🗑️ けした カバンを もどす '+(open?'▾':'▴');
+  if(!open) renderBagTrashList();
+});
 document.getElementById('dev-reset-btn').addEventListener('click',function(){
   const btn=this;
   if(btn.dataset.armed!=='1'){
@@ -6630,14 +6688,14 @@ document.getElementById('dev-reset-btn').addEventListener('click',function(){
   c.coins=0; c.coinBuffer=0;
   c.gachaWon=[]; c.gachaWonLog=[];
   c.creatures={}; c.creatureLog=[];
-  c.headerColor='default'; c.headerGlassStyle=null;
+  c.headerColor='default';
   setChildDS('nowMarkerColor', 'marker-gray');
   save();
   updateClock(); updateCoinBadge(); tick();
   showToast('リセットしました');
 });
 
-// 🧪開発用「ずかんをぜんぶプレビュー」：ヘッダー色・マーカー色・すりガラスの見た目だけ全解禁して見せる。
+// 🧪開発用「ずかんをぜんぶプレビュー」：ヘッダー色・マーカー色の見た目だけ全解禁して見せる。
 // data側のフラグのみで判定し、child.gachaWon（実際の所持データ）は一切変更しない。
 function updateDevPreviewBtn(){
   const btn=document.getElementById('dev-preview-unlock-btn');
@@ -6670,6 +6728,25 @@ document.getElementById('dev-force-sunday-btn').addEventListener('click',()=>{
   updateDevForceSundayBtn();
   showToast(data.devForceSunday ? '「そだてノート」で 木を育てる操作を テストできます' : 'テストモードを おわりました');
 });
+// 🧪開発用：木の成長段階を、実際に水やりを待たずワンタップで再現する(実機確認用)
+function setDevTreeState(waterCount, pendingFruits){
+  const c=getChild(); if(!c) return;
+  if(!c.tree) c.tree={waterCount:0,pendingFruits:0,completed:false,lastWateredAt:new Date().toISOString()};
+  c.tree.waterCount=waterCount;
+  c.tree.pendingFruits=pendingFruits;
+  c.tree.completed=false;
+  save();
+  const el=document.getElementById('garden-tree-el');
+  if(el) el.innerHTML=renderTreeVisual(c.tree);
+  renderBookPage();
+  showToast('🧪 木を テストじょうたいに しました');
+}
+document.getElementById('dev-tree-seed').addEventListener('click',()=>setDevTreeState(0,0));
+document.getElementById('dev-tree-sprout').addEventListener('click',()=>setDevTreeState(3,0));
+document.getElementById('dev-tree-young').addEventListener('click',()=>setDevTreeState(7,0));
+document.getElementById('dev-tree-flower').addEventListener('click',()=>setDevTreeState(10,3));
+document.getElementById('dev-tree-fruit').addEventListener('click',()=>setDevTreeState(15,3));
+document.getElementById('dev-tree-fruit6').addEventListener('click',()=>setDevTreeState(15,6));
 
 // 子ども1人分の後方互換フィールドを補う
 function migrateChild(c){
@@ -7071,18 +7148,6 @@ function buildWeekBookPage(offsetWeeks){
   return {start, end, weekKey, dailyMin, taskCounts, goldDays, tokens, creatures, message, topBag};
 }
 // 🌱木を育てる機能：水(=完了したやることの数)の量で成長段階が決まる
-const TREE_STAGES = [
-  {min:0,  emoji:'🌱', label:'たね'},
-  {min:3,  emoji:'🌿', label:'め'},
-  {min:7,  emoji:'🌳', label:'わかぎ'},
-  {min:13, emoji:'🌳🌸', label:'はな'},
-  {min:21, emoji:'🌳🍎', label:'み'},
-];
-function treeStageForCount(n){
-  let stage=TREE_STAGES[0];
-  for(const s of TREE_STAGES){ if(n>=s.min) stage=s; }
-  return stage;
-}
 // このタスクの重み(bag.tasks.length)を含めて、日時fromからの完了数を数える共通処理
 function countWeightedCompletions(fromTime){
   const c=getChild();
@@ -7113,10 +7178,32 @@ function isTodayPerfect(){
   const noneLate = logsToday.every(l=>l.savedMin>=0);
   return allDone && noneLate;
 }
+// 木のビジュアル：1本の同じ木に、花・実が「本当に貯まっている数だけ」増えていく方式(2026-08-11)。
+// 以前は水やり回数に応じて絵文字(🌱→🌿→🌳→🌳🌸→🌳🍎)がまるごと入れ替わる作りで、
+// 「桜の次に唐突にリンゴが出て意味が分からない」という指摘があった。
+// 今回からは、たね・めの段階を経たあとは同じ木(🌳)が変わらず居続け、その周りに
+// 実際に貯まっている実の数(tree.pendingFruits)ぶんだけ、花または実のアイコンが増えていく。
+// これにより「がんばった分だけ実が増える」という因果関係が見た目でも繋がる。
+function renderTreeVisual(tree){
+  const wc=tree.waterCount||0;
+  if(wc<3) return `<div style="font-size:76px;line-height:1.1">🌱</div>`;
+  if(wc<7) return `<div style="font-size:76px;line-height:1.1">🌿</div>`;
+  const pending=Math.min(tree.pendingFruits||0, 6);
+  const isFruitStage=wc>=13; // 開花の目安を超えたら、以降の実りは花でなく実で表現する
+  const icon=isFruitStage?'🍎':'🌸';
+  const positions=[
+    {top:'0%',  left:'20%'}, {top:'-2%', left:'60%'}, {top:'20%', left:'2%'},
+    {top:'16%', left:'78%'}, {top:'38%', left:'32%'}, {top:'36%', left:'56%'},
+  ];
+  const overlays=Array.from({length:pending}).map((_,i)=>{
+    const p=positions[i%positions.length];
+    return `<span style="position:absolute;top:${p.top};left:${p.left};font-size:22px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.15))">${icon}</span>`;
+  }).join('');
+  return `<div style="position:relative;display:inline-block;font-size:76px;line-height:1.1">🌳${overlays}</div>`;
+}
 function renderGardenCard(){
   const c=getChild();
   const tree=c.tree;
-  const stage=treeStageForCount(tree.waterCount||0);
   const sunday = new Date().getDay()===0 || !!data.devForceSunday;
   const banked=getBankedWater();
 
@@ -7145,7 +7232,7 @@ function renderGardenCard(){
 
   return `<div id="garden-card" style="border:3px solid var(--border);border-radius: var(--r-lg);padding:18px 14px;background:linear-gradient(180deg,var(--surface) 0%,var(--surface) 70%,rgba(99,70,44,0.08) 70%,rgba(99,70,44,0.08) 100%);margin-bottom:12px;position:relative;overflow:hidden">
       <div id="garden-static-layer" style="text-align:center">
-        <div id="garden-tree-el" style="font-size:76px;line-height:1.1;transition:transform 0.6s cubic-bezier(0.34,1.56,0.64,1)">${stage.emoji}</div>
+        <div id="garden-tree-el" style="font-size:76px;line-height:1.1;transition:transform 0.6s cubic-bezier(0.34,1.56,0.64,1)">${renderTreeVisual(tree)}</div>
         <div id="garden-soil-el" style="height:14px;background:var(--soil);border-radius: var(--r-sm);margin:6px auto 0;width:80%"></div>
         <div style="font-size: var(--fs-xs);color:var(--text-dim);font-weight:800;margin-top:8px">そだてている 木（${tree.waterCount||0}こ の みず）</div>
         ${actionHtml}
@@ -7174,7 +7261,7 @@ function waterTreeNow(){
   if(treeEl){
     treeEl.style.transform='scale(0.85)';
     setTimeout(()=>{
-      treeEl.textContent=treeStageForCount(c.tree.waterCount).emoji;
+      treeEl.innerHTML=renderTreeVisual(c.tree);
       treeEl.style.transform='scale(1.15)';
       setTimeout(()=>{ treeEl.style.transform='scale(1)'; }, 300);
       if(gold){
@@ -7189,49 +7276,56 @@ function waterTreeNow(){
   setTimeout(()=>{ renderBookPage(); }, 1200);
 }
 // 「しゅうかくする」：日曜日、たまった実を1つずつ確認する。実1個につき約30%でレア(ゴールド)。
-// レアが1つでも出たら、木はそこで完成。ゴールドの実が出た時だけ、色・すりガラスが1つ解禁される
+// レアが1つでも出たら、木はそこで完成。ゴールドの実が出た時だけ、なかまが1匹解禁される(案B・2026-08-11)
 function harvestTreeNow(){
   const c=getChild();
   const n=c.tree.pendingFruits||0;
   if(n<=0) return;
   let rareCount=0;
-  const unlockedItems=[];
+  const gainedCreatures=[];
+  const evolvedCreatures=[];
   for(let i=0;i<n;i++){
     if(Math.random()<0.30){
       rareCount++;
-      const item=grantRandomRareUnlock();
-      if(item) unlockedItems.push(item);
+      const r=grantRandomRareCreature();
+      if(r && r.sp) gainedCreatures.push(r.sp);
+      if(r && r.evolved) evolvedCreatures.push(r.sp);
     }
   }
   c.tree.pendingFruits=0;
   if(rareCount>0) c.tree.completed=true;
   save();
-  if(unlockedItems.length){
+  if(evolvedCreatures.length){
     const kanji=!!(c&&c.kanjiMode);
-    const labels=unlockedItems.map(it=>it.name?(kanji?it.name.kanji:it.name.hira):'').join('・');
-    showToast(`✨ ゴールドの みが ${unlockedItems.length}こ なった！「${labels}」が とうろく されたよ`);
+    const labels=evolvedCreatures.map(sp=>kanji?sp.name.kanji:sp.name.hira).join('・');
+    showToast(`🌟 しんか した！「${labels}」が 3びき あつまったよ`);
+  } else if(gainedCreatures.length){
+    const kanji=!!(c&&c.kanjiMode);
+    const labels=gainedCreatures.map(sp=>kanji?sp.name.kanji:sp.name.hira).join('・');
+    showToast(`✨ ゴールドの みが ${gainedCreatures.length}こ なった！「${labels}」が なかまに なったよ`);
   } else if(rareCount>0){
-    showToast('✨ ゴールドの みが なった！でも もう ぜんぶ あつまってるみたい');
+    showToast('✨ ゴールドの みが なった！');
   } else {
     showToast(`🍎 みを ${n}こ しゅうかくしたよ`);
   }
   renderBookPage();
 }
-// ヘッダー色・マーカー色・すりガラスの未取得アイテムから、ランダムで1つ解禁する(木の実のレア専用。コイン不要)
-function grantRandomRareUnlock(){
+// 【案B・2026-08-11】木の実のレアは「なかま」専用にする。色・マーカーはコイン交換だけで手に入る形に一本化し、
+// 「コイン交換」と「木の実のレア」で同じ景品が2つの入口から手に入って分かりにくかった状態を解消する。
+// 持っていない種類を優先し、全種持っていれば進化(3匹以上)を目指してランダムに追加する。
+function grantRandomRareCreature(){
   const c=getChild();
-  const pool=buildGachaPool();
-  const won=c.gachaWon||[];
-  const candidates=pool.filter(p=>!won.includes(p.id));
-  if(!candidates.length) return null; // もう全種類あつめ終わっている
-  const item=candidates[Math.floor(Math.random()*candidates.length)];
-  if(!c.gachaWon) c.gachaWon=[];
-  c.gachaWon.push(item.id);
-  if(!c.gachaWonLog) c.gachaWonLog=[];
-  c.gachaWonLog.push({id:item.id, type:item.type, ts:new Date().toISOString()});
+  if(!c.creatures) c.creatures={};
+  const notOwned = CREATURE_ORDER.filter(s=>!(c.creatures[s.key]>0));
+  const pickFrom = notOwned.length ? notOwned : CREATURE_ORDER;
+  const sp = pickFrom[Math.floor(Math.random()*pickFrom.length)];
+  const before=c.creatures[sp.key]||0;
+  c.creatures[sp.key] = before+1;
+  if(!c.creatureLog) c.creatureLog=[];
+  c.creatureLog.push({key:sp.key, ts:new Date().toISOString()});
   const cutoff=Date.now()-90*24*60*60*1000;
-  c.gachaWonLog=c.gachaWonLog.filter(e=>new Date(e.ts).getTime()>=cutoff);
-  return item;
+  c.creatureLog=c.creatureLog.filter(e=>new Date(e.ts).getTime()>=cutoff);
+  return {sp, evolved: before+1===3};
 }
 // 木が完成した後、新しい木を植える（種があれば無料、なければコイン15で購入）
 function plantNewTree(){
@@ -7558,6 +7652,51 @@ function moveBag(bagId, dir){
 
 let bagSelectMode = false;      // 長押しで入る「選択モード」。この間だけ✓アイコンと≡ハンドルが出る
 let bagSelectedIds = new Set(); // 選択モード中に選ばれているカバンid
+// 削除したカバンを、しばらくの間だけ復元できるように「ゴミ箱」に一旦入れておく。
+// 押し間違いで大事なカバンを消してしまった時のための安全網。30日超・21件目以降は自動で消える。
+function moveBagsToTrash(child, bagsToDelete){
+  if(!bagsToDelete || !bagsToDelete.length) return;
+  if(!child.deletedBags) child.deletedBags=[];
+  const now=new Date().toISOString();
+  bagsToDelete.forEach(b=>{
+    child.deletedBags.unshift({bag:b, deletedAt:now});
+  });
+  const cutoff=Date.now()-30*24*60*60*1000;
+  child.deletedBags = child.deletedBags
+    .filter(e=>new Date(e.deletedAt).getTime()>=cutoff)
+    .slice(0, 20);
+}
+// 「けした カバンを もどす」一覧の描画
+function renderBagTrashList(){
+  const wrap=document.getElementById('bag-trash-list'); if(!wrap) return;
+  const c=getChild();
+  const trash=(c.deletedBags||[]);
+  if(!trash.length){ wrap.innerHTML='<p style="font-size: var(--fs-xs);color:var(--text-dim);margin:0">けした カバンは ありません。</p>'; return; }
+  wrap.innerHTML='';
+  trash.forEach((entry,idx)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)';
+    const days=Math.max(0, 30-Math.floor((Date.now()-new Date(entry.deletedAt).getTime())/(24*60*60*1000)));
+    row.innerHTML=`<span style="font-weight:800;font-size: var(--fs-sm);min-width:0">${entry.bag.name}<span style="display:block;font-size:10px;color:var(--text-dim);font-weight:700">あと ${days}にち で きえます</span></span>`;
+    const btn=document.createElement('button');
+    btn.type='button'; btn.className='btn btn-secondary';
+    btn.style.cssText='font-size: var(--fs-xs);padding:6px 12px;flex-shrink:0';
+    btn.textContent='↩️ もどす';
+    btn.addEventListener('click',()=>restoreBagFromTrash(idx));
+    row.appendChild(btn);
+    wrap.appendChild(row);
+  });
+}
+function restoreBagFromTrash(idx){
+  const c=getChild();
+  const trash=(c.deletedBags||[]);
+  const entry=trash[idx]; if(!entry) return;
+  if(!c.bags) c.bags=[];
+  c.bags.push(entry.bag);
+  c.deletedBags=trash.filter((_,i)=>i!==idx);
+  save(); tick(); renderBagList(); renderBagTrashList();
+  showToast(`「${entry.bag.name}」を もどしました`);
+}
 function renderBagList(){
   const wrap=document.getElementById('bag-list'); wrap.innerHTML='';
   // イレギュラー期間専用のカバン(vacationPeriodId持ち)は、その期間の詳細ページの中だけに出す
@@ -7575,11 +7714,13 @@ function renderBagList(){
       if(!bagSelectedIds.size) return;
       if(!confirm(bagSelectedIds.size+'件のカバンを削除しますか？')) return;
       const c=getChild();
+      const toDelete = (c.bags||[]).filter(b=>bagSelectedIds.has(b.id));
+      moveBagsToTrash(c, toDelete);
       c.bags = (c.bags||[]).filter(b=>!bagSelectedIds.has(b.id));
       bagSelectedIds.clear();
       bagSelectMode=false;
       save(); tick(); renderBagList();
-      showToast('けしました');
+      showToast('けしました（30日間は「けしたカバンを もどす」から復元できます）');
     });
     bar.querySelector('#bag-select-done').addEventListener('click',()=>{
       bagSelectMode=false; bagSelectedIds.clear(); renderBagList();
@@ -7690,7 +7831,7 @@ function renderBagList(){
     }
   });
 }
-document.getElementById('add-bag-btn').addEventListener('click',()=>{ document.getElementById('parent-modal').classList.remove('open'); document.getElementById('bag-new-choice-modal').classList.add('open'); });
+document.getElementById('add-bag-btn').addEventListener('click',()=>{ bagChoiceVacationPeriodId=null; document.getElementById('parent-modal').classList.remove('open'); document.getElementById('bag-new-choice-modal').classList.add('open'); });
 // 旧: 単一のvacationFrom/vacationUntil → 新: 複数・名前付きのvacationPeriods配列へ移行
 // 旧from/until(範囲)方式のデータを、dates配列(個別日付)に展開する(移行処理専用)
 function expandDateRange(from, until){
@@ -7788,6 +7929,7 @@ function renderVacationPeriodList(){
   });
 }
 let vacationDetailId=null; // 今開いているイレギュラー期間詳細のid
+let bagChoiceVacationPeriodId=null; // 「白紙/コピー」選択モーダルを、期間専用カバンの新規作成として開いた時の期間id
 function openVacationDetail(periodId){
   const c=getChild();
   const p=(c.vacationPeriods||[]).find(x=>x.id===periodId);
@@ -7857,8 +7999,9 @@ document.getElementById('vacation-detail-bagpick').addEventListener('click',()=>
 });
 document.getElementById('vacation-detail-newbag').addEventListener('click',()=>{
   if(!vacationDetailId) return;
+  bagChoiceVacationPeriodId=vacationDetailId;
   document.getElementById('vacation-detail-modal').classList.remove('open');
-  openBagModal(null, null, vacationDetailId);
+  document.getElementById('bag-new-choice-modal').classList.add('open');
 });
 document.getElementById('vacation-detail-delete').addEventListener('click',()=>{
   const c=getChild();
@@ -7869,6 +8012,7 @@ document.getElementById('vacation-detail-delete').addEventListener('click',()=>{
     ? `「${p.name}」と、中の専用カバン${linkedBags.length}件も いっしょに 消えます。よろしいですか？`
     : `「${p.name}」を 削除しますか？`;
   if(!confirm(msg)) return;
+  if(linkedBags.length) moveBagsToTrash(c, linkedBags);
   c.bags = (c.bags||[]).filter(b=>b.vacationPeriodId!==p.id);
   c.vacationPeriods = (c.vacationPeriods||[]).filter(x=>x.id!==p.id);
   save(); tick();
@@ -8099,10 +8243,56 @@ document.getElementById('intro-start').addEventListener('click',()=>{
 // もう一度読みたい時のために、保護者設定からも開けるようにする
 function openIntroAgain(){ document.getElementById('intro-modal').classList.add('open'); }
 
-document.getElementById('bag-choice-blank').addEventListener('click',()=>{ document.getElementById('bag-new-choice-modal').classList.remove('open'); openBagModal(null); });
-document.getElementById('bag-choice-cancel').addEventListener('click',()=>{ document.getElementById('bag-new-choice-modal').classList.remove('open'); openParent(); });
+document.getElementById('bag-choice-blank').addEventListener('click',()=>{ document.getElementById('bag-new-choice-modal').classList.remove('open'); openBagModal(null, null, bagChoiceVacationPeriodId); });
+// ── カバンのプリセット(テンプレート)化 ──
+// 「白紙から作る」だと、名前もチェックリストも1から考える必要があり、特に最初の1個目のハードルが高い。
+// よくある「やること」をあらかじめ用意しておき、選ぶだけで名前とチェックリストが埋まるようにする。
+const BAG_PRESETS = [
+  { emoji:'🪥', name:'はみがき', tasks:['うえの は','したの は','うがい'] },
+  { emoji:'☀️', name:'あさの したく', tasks:['きがえる','かおを あらう','ごはんを たべる','かみを とかす'] },
+  { emoji:'🌙', name:'よるの じゅんび', tasks:['おふろ','はみがき','パジャマに きがえる','あしたの ようい'] },
+  { emoji:'📚', name:'しゅくだい', tasks:['きょうかしょを だす','もんだいを とく','ランドセルに しまう'] },
+  { emoji:'🧸', name:'おかたづけ', tasks:['つかった ものを しまう','つくえの うえを きれいに'] },
+  { emoji:'🎒', name:'もちもの チェック', tasks:['きょうかしょ','ふでばこ','たいそうふく'] },
+];
+function openBagPresetModal(){
+  const wrap=document.getElementById('bag-preset-list'); wrap.innerHTML='';
+  BAG_PRESETS.forEach(p=>{
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.style.cssText='width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:var(--surface2);border:2px solid var(--border);border-radius: var(--r-md);padding:12px 14px;margin-bottom:8px;font-family:inherit;cursor:pointer;min-height:44px';
+    btn.innerHTML=`<span style="font-size:24px">${p.emoji}</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-weight:900;font-size: var(--fs-sm);color:var(--text)">${p.name}</span>
+      <span style="display:block;font-size: var(--fs-xs);color:var(--text-dim)">${p.tasks.join('・')}</span></span>`;
+    btn.addEventListener('click',()=>{
+      document.getElementById('bag-preset-modal').classList.remove('open');
+      const copyFrom={ name:p.name, tasks:p.tasks.map(t=>({name:t, done:false})) };
+      openBagModal(null, copyFrom, bagChoiceVacationPeriodId);
+    });
+    wrap.appendChild(btn);
+  });
+}
+document.getElementById('bag-choice-preset').addEventListener('click',()=>{
+  document.getElementById('bag-new-choice-modal').classList.remove('open');
+  openBagPresetModal();
+  document.getElementById('bag-preset-modal').classList.add('open');
+});
+document.getElementById('bag-preset-cancel').addEventListener('click',()=>{
+  document.getElementById('bag-preset-modal').classList.remove('open');
+  document.getElementById('bag-new-choice-modal').classList.add('open');
+});
+document.getElementById('bag-preset-close-top').addEventListener('click',()=>document.getElementById('bag-preset-cancel').click());
+document.getElementById('bag-choice-cancel').addEventListener('click',()=>{
+  document.getElementById('bag-new-choice-modal').classList.remove('open');
+  if(bagChoiceVacationPeriodId){ openVacationDetail(bagChoiceVacationPeriodId); }
+  else { openParent(); }
+});
 document.getElementById('bag-choice-copy').addEventListener('click',()=>{ document.getElementById('bag-new-choice-modal').classList.remove('open'); openBagCopyModal(); });
-document.getElementById('bag-copy-cancel').addEventListener('click',()=>{ document.getElementById('bag-copy-modal').classList.remove('open'); openParent(); });
+document.getElementById('bag-copy-cancel').addEventListener('click',()=>{
+  document.getElementById('bag-copy-modal').classList.remove('open');
+  if(bagChoiceVacationPeriodId){ openVacationDetail(bagChoiceVacationPeriodId); }
+  else { openParent(); }
+});
 
 // ── コピー元カバン選択モーダル ──
 function openBagCopyModal(){
@@ -8122,7 +8312,7 @@ function openBagCopyModal(){
       const row=document.createElement('div');
       row.style.cssText='border:2px solid var(--border);border-radius: var(--r-md);padding:10px 13px;margin-bottom:7px;background:var(--surface);cursor:pointer;display:flex;align-items:center;gap:10px';
       row.innerHTML=`<span style="width:12px;height:12px;border-radius:50%;flex-shrink:0;background:${bag.type==='on'?'var(--on-color)':'var(--off-color)'}"></span><div style="flex:1"><div style="font-size: var(--fs-md);font-weight:800">${bag.name}</div><div style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">${bag.type==='on'?'やること':(getChild().freeLabel||'じゆうじかん')} ／ ${dowText} ／ ${taskText}</div></div>`;
-      row.addEventListener('click',()=>{ document.getElementById('bag-copy-modal').classList.remove('open'); openBagModal(null, bag); });
+      row.addEventListener('click',()=>{ document.getElementById('bag-copy-modal').classList.remove('open'); openBagModal(null, bag, bagChoiceVacationPeriodId); });
       wrap.appendChild(row);
     });
   });
@@ -8143,6 +8333,7 @@ function openBagModal(id, copyFrom, vacationPeriodId){
   document.getElementById('bag-name').value=bag?bag.name:'';
   bagType=id?(bag.type||'on'):'on'; // 親が作るカバン（白紙・コピー）は常にオンタイム。編集時のみ元の種類を維持
   bagTasks=bag?(bag.tasks||[]).map(t=>({...t})):[];
+  bagTaskSortMode=false; // カバンを開くたびに必ずOFFから始める(誤操作防止)
   bagDow=bag?(bag.dow||[]).slice():[];
   // イレギュラー期間に属するカバンかどうか（新規＝渡されたvacationPeriodId、編集＝保存済みのvacationPeriodId）
   const linkedPeriodId = bag ? (bag.vacationPeriodId||null) : (vacationPeriodId||null);
@@ -8151,8 +8342,10 @@ function openBagModal(id, copyFrom, vacationPeriodId){
   const linkedPeriod = linkedPeriodId ? (getChild().vacationPeriods||[]).find(p=>p.id===linkedPeriodId) : null;
   bagVacationPeriodType = linkedPeriod ? linkedPeriod.type : null;
   bagRepeatType=bag?(bag.repeatType||'weekly'):(linkedPeriod && linkedPeriod.type==='dates' ? 'dates' : 'weekly');
-  bagRepeatDates = bag ? (bag.repeatDates||[]).slice()
-    : (linkedPeriod && linkedPeriod.type==='dates' ? (linkedPeriod.dates||[]).slice() : []);
+  bagRepeatDates = bag ? (bag.repeatDates||[]).slice() : [];
+  // ※以前は、期間限定(dates)のイレギュラー期間に紐づく新規カバンだと、
+  //   期間の日づけが全て選択済みの状態で始まってしまっていた(稼働日を選ぶはずが、逆に外す作業になってしまうバグ)。
+  //   新規作成時は必ず「何も選ばれていない状態」から、稼働させたい日をタップして選ぶ形にする。
   bagNthWeek=bag?(bag.nthWeek||1):1;
   bagNthDow=bag?(bag.nthDow!=null?bag.nthDow:1):1;
   bagDefaultTime=bag?bag.defaultTime||'':'';
@@ -8178,6 +8371,8 @@ function openBagModal(id, copyFrom, vacationPeriodId){
   }
   renderBagColorPicker();
   updateBagType();
+  const sortToggleBtn=document.getElementById('bag-task-sort-toggle');
+  if(sortToggleBtn){ sortToggleBtn.textContent='≡ ならびかえ：OFF'; sortToggleBtn.style.background='var(--surface2)'; sortToggleBtn.style.color='var(--text-dim)'; }
   renderBagTaskList();
   updateBagDowUI();
   document.getElementById('bag-modal').classList.add('open');
@@ -8199,14 +8394,15 @@ function renderBagColorPicker(){
     wrap.appendChild(dot);
   });
 }
+let bagTaskSortMode=false; // ならびかえモード：常時ONだと誤って順番が入れ替わるため、明示的にONにした時だけ有効にする
 function renderBagTaskList(){
   const list=document.getElementById('bag-task-list'); list.innerHTML='';
   bagTasks.forEach((t,i)=>{
     const row=document.createElement('div'); row.className='task-mini';
     row.dataset.taskIdx = i;
-    // ▲▼を何度も押すのは苦痛なので、≡を持ち上げて間に落とす方式にする
+    // ▲▼を何度も押すのは苦痛なので、≡を持ち上げて間に落とす方式にする。誤操作防止のため、ならびかえモードの時だけ≡を出す
     row.innerHTML=`
-      <div class="sort-handle" aria-label="ならびかえ">≡</div>
+      ${bagTaskSortMode?'<div class="sort-handle" aria-label="ならびかえ">≡</div>':''}
       <span class="task-mini-name" style="flex:1">${t.name}</span>
       <button class="task-edit" data-i="${i}" style="background:none;border:none;cursor:pointer;font-size: var(--fs-md);min-width:44px;min-height:44px">✎</button>
       <button class="task-mini-del" data-i="${i}">✕</button>`;
@@ -8241,6 +8437,13 @@ function renderBagTaskList(){
   });
   renderBagTaskSuggest(); // 追加済みのものを候補から外して出し直す
 }
+document.getElementById('bag-task-sort-toggle').addEventListener('click',function(){
+  bagTaskSortMode=!bagTaskSortMode;
+  this.textContent='≡ ならびかえ：'+(bagTaskSortMode?'ON':'OFF');
+  this.style.background=bagTaskSortMode?'var(--accent)':'var(--surface2)';
+  this.style.color=bagTaskSortMode?'#fff':'var(--text-dim)';
+  renderBagTaskList();
+});
 document.getElementById('bag-task-add').addEventListener('click',()=>{
   const input=document.getElementById('bag-task-input'), name=input.value.trim(); if(!name)return;
   bagTasks.push({name,done:false}); input.value='';
@@ -8403,8 +8606,10 @@ document.getElementById('bag-delete').addEventListener('click',()=>{
   const c=getChild();
   const deletedBag=c.bags.find(b=>b.id===editBagId);
   const vacationPeriodId = deletedBag ? deletedBag.vacationPeriodId : null;
+  if(deletedBag) moveBagsToTrash(c, [deletedBag]);
   c.bags=c.bags.filter(b=>b.id!==editBagId);
   save(); tick(); document.getElementById('bag-modal').classList.remove('open'); returnFromBagModal(vacationPeriodId);
+  showToast('けしました（30日間は「けしたカバンを もどす」から復元できます）');
 });
 // カバン編集モーダルを閉じた後、どこに戻るか。イレギュラー期間専用カバンならその期間の詳細ページへ、それ以外は通常のカバン一覧へ
 function returnFromBagModal(vacationPeriodId){
@@ -9153,7 +9358,7 @@ document.getElementById('cond-add').addEventListener('click',()=>{
 migrateVacationPeriods();
 applyChildDisplaySettings(); // 起動時：今アクティブな子どもの画面設定(タイムラインの間隔等)を反映する
 applyNowMarkerColor(); updateCoinBadge(); updateDevPreviewBtn(); updateDevForceSundayBtn();
-updatePendingBadge(); tick(); applyKeepAwake(); refreshWeatherIfNeeded(); applyWantPanelVisibility();
+updatePendingBadge(); tick(); applyKeepAwake(); refreshWeatherIfNeeded(); applyWantPanelVisibility(); updateOfflineBadge();
 maybeShowIntro(); // カバンが1つも無い＝初回なら「カバンとは何か」を説明する
 updateNotifyUI();
 maybeShowInstallBar();
@@ -9174,7 +9379,7 @@ renderParentMessage();
      ═══════════════════════════════════════════════════════════════ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, updateDoc, getDocs, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+  import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc, getDoc, collection, updateDoc, getDocs, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
   import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
   const firebaseConfig = {
@@ -9188,7 +9393,12 @@ renderParentMessage();
   };
 
   const fbApp = initializeApp(firebaseConfig);
-  const db = getFirestore(fbApp);
+  // オフライン保存を有効化：電波が無い間の変更も端末内に一旦保存し、
+  // 復帰した瞬間に自動でクラウドへ送る(Firestore標準機能)。同じ端末で複数タブ/画面を
+  // 開いても競合しないよう、複数タブ対応のマネージャーを指定しておく。
+  const db = initializeFirestore(fbApp, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+  });
   const auth = getAuth(fbApp);
 
   // 保護者設定の「Firebase 接続テスト」ボタンから呼ばれる。
@@ -9302,6 +9512,7 @@ renderParentMessage();
         }
       }
       renderFamilyUI();
+      startParentChildDataSync(); // 家族作成・復旧の直後から、子機の進捗更新を見張り始める
     }catch(e){
       console.error('Googleログインの結果処理に失敗:', e);
       window.showToast && window.showToast('⚠️ ログインの確認に失敗しました：' + e.message);
@@ -9482,6 +9693,72 @@ renderParentMessage();
     }
   }
 
+  // ── 子機→保護者機への継続的な反映(2026-08-16) ──
+  // それまでは「参加した瞬間の1回だけ」子→クラウドへ送っていたが、子どもがチェックを入れて
+  // 「やること」が完了した時にも、保護者機の画面に同じ内容を反映させたいという要望のため、
+  // 子機がsave()するたびにも、少し待ってからchildData(参加時と同じ場所)へ送り直すようにする。
+  // 保護者機側はchildDataコレクション全体を常時見張り(onSnapshot)、変化があれば自動で取り込む
+  // (「☁️ クラウドの子どもデータを取り込む」ボタンの処理を、手動操作なしで自動的に行うイメージ)。
+  let _childProgressPushTimer = null;
+  function scheduleChildProgressPush(){
+    const fam = getFamilyLocal();
+    if(!fam || fam.role !== 'child') return; // 子機だけが送る
+    clearTimeout(_childProgressPushTimer);
+    _childProgressPushTimer = setTimeout(pushChildProgressToCloud, 3000);
+  }
+  window.scheduleChildProgressPush = scheduleChildProgressPush;
+
+  async function pushChildProgressToCloud(){
+    const fam = getFamilyLocal();
+    if(!fam || fam.role !== 'child') return;
+    try{
+      const user = await ensureAnonAuth();
+      const appData = window.getAppData ? window.getAppData() : null;
+      if(!appData) return;
+      await setDoc(doc(db, 'families', fam.familyId, 'childData', fam.uid || user.uid), {
+        childName: fam.childName,
+        data: appData,
+        uploadedAt: new Date().toISOString(),
+      });
+    }catch(e){
+      console.error('子機の進捗送信に失敗:', e);
+    }
+  }
+
+  // 保護者機側：子機からの進捗を常時見張り、届いたら自動で取り込む
+  let _parentChildDataUnsub = null;
+  function startParentChildDataSync(){
+    const fam = getFamilyLocal();
+    if(!fam || fam.role !== 'parent') return;
+    if(_parentChildDataUnsub){ _parentChildDataUnsub(); _parentChildDataUnsub=null; }
+    _parentChildDataUnsub = onSnapshot(
+      collection(db, 'families', fam.familyId, 'childData'),
+      snap=>{
+        snap.docChanges().forEach(change=>{
+          if(change.type==='removed') return;
+          mergeOneChildDataDoc(change.doc.data());
+        });
+      },
+      err=>{ console.error('保護者機の子機データ購読に失敗:', err); }
+    );
+  }
+  // 取り込みロジックはimportChildrenFromCloud()と同じ考え方(childNameを基準に統合、activeChildだけ取り込む)
+  function mergeOneChildDataDoc(payload){
+    const appData = window.getAppData ? window.getAppData() : null;
+    if(!appData || !Array.isArray(appData.children)) return;
+    const childData = payload && payload.data;
+    if(!childData || !Array.isArray(childData.children) || !childData.children.length) return;
+    const idxInDevice = childData.activeChild!=null ? childData.activeChild : 0;
+    const c = childData.children[idxInDevice] || childData.children[0];
+    if(!c) return;
+    if(payload.childName) c.name = payload.childName;
+    if(window.migrateChild){ try{ window.migrateChild(c); }catch(e){} }
+    const idx = appData.children.findIndex(existing => existing.name === c.name);
+    if(idx>=0) appData.children[idx]=c; else appData.children.push(c);
+    if(window.save) window.save();
+    if(window.tick) window.tick();
+  }
+
   let _childUnsub = null;
   function startChildSync(){
     const fam = getFamilyLocal();
@@ -9497,6 +9774,14 @@ renderParentMessage();
       },
       err=>{ console.error('子機のクラウド購読に失敗:', err); }
     );
+  }
+  // 家族から抜ける：この端末の「役割」情報だけを消す。今ある予定データ(カバン等)は端末に残したままにする
+  // (抜けた直後にデータが消えると事故につながるため。データ自体は保護者設定の「読み込む」等で別途整理できる)。
+  function leaveFamily(){
+    if(_childUnsub){ _childUnsub(); _childUnsub=null; }
+    localStorage.removeItem(FAMILY_KEY);
+    window.showToast && window.showToast('👋 家族から ぬけました。この端末の データは そのまま のこっています');
+    renderFamilyUI();
   }
 
   // 保護者設定「データ」タブの見た目を、今の端末の役割に合わせて出し分ける
@@ -9532,9 +9817,15 @@ renderParentMessage();
       if(statusEl) statusEl.textContent = '';
       childBlock.innerHTML = `<div style="background:var(--surface2);border:2px solid var(--border);border-radius:var(--r-md);padding:12px 14px;font-size:var(--fs-sm);font-weight:700;color:var(--text)">✅ この端末は「${fam.childName||'こども'}」用として、家族に参加しています。<br><span style="font-size:var(--fs-xs);font-weight:700;color:var(--text-dim)">保護者機で変更があると、この端末にも自動で反映されます。</span></div>
         <button class="btn btn-secondary" id="family-repush-btn" style="width:100%;margin-top:10px">🔄 今のデータを クラウドに 送り直す</button>
-        <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">この端末のデータを復元した後など、保護者機に最新の内容を反映したい時に使います。</p>`;
+        <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">この端末のデータを復元した後など、保護者機に最新の内容を反映したい時に使います。</p>
+        <button class="btn btn-secondary" id="family-leave-btn" style="width:100%;margin-top:14px;color:var(--danger);border-color:var(--danger)">👋 家族から ぬける</button>
+        <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">この端末を家族から切り離します。今ある予定データは そのまま端末に残り、消えません。あとで別の招待コードで、また参加し直せます。</p>`;
       const repushBtn = document.getElementById('family-repush-btn');
       if(repushBtn) repushBtn.addEventListener('click', repushChildDataToCloud);
+      const leaveBtn = document.getElementById('family-leave-btn');
+      if(leaveBtn) leaveBtn.addEventListener('click', ()=>{
+        if(confirm('家族から ぬけますか？(予定データは 端末に残ります)')) leaveFamily();
+      });
     }
   }
   window.renderFamilyUI = renderFamilyUI;
@@ -9553,11 +9844,14 @@ renderParentMessage();
   renderFamilyUI();
   handleAuthRedirect(); // Googleのログイン画面から戻ってきた直後なら、続きの処理をする
 
-  // 起動時：この端末が子機として家族に参加済みなら、保護者機からの更新を見張り始める
+  // 起動時：この端末が子機として家族に参加済みなら、保護者機からの更新を見張り始める。
+  // 保護者機なら、逆に子機からの進捗更新を見張り始める。
   (async()=>{
     const fam = getFamilyLocal();
     if(fam && fam.role === 'child'){
       try{ await ensureAnonAuth(); startChildSync(); }catch(e){ console.error('子機の初期購読に失敗:', e); }
+    } else if(fam && fam.role === 'parent'){
+      try{ await waitAuthReady(); startParentChildDataSync(); }catch(e){ console.error('保護者機の初期購読に失敗:', e); }
     }
   })();
 </script>
