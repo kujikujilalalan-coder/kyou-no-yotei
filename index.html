@@ -88,7 +88,7 @@ body {
 #topbar-row1, #topbar-row2 { display: flex; align-items: center; gap: 8px; min-height: 38px; }
 .topbar-left { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
 .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto; }
-#date-big { font-size: var(--fs-2xl); color: var(--text-dim); font-weight: 900; white-space: nowrap; }
+#date-big { font-size: var(--fs-2xl); color: var(--text); font-weight: 900; white-space: nowrap; }
 #weather-badge { display: flex; align-items: center; gap: 4px; font-size: var(--fs-md); font-weight: 800; color: var(--text-dim); margin-left: 6px; }
 #offline-badge {
   display: flex; align-items: center; gap: 4px; margin-left: 6px;
@@ -96,14 +96,14 @@ body {
   background: var(--warn-light); border-radius: var(--r-full); padding: 3px 10px;
 }
 #weather-badge .w-emoji { font-size: var(--fs-lg); }
-#child-switch-btn { flex-shrink: 0; text-align: right; font-size: var(--fs-lg); font-weight: 900; min-width: 60px; min-height: 44px; background: none; border: none; color: var(--text); font-family: inherit; cursor: pointer; padding: 4px 8px; border-radius: var(--r-md); }
+#child-switch-btn { flex-shrink: 0; text-align: right; font-size: var(--fs-md); font-weight: 900; min-width: 44px; min-height: 44px; background: none; border: none; color: var(--text); font-family: inherit; cursor: pointer; padding: 4px 8px; border-radius: var(--r-md); }
 #child-switch-btn.switchable:hover { background: var(--surface2); }
 #child-switch-btn .arrow { font-size: var(--fs-xs); color: var(--text-dim); }
 #day-label-badge {
   flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: nowrap; min-width: 0; overflow: hidden;
 }
 .dl-chip {
-  font-size: var(--fs-xl); font-weight: 900; padding: 8px 18px; border-radius: var(--r-lg);
+  font-size: var(--fs-2xl); font-weight: 900; padding: 8px 20px; border-radius: var(--r-lg);
   background: var(--surface2); color: var(--text-dim); border: 2.5px solid var(--border);
   white-space: nowrap;
 }
@@ -111,31 +111,39 @@ body {
   background: var(--accent); color: #fff; border-color: var(--accent);
 }
 #parent-btn {
+  position: relative;
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-dim);
-  width: 44px; height: 44px; border-radius: 50%; font-size: var(--fs-md); cursor: pointer;
+  width: 36px; height: 36px; border-radius: 50%; font-size: var(--fs-sm); cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
+#parent-btn::before { content:''; position:absolute; inset:-4px; }
 #parent-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 #timer-btn, #calendar-shortcut-btn {
+  position: relative;
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-dim);
-  width: 44px; height: 44px; border-radius: 50%; font-size: var(--fs-lg); cursor: pointer;
+  width: 36px; height: 36px; border-radius: 50%; font-size: var(--fs-md); cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit;
 }
+#timer-btn::before, #calendar-shortcut-btn::before { content:''; position:absolute; inset:-4px; }
 #timer-btn:hover, #calendar-shortcut-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
 #timer-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
 #fullscreen-btn {
+  position: relative;
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-dim);
-  width: 44px; height: 44px; border-radius: 50%; font-size: var(--fs-lg); cursor: pointer;
+  width: 36px; height: 36px; border-radius: 50%; font-size: var(--fs-md); cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit;
 }
+#fullscreen-btn::before { content:''; position:absolute; inset:-4px; }
 #fullscreen-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
 #fullscreen-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
 #date-nav { display: flex; align-items: center; gap: 6px; }
 #date-prev, #date-next {
+  position: relative;
   background: var(--surface2); border: 2px solid var(--border); color: var(--text-dim);
-  width: 44px; height: 44px; border-radius: 50%; font-size: var(--fs-md); cursor: pointer;
+  width: 36px; height: 36px; border-radius: 50%; font-size: var(--fs-sm); cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit; padding: 0;
 }
+#date-prev::before, #date-next::before { content:''; position:absolute; inset:-4px; }
 #date-prev:hover, #date-next:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 /* 他の日を見ているとき：画面全体を少しくすませて「今じゃない」と伝える */
 body.viewing-other-day #timeline-scroll,
@@ -274,7 +282,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .now-card-tag { font-size: var(--fs-md); font-weight: 900; display: inline-block; padding: 3px 12px; border-radius: var(--r-md); margin-bottom: 4px; }
 .tl-band.on  .now-card-tag { color: #fff; background: var(--on-color); }
 .tl-band.off .now-card-tag { color: #fff; background: var(--off-color); }
-.now-card-name { font-size: var(--fs-2xl); font-weight: 900; line-height: 1.1; margin-top: 2px; }
+.now-card-name { font-size: var(--fs-2xl); font-weight: 900; line-height: 1.15; margin-top: 2px; overflow-wrap: break-word; word-break: break-word; }
 
 .now-remain-track { height: 8px; background: rgba(0,0,0,0.07); width: 100%; }
 .now-remain-fill { height: 100%; transition: width 30s linear; }
@@ -484,12 +492,12 @@ body.viewing-other-day #date-big { color: var(--accent); }
    位置が重なることがあったため廃止し、常に同じ場所にあるヘッダーへ統合した） */
 .header-now-chip {
   display: flex; align-items: center; gap: 6px; flex-shrink: 0;
-  background: var(--surface2); border: 2px solid var(--border); color: var(--text-dim);
+  background: var(--surface2); border: 2px solid var(--border); color: var(--text);
   border-radius: var(--r-lg); padding: 6px 14px; font-family: inherit;
-  font-size: var(--fs-md); font-weight: 900; cursor: pointer; min-height: 44px;
+  font-size: var(--fs-xl); font-weight: 900; cursor: pointer; min-height: 44px;
   font-variant-numeric: tabular-nums;
 }
-.header-now-chip .hn-icon { font-size: var(--fs-md); }
+.header-now-chip .hn-icon { font-size: var(--fs-lg); }
 .header-now-chip:active { transform: scale(0.95); }
 .header-now-chip.needs-return {
   border-color: var(--accent); color: var(--accent); background: rgba(180,83,9,0.08);
@@ -1336,25 +1344,12 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       <button id="timer-btn" aria-label="タイマー" title="タイマー">⏲️</button>
       <button id="calendar-shortcut-btn" aria-label="カレンダーをみる" title="カレンダー">📅</button>
       <button id="fullscreen-btn" aria-label="全画面表示" title="全画面表示">⛶</button>
-      <button id="child-switch-btn" aria-label="こどもを きりかえる">なまえ ▼</button>
+      <button id="child-switch-btn" aria-label="タップで つぎの こどもに きりかえる">なまえ ⇄</button>
       <button id="parent-btn" aria-label="保護者設定" style="position:relative">⚙️<span id="header-pending-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;font-size: var(--fs-xs);font-weight:900;min-width:18px;height:18px;border-radius: var(--r-sm);align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 0 2px var(--surface)">0</span></button>
     </div>
   </div>
 </div>
 
-<!-- 子ども切り替えポップアップ -->
-<div class="modal-overlay" role="dialog" aria-modal="true" id="switch-modal">
-  <div class="modal" style="max-width:320px">
-    <div class="parent-header" style="margin:-24px -28px 16px;padding:18px 24px 14px">
-      <h2 style="color:var(--off-color);margin:0">だれの よてい？</h2>
-      <button type="button" class="parent-header-close" id="switch-close-top" aria-label="とじる">✕</button>
-    </div>
-    <div id="switch-list"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" id="switch-cancel">とじる</button>
-    </div>
-  </div>
-</div>
 
 <div id="main">
   <!-- タイムラインの帯と、右のカードをつなぐ接続線(分割モードの時だけ) -->
@@ -1429,6 +1424,10 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
            ガチャの対極。使っても減らないし、誰にも取られない。 -->
     </div>
     <div id="calendar-page-wrap">
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px">
+      <button class="type-btn" id="stamp-view-month" style="flex:1;max-width:120px">📅 つき</button>
+      <button class="type-btn" id="stamp-view-week" style="flex:1;max-width:120px">🗓️ しゅう</button>
+    </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <button class="btn btn-secondary" id="stamp-prev-month" aria-label="まえの月" style="padding:8px 14px">◀</button>
       <div id="stamp-month-label" style="font-size: var(--fs-lg);font-weight:900"></div>
@@ -1811,13 +1810,20 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
             <div id="bag-trash-list"></div>
           </div>
         </div>
+        <div style="border-top:1.5px dashed var(--border);margin-top:14px;padding-top:12px">
+          <button type="button" id="bag-color-name-toggle" style="background:none;border:none;padding:2px 0;font-family:inherit;font-size: var(--fs-xs);color:var(--text-dim);cursor:pointer;font-weight:800">🎨 いろに 名前を つける ▾</button>
+          <div id="bag-color-name-body" style="display:none;margin-top:8px">
+            <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">例：ならいごと・あそび・がっこう 等。すべてのカバンで共通の名前です。</p>
+            <div id="bag-color-name-list"></div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- ── 設定タブ ── -->
 
     <!-- 子ども設定（旧「こども」タブ → 設定の最初に統合） -->
-    <div data-tab-group="settings" style="margin:14px 0 6px">
+    <div data-tab-group="child" style="margin:14px 0 6px">
       <div style="font-size: var(--fs-xs);font-weight:900;color:var(--text-dim);letter-spacing:0.04em">ときどき 見直すもの</div>
       <div style="font-size: var(--fs-xs);color:var(--text-dim);opacity:0.85;margin-top:1px">こどもの成長にあわせて変える</div>
     </div>
@@ -1868,7 +1874,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
     </div>
 
     <!-- 画面・表示設定 -->
-    <div data-tab-group="settings" style="margin:14px 0 6px">
+    <div data-tab-group="child" style="margin:14px 0 6px">
       <div style="font-size: var(--fs-xs);font-weight:900;color:var(--text-dim);letter-spacing:0.04em">さいしょに 決めるもの</div>
       <div style="font-size: var(--fs-xs);color:var(--text-dim);opacity:0.85;margin-top:1px">一度決めたら、ほとんど触りません</div>
     </div>
@@ -2034,6 +2040,18 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
+    <!-- Googleカレンダー連携（開発中・段階①：予定を取得して見るところまで） -->
+    <div class="acc-section" data-acc="gcal" data-tab-group="settings">
+      <button class="acc-head" type="button" data-acc-toggle="gcal">📅 Googleカレンダー連携（開発中）<span class="acc-chevron">▶</span></button>
+      <div class="acc-body">
+        <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">保護者のGoogleカレンダーにある予定を読み取り、色ごとに子どものカバンへ取り込めるようにする機能です（作業中）。アプリからGoogleカレンダー側を書き換えることはありません（読み取り専用）。</p>
+        <div id="gcal-status" style="font-size: var(--fs-xs);font-weight:800;color:var(--text-dim);margin-bottom:10px"></div>
+        <button class="btn btn-primary" id="gcal-connect-btn" style="width:100%">🔗 Googleカレンダーと 連携する</button>
+        <button class="btn btn-secondary" id="gcal-fetch-btn" style="width:100%;margin-top:10px;display:none">📥 いま 予定を とりこむ（プレビュー）</button>
+        <div id="gcal-event-list" style="margin-top:10px"></div>
+      </div>
+    </div>
+
     <!-- 家族との連携（Firebase・開発中） -->
     <div class="acc-section" data-acc="family" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="family">👨‍👩‍👧 家族との連携（開発中）<span class="acc-chevron">▶</span></button>
@@ -2100,7 +2118,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v211・2026-08-16</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v221・2026-08-17</div>
     <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
     <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
@@ -2457,6 +2475,7 @@ if(!data.nowMarkerStyleMigratedV98){ data.nowMarkerStyle='analog'; data.nowMarke
 if(data.nowMarkerSize===undefined) data.nowMarkerSize='m'; // s/m/l
 if(data.verticalBandText===undefined) data.verticalBandText=false;
 if(data.wantPanelHeightPx===undefined) data.wantPanelHeightPx=180;
+if(!Array.isArray(data.bagColorNames)) data.bagColorNames=['','','','',''];
 if(data.nowCardWidthPct===undefined) data.nowCardWidthPct=100;
 if(data.wantPanelWidthPx===undefined) data.wantPanelWidthPx=250;
 if(data.nowMarkerColor===undefined) data.nowMarkerColor='marker-gray'; // 重なった帯の縦書き
@@ -2728,6 +2747,10 @@ function welcomeBackIfNeeded(){
 }
 
 function save(){
+  // 今アクティブな子どもに「最後に変わった時刻」を刻んでおく。
+  // 保護者機↔子機のクラウド同期で、後から届いた"古い方のデータ"が
+  // 先に入っていた"新しい方"を誤って上書きしてしまう事故(完了したはずのチェックが復活する等)を防ぐために使う。
+  try{ const c=getChild(); if(c) c._lastChangedAt=new Date().toISOString(); }catch(e){}
   try{
     localStorage.setItem('kodomoV6', JSON.stringify(data));
   }catch(e){
@@ -2745,7 +2768,18 @@ function replaceActiveChildFromCloud(childObj){
   if(!childObj || !childObj.name) return;
   if(typeof migrateChild==='function'){ try{ migrateChild(childObj); }catch(e){} }
   const idx = data.children.findIndex(c=>c.name===childObj.name);
-  if(idx>=0) data.children[idx]=childObj; else data.children.push(childObj);
+  // 【ゾンビ復活バグ対策】この端末で、まだクラウドに送り切っていない「もっと新しい変更」が
+  // 残っている場合は、届いたデータの方が古い可能性があるので上書きしない。
+  // (保護者機↔子機がほぼ同時に保存すると、古い方のpushが後から届いて
+  //  さっき完了したはずのチェックが復活する、という事故を防ぐため)
+  if(idx>=0){
+    const localChangedAt = data.children[idx]._lastChangedAt ? new Date(data.children[idx]._lastChangedAt).getTime() : 0;
+    const cloudChangedAt = childObj._lastChangedAt ? new Date(childObj._lastChangedAt).getTime() : 0;
+    if(localChangedAt > cloudChangedAt) return; // こちらの方が新しいので無視する
+    data.children[idx]=childObj;
+  } else {
+    data.children.push(childObj);
+  }
   data.activeChild = idx>=0 ? idx : data.children.length-1;
   localStorage.setItem('kodomoV6', JSON.stringify(data)); // クラウドから来た内容はそのまま保存(再度クラウドへ送り返す必要はない)
   scheduleAutoBackup();
@@ -3757,7 +3791,7 @@ function renderTimeline(){
           ? `<div class="tl-band-name-vertical">${ev.name}</div>`
           : `<div class="tl-band-name">${ev.fromChild?'⭐ ':''}${ev.name}</div>`;
       const nameWrapper = tooShort ? '' :
-        `<div style="min-width:0;${isPast?'opacity:0.75':''};${useVertical?'display:flex;align-items:center;justify-content:center;height:calc(100% - 8px);':''}">
+        `<div style="position:sticky;top:0;z-index:2;min-width:0;${useVertical?'':'padding:4px 6px;border-radius: var(--r-sm);background:rgba(255,255,255,0.88);backdrop-filter:blur(2px);transform:translateZ(0);will-change:transform;'}${isPast?'opacity:0.75':''};${useVertical?'display:flex;align-items:center;justify-content:center;height:calc(100% - 8px);':''}">
           ${nameHtml}
         </div>`;
       block.innerHTML=`<div class="tl-band ${ev.type}${overtimeStyle}" style="height:100%;width:100%;position:relative;overflow:visible;${pastStyle}${nowHi}${matchColorStyle}">
@@ -4611,7 +4645,7 @@ function updateClock(){
   const switchBtn=document.getElementById('child-switch-btn');
   const showSwitch = data.showChildSwitch && data.children.length>1;
   if(showSwitch){
-    switchBtn.innerHTML=`${getChild().name} <span class="arrow">▼</span>`;
+    switchBtn.innerHTML=`${getChild().name} <span class="arrow">⇄</span>`;
     switchBtn.classList.add('switchable');
   } else {
     switchBtn.textContent=getChild().name;
@@ -4659,9 +4693,20 @@ function checkTodayStamp(){
 }
 // ═══ スタンプカレンダー ═══
 let stampViewYear, stampViewMonth; // 表示中の年月（0始まり月）
+let stampViewMode='month'; // 'month' | 'week'
+let stampViewWeekStart=null; // 週表示中：表示している週の最初の日(Date)
+// 指定した日を含む週の、最初の日(0時)を返す(mondayStart=trueなら月曜始まり)
+function startOfWeek(date, mondayStart){
+  const d=new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const dow=d.getDay(); // 0=日〜6=土
+  const back = mondayStart ? (dow+6)%7 : dow;
+  d.setDate(d.getDate()-back);
+  return d;
+}
 function openStampModal(initialTab){
   const now=new Date();
   stampViewYear=now.getFullYear(); stampViewMonth=now.getMonth();
+  stampViewMode='month'; stampViewWeekStart=null;
   stampSelectedKey=null;
   stampMode='record'; bookWeekOffset=0;
   document.getElementById('stamp-day-detail').innerHTML='';
@@ -4688,7 +4733,7 @@ function openStampModal(initialTab){
 //   そこでカバン自体に colorIndex を固定して持たせる。
 // カバンの識別色(5色)。白文字を載せてWCAG AA(4.5:1)を満たす濃さ。
 // アプリの意味色(赤=danger/アンバー=reward/紫=purple)とは被らない色を選定。
-const BAG_PALETTE = ['#2d54a9','#228145','#a14c2b','#a92d61','#1e716a'];
+const BAG_PALETTE = ['#396ddf','#228145','#c64e20','#dc2371','#148077'];
 function bagColor(bagId){
   const bags=getBags();
   const bag=bags.find(b=>b.id===bagId);
@@ -4794,28 +4839,48 @@ function renderStampCalendar(){
   const c=getChild(); const stamps=(c&&c.stamps)||{};
   document.getElementById('stamp-mode-book').className='type-btn';
   document.getElementById('stamp-hint').innerHTML = 'いろは カバンの しゅるいです。日を タップすると、その日の よていが みられます。';
-  document.getElementById('stamp-month-label').textContent=`${stampViewYear}年 ${stampViewMonth+1}がつ`;
+  const mondayStart = !!data.weekStartMonday;
+  const isWeek = stampViewMode==='week';
+  document.getElementById('stamp-view-month').className='type-btn'+(isWeek?'':' active-on');
+  document.getElementById('stamp-view-week').className='type-btn'+(isWeek?' active-on':'');
+
+  // 表示対象の日付一覧を組み立てる(月モード：その月の1日〜末日／週モード：その週の7日間)
+  let cellDates=[]; // {date, dayNum, isPad}
+  if(isWeek){
+    if(!stampViewWeekStart) stampViewWeekStart=startOfWeek(new Date(), mondayStart);
+    for(let i=0;i<7;i++){
+      const d=new Date(stampViewWeekStart); d.setDate(d.getDate()+i);
+      cellDates.push({date:d, dayNum:d.getDate(), isPad:false});
+    }
+    const last=cellDates[6].date;
+    document.getElementById('stamp-month-label').textContent =
+      `${stampViewWeekStart.getMonth()+1}/${stampViewWeekStart.getDate()} 〜 ${last.getMonth()+1}/${last.getDate()}`;
+  } else {
+    document.getElementById('stamp-month-label').textContent=`${stampViewYear}年 ${stampViewMonth+1}がつ`;
+    const rawFirstDay=new Date(stampViewYear,stampViewMonth,1).getDay(); // 0=日〜6=土
+    const firstDay = mondayStart ? (rawFirstDay+6)%7 : rawFirstDay; // 月曜始まりの時は月=0になるようずらす
+    const daysInMonth=new Date(stampViewYear,stampViewMonth+1,0).getDate();
+    for(let i=0;i<firstDay;i++){ cellDates.push(null); }
+    for(let d=1; d<=daysInMonth; d++){ cellDates.push({date:new Date(stampViewYear,stampViewMonth,d), dayNum:d, isPad:false}); }
+  }
+
   const grid=document.getElementById('stamp-grid');
   grid.style.gridTemplateColumns='repeat(7, minmax(0, 1fr))'; // 内容に押し広げられて画面からはみ出すのを防ぐ
-  grid.style.gap = '2px'; // 名前チップの幅を稼ぐため隙間を詰める
+  grid.style.gap = isWeek ? '6px' : '2px'; // 週表示は余裕があるので隙間も広げる
   grid.innerHTML='';
-  const mondayStart = !!data.weekStartMonday;
   const dowHeaders = mondayStart ? ['月','火','水','木','金','土','日'] : ['日','月','火','水','木','金','土'];
   dowHeaders.forEach(w=>{
     const h=document.createElement('div');
     h.textContent=w; h.style.cssText='text-align:center;font-size: var(--fs-xs);font-weight:800;color:var(--text-dim)';
     grid.appendChild(h);
   });
-  const rawFirstDay=new Date(stampViewYear,stampViewMonth,1).getDay(); // 0=日〜6=土
-  const firstDay = mondayStart ? (rawFirstDay+6)%7 : rawFirstDay; // 月曜始まりの時は月=0になるようずらす
-  const daysInMonth=new Date(stampViewYear,stampViewMonth+1,0).getDate();
   const todayKey=dateKey(new Date());
-  for(let i=0;i<firstDay;i++){ grid.appendChild(document.createElement('div')); }
 
-  const monthBagIds=new Set(); // 凡例に出すカバン（この月に登場するものだけ）
-  for(let d=1; d<=daysInMonth; d++){
-    const date=new Date(stampViewYear,stampViewMonth,d);
-    const dk=`${stampViewYear}-${stampViewMonth+1}-${d}`;
+  const monthBagIds=new Set(); // 凡例に出すカバン（この表示範囲に登場するものだけ）
+  cellDates.forEach(cellInfo=>{
+    if(!cellInfo){ grid.appendChild(document.createElement('div')); return; }
+    const {date, dayNum}=cellInfo;
+    const dk=dateKey(date);
     const isToday=dk===todayKey;
     const isSelected=dk===stampSelectedKey;
     // 見出しに出す設定のあるカバンだけを、その日のチップ・凡例に出す
@@ -4823,10 +4888,11 @@ function renderStampCalendar(){
     list.forEach(x=>monthBagIds.add(x.bag.id));
 
     // 予定：カバン名を色つきのチップで直接表示（タップしなくても何の日か分かるように）
-    // マスの横幅は実測37〜46pxしかないため、名前は途中で切れる。フルネームは下の凡例で補完する。
-    const MAX=3;
+    // 週表示はマスが大きいぶん、もう少し多く・大きい文字で出せる。
+    const MAX = isWeek ? 6 : 3;
+    const chipFs = isWeek ? 10 : 8;
     const chips=list.slice(0,MAX).map(x=>
-      `<div style="background:${bagColor(x.bag.id)};color:#fff;font-size:8px;font-weight:800;line-height:1.35;border-radius:3px;padding:0 2px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box">${x.bag.labelText||x.bag.name}</div>`
+      `<div style="background:${bagColor(x.bag.id)};color:#fff;font-size:${chipFs}px;font-weight:800;line-height:1.4;border-radius:3px;padding:1px 3px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box">${x.bag.labelText||x.bag.name}</div>`
     ).join('');
     const more = list.length>MAX ? `<div style="font-size:7px;font-weight:900;color:var(--text-dim);line-height:1.2">+${list.length-MAX}</div>` : '';
     const marks = list.length
@@ -4834,13 +4900,14 @@ function renderStampCalendar(){
       : '';
 
     const cell=document.createElement('div');
-    cell.dataset.day=String(d);
+    cell.dataset.day=String(dayNum);
     const ring = isSelected ? 'border:2px solid var(--gold);' : (isToday ? 'border:2px solid var(--accent);' : '');
-    cell.style.cssText=`min-height:58px;justify-content:flex-start;padding:2px 2px 3px;display:flex;flex-direction:column;align-items:center;border-radius: var(--r-sm);font-size: var(--fs-xs);font-weight:800;cursor:pointer;box-sizing:border-box;min-width:0;overflow:hidden;${ring}background:transparent;color:var(--text-dim)`;
-    cell.innerHTML = `<div style="line-height:1.1">${d}</div>` + marks;
+    const minH = isWeek ? 110 : 58;
+    cell.style.cssText=`min-height:${minH}px;justify-content:flex-start;padding:2px 2px 3px;display:flex;flex-direction:column;align-items:center;border-radius: var(--r-sm);font-size: var(--fs-xs);font-weight:800;cursor:pointer;box-sizing:border-box;min-width:0;overflow:hidden;${ring}background:transparent;color:var(--text-dim)`;
+    cell.innerHTML = `<div style="line-height:1.1">${dayNum}</div>` + marks;
     cell.addEventListener('click',()=>{ stampSelectedKey=dk; renderStampCalendar(); renderStampDayDetail(date); });
     grid.appendChild(cell);
-  }
+  });
 
   // 凡例：いろ → カバンの名前
   const legend=document.getElementById('stamp-legend');
@@ -5092,7 +5159,6 @@ document.getElementById('child-fab-book').addEventListener('click',()=>{
 });
 document.getElementById('zukan-close').addEventListener('click',()=>document.getElementById('zukan-modal').classList.remove('open'));
 document.getElementById('zukan-close-top').addEventListener('click',()=>document.getElementById('zukan-modal').classList.remove('open'));
-document.getElementById('switch-close-top').addEventListener('click',()=>document.getElementById('switch-cancel').click());
 document.getElementById('child-modal-close-top').addEventListener('click',()=>document.getElementById('child-cancel').click());
 document.getElementById('want-modal-close-top').addEventListener('click',()=>document.getElementById('want-cancel').click());
 document.getElementById('ev-modal-close-top').addEventListener('click',()=>document.getElementById('ev-cancel').click());
@@ -5121,10 +5187,32 @@ document.getElementById('stamp-mode-book').addEventListener('click',()=>{
 document.getElementById('book-prev-week').addEventListener('click',()=>{ bookWeekOffset--; renderBookPage(); });
 document.getElementById('book-next-week').addEventListener('click',()=>{ bookWeekOffset=Math.min(0,bookWeekOffset+1); renderBookPage(); });
 document.getElementById('stamp-prev-month').addEventListener('click',()=>{
-  stampViewMonth--; if(stampViewMonth<0){stampViewMonth=11;stampViewYear--;} clearStampSelection(); renderStampCalendar();
+  if(stampViewMode==='week'){
+    const d=new Date(stampViewWeekStart); d.setDate(d.getDate()-7); stampViewWeekStart=d;
+  } else {
+    stampViewMonth--; if(stampViewMonth<0){stampViewMonth=11;stampViewYear--;}
+  }
+  clearStampSelection(); renderStampCalendar();
 });
 document.getElementById('stamp-next-month').addEventListener('click',()=>{
-  stampViewMonth++; if(stampViewMonth>11){stampViewMonth=0;stampViewYear++;} clearStampSelection(); renderStampCalendar();
+  if(stampViewMode==='week'){
+    const d=new Date(stampViewWeekStart); d.setDate(d.getDate()+7); stampViewWeekStart=d;
+  } else {
+    stampViewMonth++; if(stampViewMonth>11){stampViewMonth=0;stampViewYear++;}
+  }
+  clearStampSelection(); renderStampCalendar();
+});
+document.getElementById('stamp-view-month').addEventListener('click',()=>{
+  if(stampViewMode==='month') return;
+  stampViewMode='month'; clearStampSelection(); renderStampCalendar();
+});
+document.getElementById('stamp-view-week').addEventListener('click',()=>{
+  if(stampViewMode==='week') return;
+  // 週表示に入る瞬間：今カレンダーで見ている月の「今日」を含む週(無ければ1日を含む週)から始める
+  const base = (stampViewYear===new Date().getFullYear() && stampViewMonth===new Date().getMonth())
+    ? new Date() : new Date(stampViewYear, stampViewMonth, 1);
+  stampViewWeekStart = startOfWeek(base, !!data.weekStartMonday);
+  stampViewMode='week'; clearStampSelection(); renderStampCalendar();
 });
 
 // ═══ かせいだ時間のマイルストーン ═══
@@ -5657,26 +5745,14 @@ document.getElementById('blockfall-close').addEventListener('click',()=>{
 
 document.getElementById('dismiss-milestone').addEventListener('click',()=>{ document.getElementById('milestone-overlay').classList.remove('show'); });
 
-// 子ども切り替えポップアップ
+// 子ども切り替え：タップするたびに、次の子どもへ自動的に切り替わる(プルダウン式ではない)
 document.getElementById('child-switch-btn').addEventListener('click',()=>{
   if(!(data.showChildSwitch && data.children.length>1)) return;
-  const list=document.getElementById('switch-list'); list.innerHTML='';
-  data.children.forEach((c,i)=>{
-    const active=i===data.activeChild;
-    const row=document.createElement('button');
-    row.style.cssText=`display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border-radius: var(--r-md);border:2.5px solid ${active?'var(--off-color)':'var(--border)'};background:${active?'var(--off-light)':'var(--surface)'};margin-bottom:8px;cursor:pointer;font-family:inherit;text-align:left`;
-    row.innerHTML=`<span style="flex:1;font-size: var(--fs-lg);font-weight:800">${c.name}</span>${active?'<span style="color:var(--off-color);font-weight:900">✓</span>':''}`;
-    row.addEventListener('click',()=>{
-      withChildSwitchPin(()=>{
-        data.activeChild=i; save(); document.getElementById('switch-modal').classList.remove('open'); tick();
-      });
-    });
-    list.appendChild(row);
+  withChildSwitchPin(()=>{
+    const nextIdx=(data.activeChild+1)%data.children.length;
+    switchChild(nextIdx);
   });
-  document.getElementById('switch-modal').classList.add('open');
 });
-document.getElementById('switch-cancel').addEventListener('click',()=>document.getElementById('switch-modal').classList.remove('open'));
-document.getElementById('switch-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('switch-modal').classList.remove('open');});
 
 
 // ── 片手操作シート（保護者用）──
@@ -6669,6 +6745,13 @@ document.getElementById('bag-trash-toggle').addEventListener('click',function(){
   body.style.display=open?'none':'block';
   this.textContent='🗑️ けした カバンを もどす '+(open?'▾':'▴');
   if(!open) renderBagTrashList();
+});
+document.getElementById('bag-color-name-toggle').addEventListener('click',function(){
+  const body=document.getElementById('bag-color-name-body');
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  this.textContent='🎨 いろに 名前を つける '+(open?'▾':'▴');
+  if(!open) renderBagColorNameList();
 });
 document.getElementById('dev-reset-btn').addEventListener('click',function(){
   const btn=this;
@@ -7672,6 +7755,30 @@ function moveBagsToTrash(child, bagsToDelete){
     .slice(0, 20);
 }
 // 「けした カバンを もどす」一覧の描画
+// 「いろに 名前を つける」一覧の描画
+function renderBagColorNameList(){
+  const wrap=document.getElementById('bag-color-name-list'); if(!wrap) return;
+  if(!Array.isArray(data.bagColorNames)) data.bagColorNames=['','','','',''];
+  wrap.innerHTML='';
+  BAG_PALETTE.forEach((color,i)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:8px';
+    const dot=document.createElement('div');
+    dot.style.cssText=`width:28px;height:28px;border-radius:50%;background:${color};flex-shrink:0`;
+    const input=document.createElement('input');
+    input.type='text'; input.maxLength=10;
+    input.placeholder=`いろ${i+1}（なまえ なし）`;
+    input.value=data.bagColorNames[i]||'';
+    input.style.cssText='flex:1;min-width:0;background:var(--bg);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);font-weight:700;padding:8px 10px;font-family:inherit;outline:none';
+    input.addEventListener('change',()=>{
+      data.bagColorNames[i]=input.value.trim();
+      save();
+      renderBagColorPicker(); // 今開いているカバン編集画面があれば、色の名前表示にも反映
+    });
+    row.appendChild(dot); row.appendChild(input);
+    wrap.appendChild(row);
+  });
+}
 function renderBagTrashList(){
   const wrap=document.getElementById('bag-trash-list'); if(!wrap) return;
   const c=getChild();
@@ -8389,14 +8496,22 @@ function updateBagType(){
 function renderBagColorPicker(){
   const wrap=document.getElementById('bag-color-picker'); if(!wrap) return;
   wrap.innerHTML='';
+  if(!Array.isArray(data.bagColorNames)) data.bagColorNames=['','','','',''];
   BAG_PALETTE.forEach((color,i)=>{
+    const cell=document.createElement('div');
+    cell.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0';
     const dot=document.createElement('button');
     dot.type='button';
-    dot.setAttribute('aria-label', `いろ${i+1}を えらぶ`);
+    const label = data.bagColorNames[i] || `いろ${i+1}`;
+    dot.setAttribute('aria-label', `${label}を えらぶ`);
     const selected = i===bagColorIndex;
-    dot.style.cssText=`width:36px;height:36px;border-radius:50%;background:${color};border:3px solid ${selected?'var(--text)':'transparent'};box-shadow:${selected?'0 0 0 2px #fff, 0 0 0 4px var(--text)':'none'};cursor:pointer;padding:0`;
+    dot.style.cssText=`width:36px;height:36px;border-radius:50%;background:${color};border:3px solid ${selected?'var(--text)':'transparent'};box-shadow:${selected?'0 0 0 2px #fff, 0 0 0 4px var(--text)':'none'};cursor:pointer;padding:0;flex-shrink:0`;
     dot.addEventListener('click',()=>{ bagColorIndex=i; renderBagColorPicker(); });
-    wrap.appendChild(dot);
+    const nameEl=document.createElement('div');
+    nameEl.textContent=label;
+    nameEl.style.cssText=`font-size:10px;font-weight:800;color:${selected?'var(--text)':'var(--text-dim)'};text-align:center;max-width:44px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap`;
+    cell.appendChild(dot); cell.appendChild(nameEl);
+    wrap.appendChild(cell);
   });
 }
 let bagTaskSortMode=false; // ならびかえモード：常時ONだと誤って順番が入れ替わるため、明示的にONにした時だけ有効にする
@@ -8841,7 +8956,13 @@ document.getElementById('fullscreen-btn').addEventListener('click',()=>{
     });
   }
 });
-document.addEventListener('fullscreenchange', updateFullscreenBtn);
+document.addEventListener('fullscreenchange', ()=>{
+  updateFullscreenBtn();
+  // 全画面表示の切り替えでブラウザのアドレスバー等が出入りし、画面の縦幅が変わることで
+  // タイムラインの表示位置が一瞬ズレて見える(「スライドしてズレる」)ことがあるための対策。
+  // ブラウザが新しい画面サイズを確定させるのを少し待ってから、「今」の位置へ再センタリングする。
+  setTimeout(()=>{ userScrolledAway=false; renderTimeline(); }, 300);
+});
 updateFullscreenBtn();
 
 // ── 下・横のパネル（やりたいこと／まだ時間がきまってないこと）を一時的にたたむ ──
@@ -9526,6 +9647,7 @@ renderParentMessage();
       const user = result.user;
       const pendingCreate = sessionStorage.getItem('kyou_pending_create_family');
       const pendingRecover = sessionStorage.getItem('kyou_pending_recover_parent');
+      const pendingCalendar = sessionStorage.getItem('kyou_pending_calendar_link');
       if(pendingCreate){
         sessionStorage.removeItem('kyou_pending_create_family');
         const familyRef = doc(collection(db, 'families'));
@@ -9542,6 +9664,19 @@ renderParentMessage();
           setFamilyLocal({ familyId: fdoc.id, role: 'parent', uid: user.uid });
           window.showToast && window.showToast('👨‍👩‍👧 保護者として 復旧しました');
         }
+      } else if(pendingCalendar){
+        sessionStorage.removeItem('kyou_pending_calendar_link');
+        // Googleカレンダーの「読み取り」権限つきでログインした結果から、アクセストークンを取り出す。
+        // このトークンは1時間ほどで失効する(Firebaseの仕様)。長期保存はせず、この端末のメモリ上だけに置く。
+        const cred = GoogleAuthProvider.credentialFromResult(result);
+        if(cred && cred.accessToken){
+          googleCalendarAccessToken = cred.accessToken;
+          googleCalendarAccessTokenAt = Date.now();
+          window.showToast && window.showToast('📅 Googleカレンダーと つながりました');
+        } else {
+          window.showToast && window.showToast('⚠️ カレンダーの権限を 受け取れませんでした。もう一度お試しください');
+        }
+        renderGcalUI();
       }
       renderFamilyUI();
       startParentChildDataSync(); // 家族作成・復旧の直後から、子機の進捗更新を見張り始める
@@ -9786,7 +9921,16 @@ renderParentMessage();
     if(payload.childName) c.name = payload.childName;
     if(window.migrateChild){ try{ window.migrateChild(c); }catch(e){} }
     const idx = appData.children.findIndex(existing => existing.name === c.name);
-    if(idx>=0) appData.children[idx]=c; else appData.children.push(c);
+    if(idx>=0){
+      // 【ゾンビ復活バグ対策】保護者機の方に、まだ子機に届いていない新しい変更が残っている場合は、
+      // 子機からの(古いかもしれない)データで上書きしない。
+      const localChangedAt = appData.children[idx]._lastChangedAt ? new Date(appData.children[idx]._lastChangedAt).getTime() : 0;
+      const cloudChangedAt = c._lastChangedAt ? new Date(c._lastChangedAt).getTime() : 0;
+      if(localChangedAt > cloudChangedAt) return; // 保護者機の方が新しいので無視する
+      appData.children[idx]=c;
+    } else {
+      appData.children.push(c);
+    }
     if(window.save) window.save();
     if(window.tick) window.tick();
   }
@@ -9815,6 +9959,96 @@ renderParentMessage();
     window.showToast && window.showToast('👋 家族から ぬけました。この端末の データは そのまま のこっています');
     renderFamilyUI();
   }
+
+  // ── Googleカレンダー連携(段階①：接続して、予定を取得して見るところまで) ──
+  // アクセストークンはFirebase Authのログイン結果から得られる短命なもの(だいたい1時間で失効)。
+  // 長く保存すると漏れた時のリスクが上がるため、あえてlocalStorageには保存せず、
+  // この端末のメモリ(ページを開いている間だけ)に置く。再読み込みしたら、また「連携する」からやり直す。
+  let googleCalendarAccessToken = null;
+  let googleCalendarAccessTokenAt = 0;
+
+  function renderGcalUI(){
+    const statusEl = document.getElementById('gcal-status');
+    const connectBtn = document.getElementById('gcal-connect-btn');
+    const fetchBtn = document.getElementById('gcal-fetch-btn');
+    if(!statusEl || !connectBtn || !fetchBtn) return;
+    const connected = !!googleCalendarAccessToken;
+    if(connected){
+      statusEl.textContent = '✅ Googleカレンダーと つながっています(このページを開いている間だけ)';
+      connectBtn.textContent = '🔗 つなぎ直す';
+      fetchBtn.style.display = '';
+    } else {
+      statusEl.textContent = 'まだ Googleカレンダーと つながっていません。';
+      connectBtn.textContent = '🔗 Googleカレンダーと 連携する';
+      fetchBtn.style.display = 'none';
+    }
+  }
+
+  async function connectGoogleCalendar(){
+    try{
+      sessionStorage.setItem('kyou_pending_calendar_link', '1');
+      const provider = new GoogleAuthProvider();
+      // 予定の「読み取り」だけをお願いする(書き込み・削除の権限は求めない＝アプリからGoogle側は一切操作できない)
+      provider.addScope('https://www.googleapis.com/auth/calendar.readonly');
+      await signInWithRedirect(auth, provider);
+    }catch(e){
+      sessionStorage.removeItem('kyou_pending_calendar_link');
+      window.showToast && window.showToast('⚠️ 連携に失敗しました：' + e.message);
+    }
+  }
+
+  // 今から2ヶ月先までの予定を取得して、プレビュー表示する(この段階ではカバン化はまだしない)
+  async function fetchGoogleCalendarPreview(){
+    const btn = document.getElementById('gcal-fetch-btn');
+    const listEl = document.getElementById('gcal-event-list');
+    if(!googleCalendarAccessToken){ window.showToast && window.showToast('先に 連携してください'); return; }
+    if(btn){ btn.disabled = true; btn.textContent = '📥 とりこんでいます…'; }
+    try{
+      const timeMin = new Date().toISOString();
+      const timeMax = new Date(Date.now() + 60*24*60*60*1000).toISOString();
+      const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime&maxResults=50`;
+      const res = await fetch(url, { headers: { Authorization: 'Bearer ' + googleCalendarAccessToken } });
+      if(res.status === 401){
+        // トークン失効。連携し直しが必要なことを伝える(自動更新は今回の段階では未対応)
+        googleCalendarAccessToken = null;
+        renderGcalUI();
+        window.showToast && window.showToast('⚠️ 権限の 有効期限が切れました。もう一度「連携する」を押してください');
+        return;
+      }
+      if(!res.ok) throw new Error('Googleからの応答エラー(' + res.status + ')');
+      const json = await res.json();
+      const events = (json.items||[]).filter(ev => ev.status !== 'cancelled');
+      if(!listEl) return;
+      if(!events.length){
+        listEl.innerHTML = '<p style="font-size: var(--fs-xs);color:var(--text-dim);margin:8px 0 0">これから2ヶ月以内の 予定は 見つかりませんでした。</p>';
+        return;
+      }
+      const colorNameMap = { '1':'ラベンダー','2':'セージ','3':'ぶどう','4':'フラミンゴ','5':'バナナ','6':'みかん','7':'ピーコック','8':'グラファイト','9':'ブルーベリー','10':'バジル','11':'トマト' };
+      listEl.innerHTML = `<p style="font-size: var(--fs-xs);color:var(--text-dim);margin:8px 0 6px">${events.length}件 見つかりました(プレビューのみ・まだカバンには なりません)</p>` +
+        events.map(ev=>{
+          const start = ev.start && (ev.start.dateTime || ev.start.date);
+          const dt = start ? new Date(start) : null;
+          const dateLabel = dt ? `${dt.getMonth()+1}/${dt.getDate()}` + (ev.start.dateTime ? ` ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '(しゅうじつ)') : '?';
+          const colorLabel = ev.colorId ? (colorNameMap[ev.colorId]||('いろ'+ev.colorId)) : '(きほんの いろ)';
+          const recurLabel = ev.recurringEventId ? ' 🔁' : '';
+          return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size: var(--fs-xs)">
+            <span style="flex-shrink:0;color:var(--text-dim);font-weight:800;min-width:70px">${dateLabel}</span>
+            <span style="flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.summary||'(名前なし)'}${recurLabel}</span>
+            <span style="flex-shrink:0;color:var(--text-dim)">${colorLabel}</span>
+          </div>`;
+        }).join('');
+    }catch(e){
+      window.showToast && window.showToast('⚠️ 取得に失敗しました：' + e.message);
+    }finally{
+      if(btn){ btn.disabled = false; btn.textContent = '📥 いま 予定を とりこむ（プレビュー）'; }
+    }
+  }
+
+  const gcalConnectBtn = document.getElementById('gcal-connect-btn');
+  if(gcalConnectBtn) gcalConnectBtn.addEventListener('click', connectGoogleCalendar);
+  const gcalFetchBtn = document.getElementById('gcal-fetch-btn');
+  if(gcalFetchBtn) gcalFetchBtn.addEventListener('click', fetchGoogleCalendarPreview);
+  renderGcalUI();
 
   // 保護者設定「データ」タブの見た目を、今の端末の役割に合わせて出し分ける
   function renderFamilyUI(){
@@ -9871,7 +10105,11 @@ renderParentMessage();
   const familyJoinBtn = document.getElementById('family-join-btn');
   if(familyJoinBtn) familyJoinBtn.addEventListener('click', joinFamily);
   const familyImportBtn = document.getElementById('family-import-btn');
-  if(familyImportBtn) familyImportBtn.addEventListener('click', importChildrenFromCloud);
+  if(familyImportBtn) familyImportBtn.addEventListener('click', ()=>{
+    if(confirm('クラウドの内容で、この端末の子どものデータを 上書きします。よろしいですか？(通常は自動で同期されるため、このボタンは復旧など特別な時だけ 使ってください)')){
+      importChildrenFromCloud();
+    }
+  });
 
   renderFamilyUI();
   handleAuthRedirect(); // Googleのログイン画面から戻ってきた直後なら、続きの処理をする
