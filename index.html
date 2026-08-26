@@ -2040,15 +2040,20 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <!-- Googleカレンダー連携（開発中・段階①：予定を取得して見るところまで） -->
+    <!-- Googleカレンダー連携（開発中・段階②：色ごとの割り当て＋カバンとしての取り込み） -->
     <div class="acc-section" data-acc="gcal" data-tab-group="settings">
       <button class="acc-head" type="button" data-acc-toggle="gcal">📅 Googleカレンダー連携（開発中）<span class="acc-chevron">▶</span></button>
       <div class="acc-body">
-        <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">保護者のGoogleカレンダーにある予定を読み取り、色ごとに子どものカバンへ取り込めるようにする機能です（作業中）。アプリからGoogleカレンダー側を書き換えることはありません（読み取り専用）。</p>
+        <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">保護者のGoogleカレンダーにある予定を読み取り、色ごとに子どものカバンへ取り込みます。アプリからGoogleカレンダー側を書き換えることはありません（読み取り専用）。取り込んだカバンは、この端末からだけ普通に削除できます。</p>
         <div id="gcal-status" style="font-size: var(--fs-xs);font-weight:800;color:var(--text-dim);margin-bottom:10px"></div>
         <button class="btn btn-primary" id="gcal-connect-btn" style="width:100%">🔗 Googleカレンダーと 連携する</button>
-        <button class="btn btn-secondary" id="gcal-fetch-btn" style="width:100%;margin-top:10px;display:none">📥 いま 予定を とりこむ（プレビュー）</button>
+        <div id="gcal-color-assign-wrap" style="margin-top:12px;display:none">
+          <label style="display:block;font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-weight:700">どの子どもが、どの色？</label>
+          <div id="gcal-color-assign-list"></div>
+        </div>
+        <button class="btn btn-secondary" id="gcal-fetch-btn" style="width:100%;margin-top:10px;display:none">📥 いま 予定を みる（プレビュー）</button>
         <div id="gcal-event-list" style="margin-top:10px"></div>
+        <button class="btn" id="gcal-import-btn" style="width:100%;margin-top:10px;display:none;background:var(--leaf);color:#fff">🎒 カバンとして とりこむ</button>
       </div>
     </div>
 
@@ -2118,7 +2123,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v221・2026-08-17</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v225・2026-08-22</div>
     <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
     <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
@@ -2219,6 +2224,11 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       <button type="button" class="parent-header-close" id="bag-modal-close-top" aria-label="とじる">✕</button>
     </div>
     <div class="field"><label>カバンの名前</label><input type="text" id="bag-name" placeholder="例：学校のしゅくだい" maxlength="14"/></div>
+    <div class="field" id="bag-shared-field" style="display:none">
+      <label>どの子どもに 表示する？</label>
+      <div id="bag-shared-checklist" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:6px;margin-bottom:0;line-height:1.5">複数えらぶと、同じ内容のカバンが選んだ子ども全員ぶんできます。中身をあとで変更すると、共有している子ども全員に自動で反映されます(チェックの進み具合は、子どもごとに別々のままです)。</p>
+    </div>
     <div class="field"><label>いろ（きろくのカレンダーで見分ける色です）</label><div id="bag-color-picker" style="display:flex;gap:10px"></div></div>
     <div class="field" id="bag-tasks-field">
       <label style="display:flex;align-items:center;justify-content:space-between;gap:8px">
@@ -6264,10 +6274,10 @@ function renderWantList(){
   if(!wantList.length){
     // やりたいことが1つも無い時は、パネルの表示自体を消して、タイムラインの幅を広げる。
     // 何か追加された瞬間、自動でパネルを元に戻す(下のelse側)。
-    if(!panelsCollapsed){ panelsCollapsed=true; applyPanelsCollapsed(); }
+    if(!panelsCollapsed){ panelsCollapsed=true; applyPanelsCollapsed(); setTimeout(renderTimeline, 260); }
     return;
   }
-  if(panelsCollapsed){ panelsCollapsed=false; applyPanelsCollapsed(); }
+  if(panelsCollapsed){ panelsCollapsed=false; applyPanelsCollapsed(); setTimeout(renderTimeline, 260); }
   wantList.forEach((item,i)=>{
     const row=document.createElement('div'); row.className='want-item';
     row.innerHTML=`<span class="want-name">${item.name}</span>
@@ -7863,6 +7873,13 @@ function renderBagList(){
     const periodMark = linkedPeriod
       ? `<span title="イレギュラー期間専用のカバンです" style="display:inline-flex;align-items:center;gap:3px;background:var(--danger-light);border:1.5px solid var(--danger);color:var(--danger);border-radius: var(--r-full);padding:1px 8px;font-size: var(--fs-xs);font-weight:800;margin-left:6px">🗓️ ${linkedPeriod.name}</span>`
       : '';
+    const gcalMark = bag.gcalEventKey
+      ? `<span title="Googleカレンダーから とりこんだ カバンです" style="display:inline-flex;align-items:center;gap:3px;background:var(--surface2);border:1.5px solid var(--border);color:var(--text-dim);border-radius: var(--r-full);padding:1px 8px;font-size: var(--fs-xs);font-weight:800;margin-left:6px">📅 Google</span>`
+      : '';
+    const shareCount = bag.shareGroupId ? data.children.filter(ch=>(ch.bags||[]).some(b=>b.shareGroupId===bag.shareGroupId)).length : 0;
+    const shareMark = shareCount>1
+      ? `<span title="兄弟で共有しているカバンです" style="display:inline-flex;align-items:center;gap:3px;background:var(--surface2);border:1.5px solid var(--border);color:var(--text-dim);border-radius: var(--r-full);padding:1px 8px;font-size: var(--fs-xs);font-weight:800;margin-left:6px">🔗 きょうゆう(${shareCount}人)</span>`
+      : '';
     const isSelected = bagSelectedIds.has(bag.id);
     const row=document.createElement('div');
     row.style.cssText=`
@@ -7879,7 +7896,7 @@ function renderBagList(){
         <div class="bag-main" style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:5px;min-width:0">
             <button class="bag-color-dot" type="button" aria-label="この色の意味を みる" style="width:20px;height:20px;min-width:20px;border-radius:50%;background:${bagColor(bag.id)};flex-shrink:0;border:none;cursor:pointer;padding:0"></button>
-            <span style="font-size: var(--fs-sm);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${bag.name}</span>${labelMark}${periodMark}
+            <span style="font-size: var(--fs-sm);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${bag.name}</span>${labelMark}${periodMark}${gcalMark}${shareMark}
           </div>
           <div style="font-size: var(--fs-xs);font-weight:700;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${timeText} ／ ${dowText}</div>
         </div>
@@ -8436,6 +8453,8 @@ function openBagCopyModal(){
 let editBagId=null, bagTasks=[], bagType='on', bagDow=[], bagDefaultTime='', bagDefaultEnd='', bagColorIndex=0;
 let bagRepeatType='weekly', bagNthWeek=1, bagNthDow=1, bagRepeatDates=[];
 let bagVacationPeriodId=null, bagVacationPeriodType=null;
+let bagSelectedChildIds=[]; // このカバン編集で「表示する」にチェックが入っている子どものid一覧
+let bagShareGroupId=null; // 兄弟で共有しているカバン同士を結びつけるID(無ければ共有なし)
 function openBagModal(id, copyFrom, vacationPeriodId){
   editBagId=id;
   const bag=id?getBags().find(b=>b.id===id):(copyFrom||null);
@@ -8447,8 +8466,11 @@ function openBagModal(id, copyFrom, vacationPeriodId){
   bagTasks=bag?(bag.tasks||[]).map(t=>({...t})):[];
   bagTaskSortMode=false; // カバンを開くたびに必ずOFFから始める(誤操作防止)
   bagDow=bag?(bag.dow||[]).slice():[];
-  // イレギュラー期間に属するカバンかどうか（新規＝渡されたvacationPeriodId、編集＝保存済みのvacationPeriodId）
-  const linkedPeriodId = bag ? (bag.vacationPeriodId||null) : (vacationPeriodId||null);
+  // イレギュラー期間に属するカバンかどうか（編集(id指定)＝保存済みのvacationPeriodId、新規(白紙・コピーどちらも)＝渡されたvacationPeriodId）。
+  // ※以前は「bagがあるか」で分岐していたため、コピー元(copyFrom)も新規作成の一種なのに
+  //   「編集中」と誤判定され、渡されたvacationPeriodIdが無視されコピー元自身の(空の)期間情報で
+  //   上書きされてしまうバグがあった。正しくは「idが指定されているか(=本当に編集中か)」で分岐する。
+  const linkedPeriodId = id ? (bag.vacationPeriodId||null) : (vacationPeriodId||null);
   bagVacationPeriodId = linkedPeriodId;
   migrateVacationPeriods();
   const linkedPeriod = linkedPeriodId ? (getChild().vacationPeriods||[]).find(p=>p.id===linkedPeriodId) : null;
@@ -8482,6 +8504,18 @@ function openBagModal(id, copyFrom, vacationPeriodId){
     bagColorIndex = idx % BAG_PALETTE.length;
   }
   renderBagColorPicker();
+  // 「どの子どもに表示するか」の初期状態：編集中で共有グループがあれば、それに属する子ども全員。
+  // それ以外(新規・コピー・非共有の編集)は、今アクティブな子どもだけを初期選択にする。
+  // ※vacationPeriodIdと同じ理由で、コピー元(copyFrom)のshareGroupIdを誤って引き継がないよう、
+  //   「id(本当に編集中か)」で判定する。
+  if(id && bag && bag.shareGroupId){
+    bagShareGroupId = bag.shareGroupId;
+    bagSelectedChildIds = data.children.filter(c=>(c.bags||[]).some(b=>b.shareGroupId===bagShareGroupId)).map(c=>c.id);
+  } else {
+    bagShareGroupId = null;
+    bagSelectedChildIds = [getChild().id];
+  }
+  renderBagSharedChecklist();
   updateBagType();
   const sortToggleBtn=document.getElementById('bag-task-sort-toggle');
   if(sortToggleBtn){ sortToggleBtn.textContent='≡ ならびかえ：OFF'; sortToggleBtn.style.background='var(--surface2)'; sortToggleBtn.style.color='var(--text-dim)'; }
@@ -8493,6 +8527,26 @@ function updateBagType(){
   document.getElementById('bag-tasks-field').style.display=bagType==='on'?'':'none';
 }
 // 色選択パレット：保護者が意図を持って選べるようにする(旧: 作成順の自動割り当てのみだった)
+// 「どの子どもに 表示する？」のチェックリストを描画する。子どもが1人しかいない家庭では出さない。
+function renderBagSharedChecklist(){
+  const field=document.getElementById('bag-shared-field');
+  const wrap=document.getElementById('bag-shared-checklist');
+  if(!field || !wrap) return;
+  if(data.children.length<2){ field.style.display='none'; return; }
+  field.style.display='';
+  wrap.innerHTML='';
+  data.children.forEach(c=>{
+    const label=document.createElement('label');
+    label.style.cssText='display:flex;align-items:center;gap:6px;background:var(--surface2);border:2px solid var(--border);border-radius: var(--r-md);padding:8px 12px;cursor:pointer;min-height:44px;box-sizing:border-box';
+    const checked = bagSelectedChildIds.includes(c.id);
+    label.innerHTML=`<input type="checkbox" data-child-id="${c.id}" ${checked?'checked':''} style="width:20px;height:20px"/><span style="font-weight:800;font-size: var(--fs-sm)">${c.name}</span>`;
+    label.querySelector('input').addEventListener('change',e=>{
+      if(e.target.checked){ if(!bagSelectedChildIds.includes(c.id)) bagSelectedChildIds.push(c.id); }
+      else { bagSelectedChildIds = bagSelectedChildIds.filter(id=>id!==c.id); }
+    });
+    wrap.appendChild(label);
+  });
+}
 function renderBagColorPicker(){
   const wrap=document.getElementById('bag-color-picker'); if(!wrap) return;
   wrap.innerHTML='';
@@ -8704,6 +8758,7 @@ document.getElementById('bag-save').addEventListener('click',()=>{
   if(dtime && !dend){ showToast('おわりの時刻も えらんでください（あとから決める場合は はじまりも空にしてください）'); return; }
   // 繰り返し方が「カレンダーで選ぶ」の時は、日づけを1つ以上えらぶ必要がある
   if(bagRepeatType==='dates' && !bagRepeatDates.length){ showToast('日づけを 1つ以上 えらんでください'); return; }
+  if(!bagSelectedChildIds.length){ showToast('どの子どもに表示するか、1人以上えらんでください'); return; }
   const c=getChild(); if(!c.bags)c.bags=[];
   const showInLabel=document.getElementById('bag-show-label').checked;
   const labelText=document.getElementById('bag-label-text').value.trim();
@@ -8713,11 +8768,40 @@ document.getElementById('bag-save').addEventListener('click',()=>{
   const dowToSave = repeatType==='weekly' ? bagDow : []; // 月ごと/カレンダー指定の時は曜日配列は使わない
   const repeatDatesToSave = repeatType==='dates' ? bagRepeatDates.slice() : [];
   const vacationPeriodId = bagVacationPeriodId || null;
+  // 兄弟間で共有する「内容」フィールド一式(進み具合・その日ごとの上書きは含めない＝子どもごとに別々のまま)
+  const contentFields = {name, type:bagType, tasks:bagTasks, dow:dowToSave, repeatType, repeatDates:repeatDatesToSave, nthWeek, nthDow, defaultTime:dtime, defaultEndTime:dend, showInLabel, labelText, labelOrder, allowFree, colorIndex:bagColorIndex, vacationPeriodId};
+  const multiShare = bagSelectedChildIds.length>1;
+  // 複数人にチェックが入っているのに、まだ共有グループが無い(=白紙から複数選んで新規作成 or 単独カバンを後から共有化)場合は、新しく発行する
+  if(multiShare && !bagShareGroupId){ bagShareGroupId = 'share-'+Date.now().toString(); }
+  const shareGroupId = multiShare ? bagShareGroupId : null; // 1人だけにした場合は共有を解除する
+
   if(editBagId){
     const bag=c.bags.find(b=>b.id===editBagId);
-    if(bag){ bag.name=name; bag.type=bagType; bag.tasks=bagTasks; bag.dow=dowToSave; bag.repeatType=repeatType; bag.repeatDates=repeatDatesToSave; bag.nthWeek=nthWeek; bag.nthDow=nthDow; bag.defaultTime=dtime; bag.defaultEndTime=dend; bag.showInLabel=showInLabel; bag.labelText=labelText; bag.labelOrder=labelOrder; bag.allowFree=allowFree; bag.onlyDate=''; bag.colorIndex=bagColorIndex; bag.vacationPeriodId=vacationPeriodId; }
+    if(bag){ Object.assign(bag, contentFields); bag.onlyDate=''; bag.shareGroupId=shareGroupId; }
   } else {
-    c.bags.push({id:Date.now().toString(),name,type:bagType,tasks:bagTasks,enabled:true,dow:dowToSave,repeatType,repeatDates:repeatDatesToSave,nthWeek,nthDow,defaultTime:dtime,defaultEndTime:dend,timeByDate:{},endByDate:{},completedByDate:{},showInLabel,labelText,labelOrder,allowFree,colorIndex:bagColorIndex,vacationPeriodId});
+    c.bags.push({id:Date.now().toString(), ...contentFields, enabled:true, timeByDate:{}, endByDate:{}, completedByDate:{}, shareGroupId});
+  }
+  // 兄弟共有：選ばれている他の子どもにも、同じ内容で存在させる(既にあれば内容を同期、無ければ新規作成)。
+  // チェックを外された子どもからは、そのカバンをゴミ箱へ移して取り除く。
+  if(shareGroupId){
+    data.children.forEach(child=>{
+      if(!child.bags) child.bags=[];
+      const existing = child.bags.find(b=>b.shareGroupId===shareGroupId);
+      if(bagSelectedChildIds.includes(child.id)){
+        if(existing){ Object.assign(existing, contentFields); existing.onlyDate=''; }
+        else { child.bags.push({id:Date.now().toString()+'-'+child.id, ...contentFields, enabled:true, timeByDate:{}, endByDate:{}, completedByDate:{}, shareGroupId}); }
+      } else if(existing){
+        moveBagsToTrash(child, [existing]);
+        child.bags = child.bags.filter(b=>b.id!==existing.id);
+      }
+    });
+  } else if(bagShareGroupId){
+    // 元は共有していたが、今回1人だけに絞った：他の子どもからは取り除く(今編集していた子どもの分だけ残す)
+    data.children.forEach(child=>{
+      if(child.id===c.id) return;
+      const existing=(child.bags||[]).find(b=>b.shareGroupId===bagShareGroupId);
+      if(existing){ moveBagsToTrash(child, [existing]); child.bags=child.bags.filter(b=>b.id!==existing.id); }
+    });
   }
   save(); tick(); document.getElementById('bag-modal').classList.remove('open'); returnFromBagModal(vacationPeriodId);
 });
@@ -8979,6 +9063,9 @@ document.getElementById('panels-collapse-btn').addEventListener('click',()=>{
   if(collapseBtnDragMoved) return; // ドラッグの直後のクリックは無視(誤操作防止)
   panelsCollapsed=!panelsCollapsed;
   applyPanelsCollapsed();
+  // パネルの折りたたみでタイムラインの使える高さ/幅が変わるため、
+  // 「今やること」カード等の位置を古いサイズのまま取り残さないよう、少し待ってから再計算する。
+  setTimeout(renderTimeline, 260);
 });
 // 収納ボタンをドラッグして、「やりたいこと」パネルの見える大きさ（縦向き＝高さ／横向き＝幅）を調整する
 let collapseBtnDragMoved=false;
@@ -9971,17 +10058,45 @@ renderParentMessage();
     const statusEl = document.getElementById('gcal-status');
     const connectBtn = document.getElementById('gcal-connect-btn');
     const fetchBtn = document.getElementById('gcal-fetch-btn');
+    const assignWrap = document.getElementById('gcal-color-assign-wrap');
     if(!statusEl || !connectBtn || !fetchBtn) return;
     const connected = !!googleCalendarAccessToken;
     if(connected){
       statusEl.textContent = '✅ Googleカレンダーと つながっています(このページを開いている間だけ)';
       connectBtn.textContent = '🔗 つなぎ直す';
       fetchBtn.style.display = '';
+      if(assignWrap) assignWrap.style.display = '';
+      renderGcalColorAssignList();
     } else {
       statusEl.textContent = 'まだ Googleカレンダーと つながっていません。';
       connectBtn.textContent = '🔗 Googleカレンダーと 連携する';
       fetchBtn.style.display = 'none';
+      if(assignWrap) assignWrap.style.display = 'none';
     }
+  }
+
+  const GCAL_COLOR_NAME_MAP = { '1':'ラベンダー','2':'セージ','3':'ぶどう','4':'フラミンゴ','5':'バナナ','6':'みかん','7':'ピーコック','8':'グラファイト','9':'ブルーベリー','10':'バジル','11':'トマト' };
+
+  // 「どの子どもが、どの色？」の設定一覧を描画する。子どもごとのGoogleカレンダー色ID(child.gcalColorId)を編集する。
+  function renderGcalColorAssignList(){
+    const wrap = document.getElementById('gcal-color-assign-list');
+    const appData = window.getAppData ? window.getAppData() : null;
+    if(!wrap || !appData || !Array.isArray(appData.children)) return;
+    wrap.innerHTML = appData.children.map((c,i)=>{
+      const options = ['<option value="">（わりあて なし）</option>']
+        .concat(Object.keys(GCAL_COLOR_NAME_MAP).map(id=>`<option value="${id}" ${c.gcalColorId===id?'selected':''}>${GCAL_COLOR_NAME_MAP[id]}</option>`));
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="flex-shrink:0;font-weight:800;font-size: var(--fs-sm);min-width:60px">${c.name}</span>
+        <select data-gcal-child-idx="${i}" class="kid-select" style="flex:1">${options.join('')}</select>
+      </div>`;
+    }).join('');
+    wrap.querySelectorAll('select[data-gcal-child-idx]').forEach(sel=>{
+      sel.addEventListener('change', ()=>{
+        const idx = Number(sel.dataset.gcalChildIdx);
+        appData.children[idx].gcalColorId = sel.value || null;
+        if(window.save) window.save();
+      });
+    });
   }
 
   async function connectGoogleCalendar(){
@@ -9997,16 +10112,19 @@ renderParentMessage();
     }
   }
 
-  // 今から2ヶ月先までの予定を取得して、プレビュー表示する(この段階ではカバン化はまだしない)
+  let lastFetchedGcalEvents = []; // 直近に取得した予定一覧(このページを開いている間だけ保持。取り込みボタンで使う)
+
+  // 今から2ヶ月先までの予定を取得して、プレビュー表示する
   async function fetchGoogleCalendarPreview(){
     const btn = document.getElementById('gcal-fetch-btn');
     const listEl = document.getElementById('gcal-event-list');
+    const importBtn = document.getElementById('gcal-import-btn');
     if(!googleCalendarAccessToken){ window.showToast && window.showToast('先に 連携してください'); return; }
     if(btn){ btn.disabled = true; btn.textContent = '📥 とりこんでいます…'; }
     try{
       const timeMin = new Date().toISOString();
       const timeMax = new Date(Date.now() + 60*24*60*60*1000).toISOString();
-      const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime&maxResults=50`;
+      const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime&maxResults=100`;
       const res = await fetch(url, { headers: { Authorization: 'Bearer ' + googleCalendarAccessToken } });
       if(res.status === 401){
         // トークン失効。連携し直しが必要なことを伝える(自動更新は今回の段階では未対応)
@@ -10018,18 +10136,19 @@ renderParentMessage();
       if(!res.ok) throw new Error('Googleからの応答エラー(' + res.status + ')');
       const json = await res.json();
       const events = (json.items||[]).filter(ev => ev.status !== 'cancelled');
+      lastFetchedGcalEvents = events;
+      if(importBtn) importBtn.style.display = events.length ? '' : 'none';
       if(!listEl) return;
       if(!events.length){
         listEl.innerHTML = '<p style="font-size: var(--fs-xs);color:var(--text-dim);margin:8px 0 0">これから2ヶ月以内の 予定は 見つかりませんでした。</p>';
         return;
       }
-      const colorNameMap = { '1':'ラベンダー','2':'セージ','3':'ぶどう','4':'フラミンゴ','5':'バナナ','6':'みかん','7':'ピーコック','8':'グラファイト','9':'ブルーベリー','10':'バジル','11':'トマト' };
-      listEl.innerHTML = `<p style="font-size: var(--fs-xs);color:var(--text-dim);margin:8px 0 6px">${events.length}件 見つかりました(プレビューのみ・まだカバンには なりません)</p>` +
+      listEl.innerHTML = `<p style="font-size: var(--fs-xs);color:var(--text-dim);margin:8px 0 6px">${events.length}件 見つかりました</p>` +
         events.map(ev=>{
           const start = ev.start && (ev.start.dateTime || ev.start.date);
           const dt = start ? new Date(start) : null;
           const dateLabel = dt ? `${dt.getMonth()+1}/${dt.getDate()}` + (ev.start.dateTime ? ` ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '(しゅうじつ)') : '?';
-          const colorLabel = ev.colorId ? (colorNameMap[ev.colorId]||('いろ'+ev.colorId)) : '(きほんの いろ)';
+          const colorLabel = ev.colorId ? (GCAL_COLOR_NAME_MAP[ev.colorId]||('いろ'+ev.colorId)) : '(きほんの いろ)';
           const recurLabel = ev.recurringEventId ? ' 🔁' : '';
           return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size: var(--fs-xs)">
             <span style="flex-shrink:0;color:var(--text-dim);font-weight:800;min-width:70px">${dateLabel}</span>
@@ -10040,7 +10159,91 @@ renderParentMessage();
     }catch(e){
       window.showToast && window.showToast('⚠️ 取得に失敗しました：' + e.message);
     }finally{
-      if(btn){ btn.disabled = false; btn.textContent = '📥 いま 予定を とりこむ（プレビュー）'; }
+      if(btn){ btn.disabled = false; btn.textContent = '📥 いま 予定を みる（プレビュー）'; }
+    }
+  }
+
+  // 直近に取得した予定のうち、子どもに割り当てた色と一致するものだけを、その子のカバンとして取り込む。
+  // 単発の予定は「日づけ指定(dates)」のカバン、繰り返しの予定(recurringEventId)は「毎週◯曜日」のカバンにする。
+  // 同じGoogleの予定からは1回だけ取り込む(bag.gcalEventKeyで重複防止)。Googleカレンダー側は一切書き換えない。
+  async function importGcalEventsAsBags(){
+    const btn = document.getElementById('gcal-import-btn');
+    const appData = window.getAppData ? window.getAppData() : null;
+    if(!appData || !Array.isArray(appData.children)) return;
+    const childrenWithColor = appData.children.filter(c=>c.gcalColorId);
+    if(!childrenWithColor.length){
+      window.showToast && window.showToast('先に「どの子どもが、どの色？」を 設定してください');
+      return;
+    }
+    if(!lastFetchedGcalEvents.length){
+      window.showToast && window.showToast('先に「いま 予定を みる」で 取得してください');
+      return;
+    }
+    if(btn){ btn.disabled = true; btn.textContent = '🎒 とりこんでいます…'; }
+    try{
+      // recurringEventIdでまとめる(単発は自分自身のidをキーにする＝グループ1件)
+      const groups = {};
+      lastFetchedGcalEvents.forEach(ev=>{
+        if(!ev.start || !ev.start.dateTime) return; // 終日の予定は今回は対象外(時刻が無いため)
+        const key = ev.recurringEventId || ev.id;
+        if(!groups[key]) groups[key] = [];
+        groups[key].push(ev);
+      });
+
+      let addedCount = 0;
+      Object.values(groups).forEach(group=>{
+        group.sort((a,b)=> new Date(a.start.dateTime) - new Date(b.start.dateTime));
+        const first = group[0];
+        const colorId = first.colorId || null;
+        if(!colorId) return; // 色が付いていない予定(基本の色)は対象外
+        const targetChild = childrenWithColor.find(c=>c.gcalColorId===colorId);
+        if(!targetChild) return; // どの子にも割り当てられていない色
+
+        const eventKey = first.recurringEventId || first.id; // 重複取り込み防止のキー
+        if(!targetChild.bags) targetChild.bags=[];
+        if(targetChild.bags.some(b=>b.gcalEventKey===eventKey)) return; // 取り込み済み
+
+        const startDt = new Date(first.start.dateTime);
+        const endDt = first.end && first.end.dateTime ? new Date(first.end.dateTime) : null;
+        const defaultTime = `${String(startDt.getHours()).padStart(2,'0')}:${String(startDt.getMinutes()).padStart(2,'0')}`;
+        const defaultEndTime = endDt ? `${String(endDt.getHours()).padStart(2,'0')}:${String(endDt.getMinutes()).padStart(2,'0')}` : '';
+
+        const isRecurring = !!first.recurringEventId;
+        const bag = {
+          id: 'gcal-' + eventKey + '-' + Date.now(),
+          name: (first.summary || 'Googleの よてい').slice(0,14),
+          type: 'on',
+          tasks: [],
+          defaultTime, defaultEndTime,
+          colorIndex: null,
+          gcalEventKey: eventKey, // 重複取り込み防止・取り込み元の目印
+        };
+        if(isRecurring){
+          // 見えている範囲で登場した曜日を全部拾う(週1回とは限らないため)
+          const dowSet = new Set(group.map(ev=> new Date(ev.start.dateTime).getDay()));
+          bag.repeatType = 'weekly';
+          bag.dow = [...dowSet];
+        } else {
+          bag.repeatType = 'dates';
+          bag.dow = [];
+          bag.repeatDates = [`${startDt.getFullYear()}-${String(startDt.getMonth()+1).padStart(2,'0')}-${String(startDt.getDate()).padStart(2,'0')}`];
+        }
+        if(window.migrateChild){ try{ window.migrateChild(targetChild); }catch(e){} }
+        targetChild.bags.push(bag);
+        addedCount++;
+      });
+
+      if(addedCount>0){
+        if(window.save) window.save();
+        if(window.tick) window.tick();
+        window.showToast && window.showToast(`🎒 ${addedCount}件を カバンとして とりこみました`);
+      } else {
+        window.showToast && window.showToast('新しく とりこめる 予定は ありませんでした(色の わりあて・重複取り込み済みを ご確認ください)');
+      }
+    }catch(e){
+      window.showToast && window.showToast('⚠️ 取り込みに失敗しました：' + e.message);
+    }finally{
+      if(btn){ btn.disabled = false; btn.textContent = '🎒 カバンとして とりこむ'; }
     }
   }
 
@@ -10048,6 +10251,8 @@ renderParentMessage();
   if(gcalConnectBtn) gcalConnectBtn.addEventListener('click', connectGoogleCalendar);
   const gcalFetchBtn = document.getElementById('gcal-fetch-btn');
   if(gcalFetchBtn) gcalFetchBtn.addEventListener('click', fetchGoogleCalendarPreview);
+  const gcalImportBtn = document.getElementById('gcal-import-btn');
+  if(gcalImportBtn) gcalImportBtn.addEventListener('click', importGcalEventsAsBags);
   renderGcalUI();
 
   // 保護者設定「データ」タブの見た目を、今の端末の役割に合わせて出し分ける
