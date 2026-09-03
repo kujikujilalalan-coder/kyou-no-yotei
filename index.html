@@ -2123,7 +2123,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v225・2026-08-22</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v226・2026-08-23</div>
     <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
     <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
@@ -8758,6 +8758,15 @@ document.getElementById('bag-save').addEventListener('click',()=>{
   if(dtime && !dend){ showToast('おわりの時刻も えらんでください（あとから決める場合は はじまりも空にしてください）'); return; }
   // 繰り返し方が「カレンダーで選ぶ」の時は、日づけを1つ以上えらぶ必要がある
   if(bagRepeatType==='dates' && !bagRepeatDates.length){ showToast('日づけを 1つ以上 えらんでください'); return; }
+  // 「どの子どもに表示するか」は、内部の記録ではなく、この瞬間に画面へ実際に表示されている
+  // チェックボックスの状態から直接読み取る(内部記録とのズレが起きる可能性自体を無くすため)。
+  // 子どもが1人しかいない家庭では、このチェックリスト自体が表示されない(常にその子だけ)。
+  const sharedCheckboxes = document.querySelectorAll('#bag-shared-checklist input[type="checkbox"]');
+  if(sharedCheckboxes.length){
+    bagSelectedChildIds = Array.from(sharedCheckboxes).filter(el=>el.checked).map(el=>el.dataset.childId);
+  } else {
+    bagSelectedChildIds = [getChild().id];
+  }
   if(!bagSelectedChildIds.length){ showToast('どの子どもに表示するか、1人以上えらんでください'); return; }
   const c=getChild(); if(!c.bags)c.bags=[];
   const showInLabel=document.getElementById('bag-show-label').checked;
