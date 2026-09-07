@@ -977,13 +977,15 @@ body.viewing-other-day #date-big { color: var(--accent); }
   z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px);
 }
 .modal-overlay.open { display: flex; }
-/* こども用の限定表示モード：⚙️を軽くタップした時、画面の見た目の設定だけを見せる(それ以外は隠す)。
-   長押し(openParent直呼び)の時はこのクラスを付けないので、今まで通り全部見える。 */
+/* こども用の限定表示モード：⚙️を軽くタップした時、画面の見た目の設定・ナイトモードだけを見せる(それ以外は隠す)。
+   どちらも「その端末自身」の設定(部屋の明るさ等)であり、保護者機で設定しても子機には反映されないため、
+   その端末で直接いじれる必要がある。長押し(openParent直呼び)の時はこのクラスを付けないので、今まで通り全部見える。 */
 #parent-modal.limited-mode #parent-tab-bar,
-#parent-modal.limited-mode [data-tab-group]:not([data-acc="display"]) {
+#parent-modal.limited-mode [data-tab-group]:not([data-acc="display"]):not([data-acc="night"]) {
   display: none !important;
 }
-#parent-modal.limited-mode [data-acc="display"] {
+#parent-modal.limited-mode [data-acc="display"],
+#parent-modal.limited-mode [data-acc="night"] {
   display: block !important;
 }
 .modal {
@@ -2123,7 +2125,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v226・2026-08-23</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v227・2026-08-23</div>
     <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
     <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
@@ -6646,12 +6648,12 @@ document.getElementById('parent-btn').addEventListener('click',()=>{
 // こども役割の端末向け：画面の見た目の設定だけを開く(限定表示モード)
 function openChildDisplaySettings(){
   updateZoomUI(); updateNowMarkerUI(); updateVerticalBandUI(); updateSoundUI();
-  updateWantPanelToggleUI(); updateWeekStartToggleUI();
+  updateWantPanelToggleUI(); updateWeekStartToggleUI(); updateNightUI();
   const modal=document.getElementById('parent-modal');
   modal.classList.add('limited-mode');
   showParentTab('child');
   document.querySelectorAll('#parent-modal .acc-section').forEach(sec=>{
-    if(sec.dataset.acc==='display') sec.classList.add('open');
+    if(sec.dataset.acc==='display' || sec.dataset.acc==='night') sec.classList.add('open');
   });
   modal.classList.add('open');
 }
