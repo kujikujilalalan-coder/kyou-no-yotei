@@ -977,6 +977,18 @@ body.viewing-other-day #date-big { color: var(--accent); }
   z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px);
 }
 .modal-overlay.open { display: flex; }
+/* 無操作時の省電力モード(2026-08-23)：背景を暗めに、影・ぼかしを簡略化、動き続けるアニメーションを止める。
+   タップした瞬間に全部元通りになるので、複雑な「復元」処理は不要。 */
+body.idle-power-save { background: #000; }
+body.idle-power-save #topbar, body.idle-power-save #main { filter: brightness(0.72); }
+body.idle-power-save *,
+body.idle-power-save *::before,
+body.idle-power-save *::after {
+  animation-play-state: paused !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
 /* こども用の限定表示モード：⚙️を軽くタップした時、画面の見た目の設定・ナイトモードだけを見せる(それ以外は隠す)。
    どちらも「その端末自身」の設定(部屋の明るさ等)であり、保護者機で設定しても子機には反映されないため、
    その端末で直接いじれる必要がある。長押し(openParent直呼び)の時はこのクラスを付けないので、今まで通り全部見える。 */
@@ -2125,7 +2137,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v227・2026-08-23</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v228・2026-08-23</div>
     <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
     <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
@@ -2427,7 +2439,41 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
 const EMOJIS = ['🌅','🌙','🍳','🥛','📚','✏️','🎒','🏫','🏠','⚽','🎮','🛁','😴','💤','❤️','✅'];
 const ON_COL='#4338CA', OFF_COL='#206679';
 
-// アプリ内トースト（ネイティブalertの代替）。非ブロックで数秒表示
+// ═══ 無操作時の省電力モード(2026-08-23) ═══
+// 一定時間(3分)タップ・スクロール等が無いと、電池を節約するモードに入る。
+// 画面に触れた瞬間、即座に通常表示へ戻す(復帰に手間がかからないものだけを対象にする方針)。
+const IDLE_POWER_SAVE_MS = 3*60*1000;
+let lastInteractionAt = Date.now();
+let isIdlePowerSave = false;
+function enterIdlePowerSave(){
+  if(isIdlePowerSave) return;
+  isIdlePowerSave = true;
+  document.body.classList.add('idle-power-save');
+  // Wake Lock(画面をつけっぱなしにする機能)を一旦手放す。次に触れた瞬間、applyKeepAwake()で取り直す。
+  if(_wakeLock){ try{ _wakeLock.release(); }catch(e){} _wakeLock=null; }
+  // 1分ごとの更新を、無操作時は5分ごとに間引く(保存・再描画の頻度そのものが下がる)
+  if(_tickIntervalId){ clearInterval(_tickIntervalId); _tickIntervalId=setInterval(tick, 5*60*1000); }
+}
+function exitIdlePowerSave(){
+  if(!isIdlePowerSave) return;
+  isIdlePowerSave = false;
+  document.body.classList.remove('idle-power-save');
+  applyKeepAwake(); // 「画面を消さない」設定がONなら、Wake Lockを取り直す
+  if(_tickIntervalId){ clearInterval(_tickIntervalId); _tickIntervalId=setInterval(tick, 60000); }
+  tick(); // 間引かれていた間の表示を、すぐ最新に戻す
+}
+function noteInteraction(){
+  lastInteractionAt = Date.now();
+  if(isIdlePowerSave) exitIdlePowerSave();
+}
+['pointerdown','keydown','wheel'].forEach(evt=>{
+  document.addEventListener(evt, noteInteraction, { passive: true });
+});
+setInterval(()=>{
+  if(!isIdlePowerSave && Date.now()-lastInteractionAt >= IDLE_POWER_SAVE_MS) enterIdlePowerSave();
+}, 15000);
+
+// トースト（ネイティブalertの代替）。非ブロックで数秒表示
 let _toastTimer=null;
 // トースト。onUndo を渡すと「もどす」ボタンが出る。
 // 片手操作では誤タップが避けられないため、破壊的な操作には必ず取り消しを付ける。
@@ -3328,6 +3374,7 @@ window.addEventListener('online', ()=>{ updateOfflineBadge(); showToast('🔌 �
 window.addEventListener('offline', ()=>{ updateOfflineBadge(); showToast('🔌 オフラインに なりました（へんこうは あとで おくられます）'); });
 // 起動時など：地域があれば天気を更新（1日1回）。失敗しても静かに無視（空の見た目は出る）
 async function refreshWeatherIfNeeded(){
+  if(isIdlePowerSave) return; // 無操作の省電力モード中は取得しない(次にtickが通常間隔に戻った時に自動で再開)
   const w=data.weather;
   if(!w || w.lat==null) return;
   const today=dateKey(new Date());
@@ -6176,6 +6223,7 @@ function playTimerSound(){
 }
 // 音のもと（共通）：周波数の並びを鳴らす
 function playTones(freqs, opts){
+  if(isIdlePowerSave) return; // 無操作の省電力モード中は鳴らさない(次に触れた瞬間、普通に鳴る状態へ自動的に戻る)
   opts=opts||{};
   try{
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
@@ -9616,9 +9664,10 @@ maybeShowInstallBar();
 initAutoBackup();   // データが勝手に消されないようにし、前に選んだ保存先を復元する
 welcomeBackIfNeeded();  // 久しぶりでも責めずに迎える（何日空いたかは言わない）
 renderParentMessage();
+let _tickIntervalId=null;
 (function scheduleMinute(){
   const now=new Date(); const ms=(60-now.getSeconds())*1000-now.getMilliseconds();
-  setTimeout(()=>{tick();setInterval(tick,60000);},ms);
+  setTimeout(()=>{tick();_tickIntervalId=setInterval(tick,60000);},ms);
 })();
 </script>
 
