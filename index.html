@@ -2137,7 +2137,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v228・2026-08-23</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v229・2026-08-23</div>
     <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
     <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
@@ -6324,10 +6324,12 @@ function renderWantList(){
   if(!wantList.length){
     // やりたいことが1つも無い時は、パネルの表示自体を消して、タイムラインの幅を広げる。
     // 何か追加された瞬間、自動でパネルを元に戻す(下のelse側)。
-    if(!panelsCollapsed){ panelsCollapsed=true; applyPanelsCollapsed(); setTimeout(renderTimeline, 260); }
+    // ただし、ユーザーが手動でつまみを操作した後は、この自動処理は行わない
+    // (でないと、せっかく手動で開いても、次の再描画で勝手にまた畳まれてしまい「開けなくなる」バグになる)。
+    if(!wantPanelManuallyToggled && !panelsCollapsed){ panelsCollapsed=true; applyPanelsCollapsed(); reflowAfterPanelChange(); }
     return;
   }
-  if(panelsCollapsed){ panelsCollapsed=false; applyPanelsCollapsed(); setTimeout(renderTimeline, 260); }
+  if(!wantPanelManuallyToggled && panelsCollapsed){ panelsCollapsed=false; applyPanelsCollapsed(); reflowAfterPanelChange(); }
   wantList.forEach((item,i)=>{
     const row=document.createElement('div'); row.className='want-item';
     row.innerHTML=`<span class="want-name">${item.name}</span>
@@ -9110,6 +9112,13 @@ updateFullscreenBtn();
 
 // ── 下・横のパネル（やりたいこと／まだ時間がきまってないこと）を一時的にたたむ ──
 let panelsCollapsed=false;
+// パネルの表示切替(折りたたみ等)の直後、レイアウトが確定してから再計算する共通処理。
+// 以前はsetTimeout(260ms)で決め打ちしていたが、その間は古い位置のまま「ズレて」見えてしまっていた。
+// ブラウザが実際にレイアウトを確定させた直後(次の描画の、さらに次のフレーム)を狙うことで、
+// 目に見えるズレの時間をほぼ無くす。
+function reflowAfterPanelChange(){
+  requestAnimationFrame(()=>requestAnimationFrame(renderTimeline));
+}
 function applyPanelsCollapsed(){
   document.getElementById('main').classList.toggle('panels-collapsed', panelsCollapsed);
   document.getElementById('untimed-tray').classList.toggle('tray-collapsed', panelsCollapsed);
@@ -9118,13 +9127,15 @@ function applyPanelsCollapsed(){
   btn.textContent = panelsCollapsed ? '🔼' : '🔽';
   btn.title = panelsCollapsed ? 'らんを もとに もどす' : 'ドラッグで 大きさを かえる／タップで たたむ';
 }
+let wantPanelManuallyToggled=false; // 手動でつまみを操作した後は、自動折りたたみ(空の時に自動で畳む)を優先させない
 document.getElementById('panels-collapse-btn').addEventListener('click',()=>{
   if(collapseBtnDragMoved) return; // ドラッグの直後のクリックは無視(誤操作防止)
+  wantPanelManuallyToggled=true;
   panelsCollapsed=!panelsCollapsed;
   applyPanelsCollapsed();
   // パネルの折りたたみでタイムラインの使える高さ/幅が変わるため、
   // 「今やること」カード等の位置を古いサイズのまま取り残さないよう、少し待ってから再計算する。
-  setTimeout(renderTimeline, 260);
+  reflowAfterPanelChange();
 });
 // 収納ボタンをドラッグして、「やりたいこと」パネルの見える大きさ（縦向き＝高さ／横向き＝幅）を調整する
 let collapseBtnDragMoved=false;
