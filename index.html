@@ -989,6 +989,8 @@ body.idle-power-save *::after {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+/* 次のやることまで1時間以上(学校・習い事など、家を空けている可能性が高い)の時は、より深く省電力にする(2026-09-26) */
+body.idle-power-save-deep #topbar, body.idle-power-save-deep #main { filter: brightness(0.5); }
 /* こども用の限定表示モード：⚙️を軽くタップした時、画面の見た目の設定・ナイトモードだけを見せる(それ以外は隠す)。
    どちらも「その端末自身」の設定(部屋の明るさ等)であり、保護者機で設定しても子機には反映されないため、
    その端末で直接いじれる必要がある。長押し(openParent直呼び)の時はこのクラスを付けないので、今まで通り全部見える。 */
@@ -2137,7 +2139,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v229・2026-08-23</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v231・2026-09-26</div>
     <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
     <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
@@ -2439,25 +2441,75 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
 const EMOJIS = ['🌅','🌙','🍳','🥛','📚','✏️','🎒','🏫','🏠','⚽','🎮','🛁','😴','💤','❤️','✅'];
 const ON_COL='#4338CA', OFF_COL='#206679';
 
-// ═══ 無操作時の省電力モード(2026-08-23) ═══
+// ═══ 無操作時の省電力モード(2026-08-23、2026-09-26に状況判定を追加) ═══
 // 一定時間(3分)タップ・スクロール等が無いと、電池を節約するモードに入る。
 // 画面に触れた瞬間、即座に通常表示へ戻す(復帰に手間がかからないものだけを対象にする方針)。
+// ただし「今まさにやることがある(オンタイムで未完了)」時は、時計代わりに見る用途を優先し、
+// 無操作でも省電力に入らない。学校・授業のような長時間の外出中は、そもそも誰も触らないので
+// 無操作タイマーだけで自然に省電力へ入る(出発前にチェックし終えている前提)。
+// ナイトモード時間帯は、上記の判定を待たず即座に省電力へ入る(夜間に見る必要は基本的に無いため)。
 const IDLE_POWER_SAVE_MS = 3*60*1000;
 let lastInteractionAt = Date.now();
 let isIdlePowerSave = false;
+let isIdlePowerSaveDeep = false;
+
+// 「今」の瞬間、オンタイムで・やることを持ち・まだ完了していないカバンが1件でもあるか。
+// 時間切れでも未完了なら居座り扱いにする(renderTimeline()の「今」判定と同じ考え方)。
+function hasUnfinishedActiveTaskNow(){
+  if(!isViewingToday() || editMode) return false;
+  const cur=nowMin();
+  const sorted=getTodayEvents();
+  const sleep=toMin(getChild().sleepTime||'21:00');
+  function evEndTmp(i){const ev=sorted[i];if(ev.end)return toMin(ev.end);return i<sorted.length-1?toMin(sorted[i+1].time):sleep;}
+  for(let i=0;i<sorted.length;i++){
+    const ev=sorted[i];
+    if(ev._completedAt!=null) continue;
+    if(ev.type!=='on' || !ev.tasks || ev.tasks.length===0) continue;
+    const s=toMin(ev.time), e=evEndTmp(i);
+    if(cur>=s && cur<e) return true; // 進行中で未完了
+  }
+  for(let i=0;i<sorted.length;i++){
+    const ev=sorted[i];
+    if(ev._completedAt!=null) continue;
+    if(ev.type!=='on' || !ev.tasks || ev.tasks.length===0) continue;
+    if(!ev.end) continue;
+    if(cur>=toMin(ev.end)) return true; // 時間切れでも未完了なら居座り扱い
+  }
+  return false;
+}
+
+// 次に「オンタイムでやることのある」カバンが始まるまでの分数(今日中に無ければInfinity)。
+// 空白が長い(学校・習い事など、家を空けている可能性が高い)ほど、省電力を深くする判定に使う。
+function minutesToNextTask(){
+  if(!isViewingToday()) return Infinity;
+  const cur=nowMin();
+  const sorted=getTodayEvents();
+  let best=Infinity;
+  sorted.forEach(ev=>{
+    if(ev.type!=='on' || !ev.tasks || ev.tasks.length===0) return;
+    const s=toMin(ev.time);
+    if(s>cur && s-cur<best) best=s-cur;
+  });
+  return best;
+}
+
 function enterIdlePowerSave(){
   if(isIdlePowerSave) return;
   isIdlePowerSave = true;
+  // 次のやることまでの空白が1時間以上(学校・習い事など)なら、より深い省電力にする
+  isIdlePowerSaveDeep = minutesToNextTask() >= 60;
   document.body.classList.add('idle-power-save');
+  document.body.classList.toggle('idle-power-save-deep', isIdlePowerSaveDeep);
   // Wake Lock(画面をつけっぱなしにする機能)を一旦手放す。次に触れた瞬間、applyKeepAwake()で取り直す。
   if(_wakeLock){ try{ _wakeLock.release(); }catch(e){} _wakeLock=null; }
-  // 1分ごとの更新を、無操作時は5分ごとに間引く(保存・再描画の頻度そのものが下がる)
-  if(_tickIntervalId){ clearInterval(_tickIntervalId); _tickIntervalId=setInterval(tick, 5*60*1000); }
+  // 1分ごとの更新を、無操作時は間引く(保存・再描画の頻度そのものが下がる)。深い省電力時はさらに間引く。
+  if(_tickIntervalId){ clearInterval(_tickIntervalId); _tickIntervalId=setInterval(tick, (isIdlePowerSaveDeep?10:5)*60*1000); }
 }
 function exitIdlePowerSave(){
   if(!isIdlePowerSave) return;
   isIdlePowerSave = false;
-  document.body.classList.remove('idle-power-save');
+  isIdlePowerSaveDeep = false;
+  document.body.classList.remove('idle-power-save','idle-power-save-deep');
   applyKeepAwake(); // 「画面を消さない」設定がONなら、Wake Lockを取り直す
   if(_tickIntervalId){ clearInterval(_tickIntervalId); _tickIntervalId=setInterval(tick, 60000); }
   tick(); // 間引かれていた間の表示を、すぐ最新に戻す
@@ -2470,7 +2522,15 @@ function noteInteraction(){
   document.addEventListener(evt, noteInteraction, { passive: true });
 });
 setInterval(()=>{
-  if(!isIdlePowerSave && Date.now()-lastInteractionAt >= IDLE_POWER_SAVE_MS) enterIdlePowerSave();
+  if(isIdlePowerSave){
+    // 状況が変わったら、操作を待たずに自動で通常表示へ戻す
+    // (ナイトモードが明けた／今まさにやることが出てきた、のどちらか)
+    if(!inNightWindow() && hasUnfinishedActiveTaskNow()) exitIdlePowerSave();
+    return;
+  }
+  if(inNightWindow()){ enterIdlePowerSave(); return; } // ナイトモード中は無操作タイマーを待たず即座に
+  if(hasUnfinishedActiveTaskNow()) return; // 今まさにやることがある間は省電力に入らない
+  if(Date.now()-lastInteractionAt >= IDLE_POWER_SAVE_MS) enterIdlePowerSave();
 }, 15000);
 
 // トースト（ネイティブalertの代替）。非ブロックで数秒表示
@@ -6093,7 +6153,16 @@ async function applyKeepAwake(){
   }catch(e){ _wakeLock=null; }
 }
 // 前面に戻ったら取り直す（OSが解除するため）
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') applyKeepAwake(); });
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){
+    applyKeepAwake();
+    // 他アプリに切り替えていた／画面ロックしていた後に戻ってきた時、
+    // 「きょう・今の時間」へ合わせ直す(離れていた間ずっと同じ場所・別の日を見せ続けないため)。
+    userScrolledAway=false;
+    if(displayDayOffset!==0){ displayDayOffset=0; }
+    tick();
+  }
+});
 
 // ═══ ナイトモード ═══
 let _nightShiftTimer=null, _nightWakeTimer=null, _nightTempOff=false;
