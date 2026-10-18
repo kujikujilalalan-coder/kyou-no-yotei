@@ -351,9 +351,10 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .now-tasks { padding: 14px 22px 8px; }
 .now-task-item {
   display: flex; align-items: center; gap: 14px;
-  padding: 18px 18px; background: var(--surface); border: 3px solid var(--border);
-  border-radius: var(--r-md); margin-bottom: 10px; cursor: pointer;
-  min-height: 60px; /* タップ最低高さ保証 */ -webkit-tap-highlight-color: rgba(0,0,0,0.06);
+  padding: 12px 16px; background: var(--surface); border: 3px solid var(--border);
+  border-radius: var(--r-md); margin-bottom: 6px; cursor: pointer;
+  min-height: 52px; /* タップ最低高さ保証(44px基準＋余裕8px)。
+    以前は60px＋間隔10pxで、スマホでは7個中5個しか見えなかった */ -webkit-tap-highlight-color: rgba(0,0,0,0.06);
   user-select: none;
   position: relative; overflow: hidden; /* 波紋を内側で切る */
   transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), opacity 0.28s, border-color 0.2s;
@@ -436,6 +437,8 @@ body.viewing-other-day #date-big { color: var(--accent); }
 .now-free-num { font-size: var(--fs-2xl); font-weight: 900; font-variant-numeric: tabular-nums; }
 
 .now-complete-wrap { padding: 6px 22px 22px; }
+/* 進捗バー(まだ終わっていない時)は主役ではないので、周りの余白も控えめにする */
+.now-complete-wrap:has(.not-ready) { padding: 4px 14px 8px; }
 .now-complete-btn {
   width: 100%; padding: 18px; border: none; border-radius: var(--r-lg);
   font-size: var(--fs-xl); font-weight: 900; font-family: inherit; cursor: pointer;
@@ -447,6 +450,10 @@ body.viewing-other-day #date-big { color: var(--accent); }
   background: var(--surface2); color: var(--text-dim); cursor: default;
   position: relative; overflow: hidden; border: 2px dashed var(--border);
   box-shadow: none;
+  /* 「0 / 7 おわった」は押すボタンではなく進捗の表示なので、
+     fs-xl＋padding18pxだとカードの幅(199px)に収まらず2〜3行に折り返して69pxも使っていた。
+     1行に収めて、そのぶんをやることリストに回す(2026-10-18) */
+  font-size: var(--fs-md); padding: 11px 10px; white-space: nowrap;
 }
 .now-complete-btn.not-ready .ncb-fill {
   position: absolute; left: 0; top: 0; bottom: 0;
@@ -2284,7 +2291,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v241・2026-10-18</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v242・2026-10-18</div>
     <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
     <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
@@ -4712,7 +4719,7 @@ function buildTaskCard(ev, isOvertime){
   const tasks=(ev.tasks||[]);
   let tasksHtml='<div class="now-tasks" style="padding:4px 0">';
   tasks.forEach((t,ti)=>{
-    tasksHtml+=`<div class="now-task-item ${t.done?'done':''}" data-ti="${ti}" style="padding:11px 13px;gap:10px;margin-bottom:8px"><div class="now-task-check" style="width:28px;height:28px">${t.done?'✓':''}</div><div class="now-task-name" style="font-size: var(--fs-lg)">${t.name}</div></div>`;
+    tasksHtml+=`<div class="now-task-item ${t.done?'done':''}" data-ti="${ti}" style="padding:9px 12px;gap:10px;margin-bottom:6px;min-height:52px"><div class="now-task-check" style="width:28px;height:28px">${t.done?'✓':''}</div><div class="now-task-name" style="font-size: var(--fs-lg)">${t.name}</div></div>`;
   });
   tasksHtml+='</div>';
 
@@ -4730,7 +4737,7 @@ function buildTaskCard(ev, isOvertime){
   }
 
   const overtimeTag = isOvertime
-    ? `<div style="font-size: var(--fs-sm);font-weight:900;color:#fff;background:var(--danger);display:inline-block;padding:3px 12px;border-radius: var(--r-md);margin-bottom:6px">⏰ じかんが すぎたよ</div>`
+    ? `<div style="font-size: var(--fs-sm);font-weight:900;color:#fff;background:var(--danger);display:inline-block;padding:3px 12px;border-radius: var(--r-md);margin-bottom:6px;white-space:nowrap;max-width:100%;overflow:hidden">⏰ じかんが すぎたよ</div>`
     : '';
   const skipBtnHtml = isOvertime
     ? `<button type="button" id="overtime-skip-btn" style="display:block;width:auto;margin:8px auto 0;padding:6px 16px;min-height:44px;border-radius: var(--r-md);border:1.5px solid var(--danger);background:#fff;color:var(--danger);font-weight:800;font-size: var(--fs-xs);cursor:pointer">😴 きょうは とばす</button>`
@@ -4740,9 +4747,9 @@ function buildTaskCard(ev, isOvertime){
       <div style="padding:14px 18px 0;flex-shrink:0;text-align:center">
         ${overtimeTag}
         <div class="now-card-name" style="font-size: var(--fs-xl);margin-bottom:10px">${ev.fromChild?'⭐ ':''}${ev.name}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:8px">${remainPieHTML(remainFrac, remainMin, borderColor, 120)}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:8px">${remainPieHTML(remainFrac, remainMin, borderColor, 84)}</div>
       </div>
-      <div class="now-scroll-area" style="flex:1;min-height:0;overflow-y:auto;padding:0 18px 74px">${tasksHtml}</div>
+      <div class="now-scroll-area" style="flex:1;min-height:0;overflow-y:auto;padding:0 18px 10px">${tasksHtml}</div>
       <div style="padding:0 18px 14px">${btnHtml}${skipBtnHtml}</div>
     </div>`;
 }
@@ -4754,7 +4761,7 @@ function buildUntimedPromoCard(ev){
   const tasks=(ev.tasks||[]);
   let tasksHtml='<div class="now-tasks" style="padding:4px 0">';
   tasks.forEach((t,ti)=>{
-    tasksHtml+=`<div class="now-task-item ${t.done?'done':''}" data-ti="${ti}" style="padding:11px 13px;gap:10px;margin-bottom:8px"><div class="now-task-check" style="width:28px;height:28px">${t.done?'✓':''}</div><div class="now-task-name" style="font-size: var(--fs-lg)">${t.name}</div></div>`;
+    tasksHtml+=`<div class="now-task-item ${t.done?'done':''}" data-ti="${ti}" style="padding:9px 12px;gap:10px;margin-bottom:6px;min-height:52px"><div class="now-task-check" style="width:28px;height:28px">${t.done?'✓':''}</div><div class="now-task-name" style="font-size: var(--fs-lg)">${t.name}</div></div>`;
   });
   tasksHtml+='</div>';
 
@@ -4778,7 +4785,7 @@ function buildUntimedPromoCard(ev){
           <div class="now-card-name" style="font-size: var(--fs-xl)">${ev.fromChild?'⭐ ':''}${ev.name}</div>
         </div>
       </div>
-      <div class="now-scroll-area" style="flex:1;min-height:0;overflow-y:auto;padding:0 18px 74px">${tasksHtml}</div>
+      <div class="now-scroll-area" style="flex:1;min-height:0;overflow-y:auto;padding:0 18px 10px">${tasksHtml}</div>
       <div style="padding:0 18px 14px">${btnHtml}
         <button type="button" id="untimed-promo-settime" style="width:100%;margin-top:8px;padding:12px;min-height:44px;border-radius: var(--r-md);border:2px solid var(--text-dim);background:#fff;color:var(--text-dim);font-weight:900;font-size: var(--fs-sm);cursor:pointer">⏰ じかんを きめる</button>
       </div>
