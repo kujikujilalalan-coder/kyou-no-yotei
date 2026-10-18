@@ -2,7 +2,10 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- viewport-fit=cover：ノッチ/ホームバーのある端末でも画面の端まで使う。
+     そのぶん、端に置く要素(ヘッダー・パネル・⚡タブ・モーダルのボタン列)には
+     env(safe-area-inset-*) で余白を足して、指が届かない・隠れるのを防ぐ -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>きょうのよてい</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -71,7 +74,10 @@
   --soil:       #63462c;              /* 木を育てる演出の土。CTA/報酬と同じ暖色系だが彩度を落とした低彩度の茶色 */
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+/* height:100% は環境によって「アドレスバーを含む高さ」になり、下がはみ出す。
+   dvh(いま実際に見えている高さ)で上書きする。dvh非対応の古い環境では100%のまま動く */
 html, body { width: 100%; height: 100%; overflow: hidden; }
+html, body { height: 100dvh; }
 body {
   background: var(--bg);
   color: var(--text);
@@ -84,11 +90,20 @@ body {
   background: var(--surface); border-bottom: 3px solid var(--border);
   display: flex; flex-direction: column; padding: 8px 26px; gap: 4px; flex-shrink: 0;
   position: relative;
+  /* ノッチ・ステータスバーの下に潜らないようにする(ない端末では今までと同じ値のまま) */
+  padding-top: max(8px, env(safe-area-inset-top));
+  padding-left: max(26px, env(safe-area-inset-left));
+  padding-right: max(26px, env(safe-area-inset-right));
 }
 #topbar-row1, #topbar-row2 { display: flex; align-items: center; gap: 8px; min-height: 38px; }
-.topbar-left { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
+/* 日付送り＋日付と、いまの時刻チップの並び。
+   どの画面幅でも「収まらない時は折り返す」を既定にしておく。
+   以前はスマホ幅(480px以下)だけの対策だったため、481〜767pxの端末(Surface Duo等)では
+   少し長い日付で時計が画面の外へ押し出される余地が残っていた */
+.topbar-left { display: flex; align-items: center; gap: 18px; flex-shrink: 0; flex-wrap: wrap; row-gap: 4px; min-width: 0; }
+#date-nav { min-width: 0; }
 .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto; }
-#date-big { font-size: var(--fs-2xl); color: var(--text); font-weight: 900; white-space: nowrap; }
+#date-big { font-size: var(--fs-2xl); color: var(--text); font-weight: 900; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 #weather-badge { display: flex; align-items: center; gap: 4px; font-size: var(--fs-md); font-weight: 800; color: var(--text-dim); margin-left: 6px; }
 #offline-badge {
   display: flex; align-items: center; gap: 4px; margin-left: 6px;
@@ -151,10 +166,16 @@ body.viewing-other-day #untimed-tray { filter: grayscale(0.55) opacity(0.82); tr
 body.viewing-other-day #date-big { color: var(--accent); }
 
 /* ── MAIN ── */
-#main { flex: 1; display: grid; grid-template-columns: 1fr var(--want-panel-w, 250px); min-height: 0; position: relative; }
+/* grid-template-rows を minmax(0,1fr) で必ず固定する。
+   これが無いと行の高さが「中身の高さ」で決まるため、やりたいことが増えると
+   行ごと画面の高さを超えて伸び、タイムラインと時間未定トレイが画面外へ押し出される
+   (横向きで5件以上で発生。html/bodyがoverflow:hiddenなのでスクロールでも戻せない) */
+#main { flex: 1; display: grid; grid-template-columns: 1fr var(--want-panel-w, 250px); grid-template-rows: minmax(0, 1fr); min-height: 0; position: relative; }
 #main.panels-collapsed { grid-template-columns: 1fr 0px; }
 #main.want-panel-disabled { grid-template-columns: 1fr !important; grid-template-rows: 1fr !important; }
 #main.want-panel-disabled #right-panel, #main.want-panel-disabled #panels-collapse-btn { display: none !important; }
+/* パネルを出さない設定では、時間未定トレイが画面の下端に接する */
+#main.want-panel-disabled #untimed-tray { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
 #main.panels-collapsed #right-panel { padding: 0; border: none; }
 #left-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
@@ -242,6 +263,19 @@ body.viewing-other-day #date-big { color: var(--accent); }
    基準値はスマホ幅（最も狭い＝カード幅273px）に合わせ、画面が広いほど大きくする。
    各値は「12文字の長い名前でも省略されずに収まる」ことを実測して決めた上限より十分内側に設定。 */
 .tl-band-name { font-size: var(--fs-lg); font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 大きい字では収まらない帯用：折り返して名前を最後まで見せる。
+   .tl-band-name-mid はふつうの細さ(タブレットのレール等)、
+   .tl-band-name-narrow は極端に細い時(スマホのレール・帯が3分割された時など)。 */
+.tl-band-name-mid {
+  font-size: var(--fs-sm); font-weight: 800; line-height: 1.2;
+  white-space: normal; overflow-wrap: anywhere; word-break: break-all;
+  overflow: hidden; max-height: 100%;
+}
+.tl-band-name-narrow {
+  font-size: var(--fs-xs); font-weight: 800; line-height: 1.15;
+  white-space: normal; overflow-wrap: anywhere; word-break: break-all;
+  overflow: hidden; max-height: 100%;
+}
 /* 重なり帯の縦書きモード（writing-mode: vertical-rl / W3C CSS Writing Modes Level 3） */
 .tl-band-name-vertical {
   writing-mode: vertical-rl;
@@ -547,8 +581,12 @@ body.viewing-other-day #date-big { color: var(--accent); }
 #right-panel {
   background: var(--surface); border-left: 3px solid var(--border);
   display: flex; flex-direction: column; overflow: visible; position: relative;
+  min-height: 0; /* グリッド行からはみ出して伸びないようにする(はみ出すとタイムラインが画面外へ出る) */
+  /* 横向きではこのパネルが画面の右端に接するので、角丸・ジェスチャー領域のぶん余白を足す */
+  padding-right: env(safe-area-inset-right);
 }
-#right-panel-scroll { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+/* やりたいことが増えた時は、パネルごと伸びるのではなくこの中だけスクロールさせる */
+#right-panel-scroll { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; }
 /* 収納ボタン：横向き＝左境目の中央、縦向き＝上境目の中央 */
 #panels-collapse-btn {
   position: absolute; z-index: 20;
@@ -558,8 +596,12 @@ body.viewing-other-day #date-big { color: var(--accent); }
   display: flex; align-items: center; justify-content: center; font-family: inherit;
   box-shadow: none; transition: background 0.2s; opacity: 0.7;
 }
+/* 見た目は6pxの細い線だが、押せる範囲は44px確保する(Apple HIG)。
+   右側(やりたいことパネル側)へ広げて44pxにする: 6+11+27=44px。
+   パネル側は境界線3px＋リストの余白14pxの内側に収まるので、やりたいことの項目と取り合いにならない。
+   左側(タイムライン側)は「いまやること」カードと重ならないよう-11pxのまま変えない */
 #panels-collapse-btn::before {
-  content: ''; position: absolute; top: -18px; bottom: -18px; left: -11px; right: -19px;
+  content: ''; position: absolute; top: -18px; bottom: -18px; left: -11px; right: -27px;
 }
 #panels-collapse-btn:active, #panels-collapse-btn.active { background: var(--text-dim); opacity: 0.9; }
 /* 縦向き時：上境目に横長の細いつまみとして出す */
@@ -570,10 +612,14 @@ body.viewing-other-day #date-big { color: var(--accent); }
 /* 畳んだ時：パネル幅が0になるので、パネル基準(left:-16px)のままだと画面外にはみ出す。画面の右端基準に切り替える */
 #main.panels-collapsed #panels-collapse-btn { left: auto; right: 8px; }
 #main.panels-collapsed #panels-collapse-btn.vertical-mode { left: 50%; right: auto; top: -44px; }
+/* 横向きではパネル幅が250px固定なので、見出し＋ボタン類(ずかん・そだてノート・＋)が1行に収まらず
+   「＋」ボタンが右に21px切れていた。収まらない時だけ折り返して、ボタンを必ず画面内に収める */
 #want-header {
   padding: 8px 16px; border-bottom: 2px solid var(--border); flex-shrink: 0;
   display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 8px;
+  flex-wrap: wrap; row-gap: 6px;
 }
+#want-header #want-title { min-width: 0; }
 #want-title { font-size: var(--fs-md); font-weight: 900; white-space: nowrap; }
 #want-actions { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; flex-shrink: 0; }
 /* ずかん・そだてノート：アイコンのみの正方形ボタン(以前は⚡をタップして飛び出す形だったが、⚡は保護者専用にしたため直接出す) */
@@ -754,7 +800,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
 #offtime-overlay.show { display: flex; }
 #offtime-card {
   background: var(--surface); border-radius: var(--r-lg); padding: 28px 26px 24px;
-  max-width: 90vw; width: 420px; max-height: 84vh; overflow-y: auto;
+  max-width: 90vw; width: 420px; max-height: 84vh; max-height: 84dvh; overflow-y: auto;
   text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
   animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
 }
@@ -779,7 +825,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
 }
 #blockfall-overlay.show { display: flex; }
 #blockfall-stage {
-  position: relative; width: min(320px, 80vw); height: min(380px, 60vh);
+  position: relative; width: min(320px, 80vw); height: min(380px, 60vh); height: min(380px, 60dvh);
   background: linear-gradient(180deg,#dceefc,#fef9e7); border-radius: var(--r-lg); overflow: hidden;
   box-shadow: 0 20px 60px rgba(0,0,0,0.4); border: 3px solid #fff;
 }
@@ -935,7 +981,7 @@ body.viewing-other-day #date-big { color: var(--accent); }
 #timer-overlay.show { display: flex; }
 #timer-card {
   background: var(--surface); border-radius: var(--r-lg); padding: 26px 24px 22px;
-  max-width: 90vw; width: 380px; max-height: 88vh; overflow-y: auto; text-align: center;
+  max-width: 90vw; width: 380px; max-height: 88vh; max-height: 88dvh; overflow-y: auto; text-align: center;
   box-shadow: 0 20px 60px rgba(0,0,0,0.4); animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
 }
 .timer-h2 { font-size: var(--fs-2xl); font-weight: 900; color: var(--off-color); }
@@ -1004,7 +1050,7 @@ body.idle-power-save-deep #topbar, body.idle-power-save-deep #main { filter: bri
 }
 .modal {
   background: var(--surface); border: 2px solid var(--border); border-radius: var(--r-lg);
-  padding: 24px 28px; width: min(540px, 94vw); max-height: 88vh; overflow-y: auto; scrollbar-width: thin;
+  padding: 24px 28px; width: min(540px, 94vw); max-height: 88vh; max-height: 88dvh; overflow-y: auto; scrollbar-width: thin;
 }
 .modal h2 { font-size: var(--fs-lg); font-weight: 900; color: var(--text); margin-bottom: 18px; }
 .settings-section { border: 1.5px solid var(--border); border-radius: var(--r-md); padding: 16px 18px; margin-bottom: 14px; background: var(--bg); }
@@ -1013,10 +1059,14 @@ body.idle-power-save-deep #topbar, body.idle-power-save-deep #main { filter: bri
 .acc-section { border: 1.5px solid var(--border); border-radius: var(--r-md); margin-bottom: 12px; background: var(--bg); overflow: hidden; }
 .acc-section[data-tab-group] { display: none; }
 .acc-section[data-tab-group].tab-active { display: block; }
+/* タブは4等分(minmax(0,1fr))の枠に必ず収める。
+   以前は white-space:nowrap + 左右10pxパディングで最小幅が枠を超えてしまい、
+   スマホ縦(390px)では4つめの「⚙️設定」が右に36pxはみ出して文字とバッジが切れていた */
 .ptab-btn {
   flex-shrink: 0; background: var(--surface); border: 2px solid var(--border); color: var(--text-dim);
-  border-radius: var(--r-md); padding: 13px 10px; font-size: var(--fs-sm); font-weight: 800; cursor: pointer;
-  font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap;
+  border-radius: var(--r-md); padding: 11px 6px; font-size: var(--fs-sm); font-weight: 800; cursor: pointer;
+  font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 4px;
+  white-space: normal; line-height: 1.25; min-width: 0; min-height: 44px; text-align: center;
 }
 .ptab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .acc-head {
@@ -1067,10 +1117,20 @@ body.idle-power-save-deep #topbar, body.idle-power-save-deep #main { filter: bri
 .name-edit-row button { flex: 1; min-width: 0; }
 .field { margin-bottom: 12px; }
 .field label { display: block; font-size: var(--fs-xs); color: var(--text-dim); margin-bottom: 5px; font-weight: 700; }
-.field input, .field select { width: 100%; background: var(--bg); border: 2px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-size: var(--fs-md); padding: 9px 12px; outline: none; font-family: inherit; font-weight: 600; }
+/* min-height:44px はタップ領域の基準。ただしチェックボックス・ラジオは対象外にする
+   (これらに効かせると、20x20のつもりが20x44の縦長に伸びて見た目が崩れる。
+    チェックボックスは囲んでいる<label>側が44pxあるので基準は満たしている) */
+.field input:not([type="checkbox"]):not([type="radio"]), .field select { width: 100%; background: var(--bg); border: 2px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-size: var(--fs-md); padding: 9px 12px; outline: none; font-family: inherit; font-weight: 600; min-height: 44px; box-sizing: border-box; }
+.field input[type="checkbox"], .field input[type="radio"] { background: var(--bg); border: 2px solid var(--border); color: var(--text); font-family: inherit; }
 .field input:focus, .field select:focus { border-color: var(--accent); }
 .type-toggle { display: flex; gap: 7px; margin-bottom: 12px; }
-.type-btn { flex: 1; padding: 10px; border-radius: var(--r-sm); border: 2px solid var(--border); background: var(--bg); color: var(--text-dim); font-family: inherit; font-size: var(--fs-sm); font-weight: 800; cursor: pointer; }
+/* カバンの色えらびの丸：見た目は36pxのまま、押せる範囲だけ44pxに広げる
+   (ヘッダーのアイコンボタンと同じ方式。丸を大きくすると5色が横に並ばなくなるため) */
+.bag-color-dot { position: relative; }
+.bag-color-dot::before { content: ''; position: absolute; inset: -4px; }
+/* 2択・3択の切り替えボタン。padding任せだと高さ42pxで44px基準を割るため min-height で担保する
+   (「出す/出さない」「にちようび/げつようび」「小/中/大」など20箇所以上がこのクラス) */
+.type-btn { flex: 1; padding: 10px; border-radius: var(--r-sm); border: 2px solid var(--border); background: var(--bg); color: var(--text-dim); font-family: inherit; font-size: var(--fs-sm); font-weight: 800; cursor: pointer; min-height: 44px; }
 .kid-select { width: 100%; background: var(--bg); border: 2px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-size: var(--fs-md); font-weight: 800; padding: 11px 12px; outline: none; font-family: inherit; }
 .kid-select:focus { border-color: var(--off-color); }
 .type-btn.active-on  { border-color: var(--on-color);  background: var(--surface2);  color: var(--on-color); }
@@ -1084,6 +1144,8 @@ body.idle-power-save-deep #topbar, body.idle-power-save-deep #main { filter: bri
   background: var(--surface);
   margin: 16px -28px -24px; padding: 12px 28px 20px;
   border-top: 2px solid var(--border);
+  /* 画面下端に貼り付くボタン列。ホームバーと重なって押せなくなるのを防ぐ */
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
 }
 /* すべてのボタンに最小タップ領域を保証する。
    個別に指定し忘れると、子どもや抱っこ中の親が押せなくなるため。
@@ -1125,10 +1187,13 @@ body.idle-power-save-deep #topbar, body.idle-power-save-deep #main { filter: bri
 .ev-info-meta { font-size: var(--fs-xs); color: var(--text-dim); margin-top: 1px; }
 .ev-edit { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: var(--fs-sm); padding: 3px 6px; }
 .task-add-row { display: flex; gap: 7px; }
-.task-add-row input { flex: 1; background: var(--bg); border: 2px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-size: var(--fs-sm); padding: 7px 10px; outline: none; font-family: inherit; font-weight: 600; }
-.task-mini { display: flex; align-items: center; gap: 7px; padding: 6px 9px; background: var(--bg); border-radius: var(--r-sm); margin-bottom: 4px; font-size: var(--fs-sm); font-weight: 600; }
+.task-add-row input { flex: 1; background: var(--bg); border: 2px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-size: var(--fs-sm); padding: 7px 10px; outline: none; font-family: inherit; font-weight: 600; min-height: 44px; box-sizing: border-box; }
+/* 行の高さを44pxにしてから、✕ボタンを行いっぱいの44x44にする。
+   こうすると上下の行の✕と判定が重ならないので、隣の やること を誤って消す心配が無い
+   (以前は✕が20x18しか無く、小さすぎて押しづらかった) */
+.task-mini { display: flex; align-items: center; gap: 7px; padding: 6px 9px; background: var(--bg); border-radius: var(--r-sm); margin-bottom: 4px; font-size: var(--fs-sm); font-weight: 600; min-height: 44px; }
 .task-mini span { flex: 1; }
-.task-mini-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: var(--fs-xs); padding: 2px 5px; }
+.task-mini-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: var(--fs-xs); padding: 2px 5px; min-width: 44px; min-height: 44px; }
 .pending-item { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: rgba(245,158,11,0.07); border: 1.5px solid var(--gold); border-radius: var(--r-sm); margin-bottom: 6px; }
 .pending-info { flex: 1; }
 .pending-info-name { font-size: var(--fs-sm); font-weight: 700; }
@@ -1137,19 +1202,40 @@ body.idle-power-save-deep #topbar, body.idle-power-save-deep #main { filter: bri
 .pending-badge { display: inline-block; background: var(--gold); color: #fff; border-radius: var(--r-sm); font-size: var(--fs-xs); font-weight: 800; padding: 2px 6px; margin-left: 5px; }
 
 /* ── 縦向き（タブレットを縦にしたとき）：横2分割をやめ、やりたいことを下部に ── */
+/* ── 画面が低い時(スマホを横にした時など)のモーダル ──
+   高さ390pxの端末では 88dvh=343px しかなく、保護者設定は中身1210pxのうち749pxが隠れていた。
+   余白を詰めて使える高さをほぼ全部使い、隠れる量を減らす。
+   (スクロールはできていたので操作不能ではなかったが、横向きでの設定変更が実質かなり辛かった) */
+@media (max-height: 520px) {
+  .modal {
+    padding: 14px 16px;
+    max-height: 94vh; max-height: 94dvh;
+  }
+  .modal h2 { font-size: var(--fs-md); margin-bottom: 10px; }
+  .modal-actions { margin: 10px -16px -14px; padding: 8px 16px 10px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+  .settings-section { padding: 10px 12px; margin-bottom: 10px; }
+  .acc-head { padding: 11px 12px; }
+  #parent-tab-bar { padding: 0 12px 8px !important; }
+  /* 他のカード類も同様に、低い画面では画面の高さいっぱいまで使う */
+  #offtime-card { max-height: 94vh; max-height: 94dvh; }
+}
+
 @media (orientation: portrait) {
-  #main { grid-template-columns: 1fr; grid-template-rows: 1fr var(--want-panel-h, 180px); }
-  #main.panels-collapsed { grid-template-columns: 1fr; grid-template-rows: 1fr 0px; }
+  #main { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) var(--want-panel-h, 180px); }
+  #main.panels-collapsed { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) 0px; }
   #main.panels-collapsed #right-panel { border-top-width: 0; }
   #right-panel {
     border-left: none; border-top: 3px solid var(--border);
+    /* 縦向きではパネルが画面の下端に接する。ホームバーの下に項目が潜らないようにする */
+    padding-right: 0; padding-bottom: env(safe-area-inset-bottom);
   }
-  #right-panel-scroll { max-height: 45vh; overflow-y: auto; }
+  #right-panel-scroll { max-height: 45vh; max-height: 45dvh; overflow-y: auto; }
   /* 縦向き：上境目に配置(左右位置はJSでドラッグ位置を反映するため、ここではtopのみ指定) */
   #panels-collapse-btn.vertical-mode { left: 50%; top: -10px; transform: translateX(-50%); }
   #want-header { padding: 6px 18px; }
   #want-title { font-size: var(--fs-md); }
-  #topbar { padding: 6px 12px; gap: 4px; }
+  /* paddingを上書きするとsafe-area分が消えるので、max()で両立させる */
+  #topbar { padding: 6px 12px; gap: 4px; padding-top: max(6px, env(safe-area-inset-top)); padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
   #date-big { font-size: var(--fs-xl); }
   .topbar-left { gap: 10px; }
   #child-switch-btn { font-size: var(--fs-md); min-width: 0; padding: 4px 4px; }
@@ -1161,27 +1247,34 @@ body.idle-power-save-deep #topbar, body.idle-power-save-deep #main { filter: bri
 }
 /* スマホ幅：ヘッダーの文字・ボタンを少し小さく */
 @media (orientation: portrait) and (max-width: 480px) {
-  #topbar { padding: 6px 10px; gap: 4px; }
+  #topbar { padding: 6px 10px; gap: 4px; padding-top: max(6px, env(safe-area-inset-top)); padding-left: max(10px, env(safe-area-inset-left)); padding-right: max(10px, env(safe-area-inset-right)); }
   #topbar-row1, #topbar-row2 { flex-wrap: wrap; row-gap: 4px; min-height: 0; }
-  .topbar-left { width: 100%; justify-content: space-between; gap: 8px; }
+  /* スマホ幅ではヘッダーの1行が特に厳しいので、すき間を詰めて1行に収める。
+     折り返しの安全網そのものは基本CSS側(.topbar-left)に移したので、ここでは詰めだけ行う */
+  .topbar-left { width: 100%; justify-content: space-between; gap: 6px; }
+  #date-nav { flex-shrink: 1; gap: 4px; }
   #day-label-badge { flex: 1 1 auto; justify-content: flex-start; min-width: 0; }
   .topbar-right { flex-shrink: 0; gap: 6px; margin-left: auto; }
   #date-big { font-size: var(--fs-lg); }
+  /* 日付＋日付送り＋時計チップを1行に収めるための詰め。文字サイズと情報は削らない。
+     ◀▶は見た目を28pxにするが、::beforeを-8pxに広げてタップ領域44pxは維持する。
+     時計は時刻によって幅が変わる(「ごぜん 9:05」より「ごぜん 12:38」が11px広い)ため、
+     いちばん広くなる時刻でも収まる余裕を持たせてある */
+  #date-prev, #date-next { width: 28px; height: 28px; }
+  #date-prev::before, #date-next::before { inset: -8px; }
+  #header-now-chip { padding: 6px 7px; gap: 4px; }
   /* スマホでも44pxのタップ領域は縮めない（Apple HIG / MD3・子どもは指の制御が未熟なため特に重要） */
   #child-switch-btn { font-size: var(--fs-md); min-width: 0; padding: 4px 6px; }
   .dl-chip { font-size: var(--fs-sm); padding: 4px 8px; }
 }
-/* ── タイムラインのラベル：画面が広いほど文字を大きく ──
-   カード幅の実測（スマホ273px / タブレット約580px / PC約908px）に対し、
-   12文字の名前でも省略されないことを検証済みのサイズを段階的に適用する。 */
-@media (min-width: 768px) {
-  .tl-band-name { font-size: var(--fs-xl); }
-  .tl-band-tag  { font-size: var(--fs-md); }
-}
-@media (min-width: 1200px) {
-  .tl-band-name { font-size: var(--fs-xl); }
-  .tl-band-tag  { font-size: var(--fs-md); }
-}
+/* ── タイムラインのラベル：帯の実際の幅で文字の大きさを決める ──
+   以前は「画面の幅が768px以上なら大きく」としていたが、画面の幅と帯の幅は別物だった。
+   例: スマホを横にすると画面幅844pxで条件に当たるのに、帯は154pxしかなく文字が入らない。
+   逆に、帯が重なって2分割された時はタブレットでも帯が104pxになる。
+   そこで renderTimeline() で帯の幅を実測し、.tl-band-wide / .tl-band-name-narrow を
+   付け替える方式に変更した(画面の幅には依存しない)。 */
+.tl-band-name.tl-band-wide { font-size: var(--fs-xl); }
+.tl-band-tag.tl-band-wide  { font-size: var(--fs-md); }
 /* ── 片手操作用（保護者）：親指が自然に届く右下に置く ──
    根拠：保護者の操作(時刻変更・日付移動・設定)は全て画面上部にあり、
    抱っこ中は持ち替えないと届かない。ここから同じ操作に到達できるようにする。 */
@@ -1190,7 +1283,8 @@ body.idle-power-save-deep #topbar, body.idle-power-save-deep #main { filter: bri
    タブのすぐそばに小さいアイコンだけが縦に並んで浮き出る(画面いっぱいに広がらないので、
    タブを押した指のまま、そのまま届く範囲だけで操作が完結する)。左右は保護者設定で選べる。 ── */
 #quick-fab {
-  position: fixed; right: 0; top: 65%; transform: translateY(-50%); z-index: 110;
+  /* 画面の端に出すタブ。角丸・ジェスチャー領域の内側に入ると押せなくなるのでsafe-area分ずらす */
+  position: fixed; right: env(safe-area-inset-right); top: 65%; transform: translateY(-50%); z-index: 110;
   width: 15px; height: 72px;
   background: var(--surface2); border: 2px solid var(--border); border-right: none; color: var(--text-dim);
   border-radius: var(--r-md) 0 0 var(--r-md);
@@ -1206,21 +1300,27 @@ body.idle-power-save-deep #topbar, body.idle-power-save-deep #main { filter: bri
 #quick-fab:active { transform: translateY(-50%) scale(0.93); }
 /* 保護者設定で「ひだり」を選んだ場合 */
 body.fab-left #quick-fab {
-  right: auto; left: 0; border-right: 2px solid var(--border); border-left: none;
+  right: auto; left: env(safe-area-inset-left); border-right: 2px solid var(--border); border-left: none;
   border-radius: 0 var(--r-md) var(--r-md) 0; box-shadow: 2px 2px 10px rgba(0,0,0,0.16);
 }
 #quick-sheet {
-  position: fixed; right: 20px; top: 65%; transform: translateY(-50%) scale(0.85); z-index: 130;
+  position: fixed; right: calc(20px + env(safe-area-inset-right)); top: 65%; transform: translateY(-50%) scale(0.85); z-index: 130;
   background: var(--surface); border: 2px solid var(--border); border-radius: var(--r-lg);
   padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
   display: none; flex-direction: column; gap: 6px;
-  width: 168px; max-height: 80vh; overflow-y: auto;
+  width: 168px; max-height: 80vh; max-height: 80dvh; overflow-y: auto;
   transform-origin: right center; opacity: 0;
   transition: transform 0.15s ease-out, opacity 0.15s ease-out;
 }
 body.fab-left #quick-sheet { right: auto; left: 20px; transform-origin: left center; transform: translateY(-50%) scale(0.85); }
 #quick-sheet.open { display: flex; transform: translateY(-50%) scale(1); opacity: 1; }
 body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
+/* ⚡シートは「画面の65%の位置が中心」なので、画面が低いと下へはみ出す(実測18〜20px)。
+   低い画面では中心を50%に戻し、高さも画面内に収める。
+   ※この指定は #quick-sheet の定義より後ろに置く必要がある(同じ強さなので後ろが勝つ) */
+@media (max-height: 520px) {
+  #quick-sheet { top: 50%; max-height: calc(100dvh - 24px); }
+}
 #quick-sheet .qs-title { font-size: var(--fs-xs); font-weight: 900; color: var(--text-dim); margin-bottom: 0; }
 #quick-sheet .qs-btn {
   width: 100%; min-height: 48px; border-radius: var(--r-md); cursor: pointer;
@@ -1369,7 +1469,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
 
 <div id="main">
   <!-- タイムラインの帯と、右のカードをつなぐ接続線(分割モードの時だけ) -->
-  <svg id="now-connector-svg" style="position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:15;" aria-hidden="true"></svg>
+  <svg id="now-connector-svg" style="position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;pointer-events:none;z-index:15;" aria-hidden="true"></svg>
   <!-- 左カラム：タイムライン＋時間未定トレイ -->
   <div id="left-col">
     <div id="timeline-col">
@@ -1445,9 +1545,9 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       <button class="type-btn" id="stamp-view-week" style="flex:1;max-width:120px">🗓️ しゅう</button>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <button class="btn btn-secondary" id="stamp-prev-month" aria-label="まえの月" style="padding:8px 14px">◀</button>
+      <button class="btn btn-secondary" id="stamp-prev-month" aria-label="まえの月" style="padding:8px 14px;min-width:44px">◀</button>
       <div id="stamp-month-label" style="font-size: var(--fs-lg);font-weight:900"></div>
-      <button class="btn btn-secondary" id="stamp-next-month" aria-label="つぎの月" style="padding:8px 14px">▶</button>
+      <button class="btn btn-secondary" id="stamp-next-month" aria-label="つぎの月" style="padding:8px 14px;min-width:44px">▶</button>
     </div>
     <div id="stamp-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px"></div>
     <div id="stamp-legend" style="margin-top:10px"></div>
@@ -1710,7 +1810,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
       <div id="child-switcher-top"></div>
     </div>
-    <div id="parent-tab-bar" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;padding:0 18px 12px">
+    <div id="parent-tab-bar" style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:6px;padding:0 18px 12px">
       <button class="ptab-btn" type="button" data-tab="pending">📨 今日<span class="pending-badge" id="pending-count-tab" style="display:none">0</span></button>
       <button class="ptab-btn" type="button" data-tab="bag">🎒 カバン</button>
       <button class="ptab-btn" type="button" data-tab="child">👶 子ども</button>
@@ -1744,7 +1844,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
         <div id="msg-presets" style="margin-bottom:8px"></div>
         <div class="task-add-row">
           <input type="text" id="msg-input" placeholder="例：きのうより はやかったね！" maxlength="24"/>
-          <button class="btn btn-primary" id="msg-send" style="padding:7px 11px;font-size: var(--fs-xs)">おくる</button>
+          <button class="btn btn-primary" id="msg-send" style="padding:7px 11px;font-size: var(--fs-xs);min-width:44px">おくる</button>
         </div>
         <div id="msg-current" style="margin-top:8px;font-size: var(--fs-xs);line-height:1.5"></div>
       </div>
@@ -1757,7 +1857,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
         <div style="display:flex;justify-content:flex-end"><button type="button" class="info-toggle" data-info-toggle="info-2" aria-label="せつめいを みる"></button></div><p class="info-text" id="info-2" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:8px;line-height:1.5">上の一言と違い、消えずに その週のページに残り続けます。</p>
         <div class="task-add-row">
           <input type="text" id="book-msg-input" placeholder="例：今週もよくがんばったね" maxlength="40"/>
-          <button class="btn btn-primary" id="book-msg-send" style="padding:7px 11px;font-size: var(--fs-xs)">のこす</button>
+          <button class="btn btn-primary" id="book-msg-send" style="padding:7px 11px;font-size: var(--fs-xs);min-width:44px">のこす</button>
         </div>
       </div>
     </div>
@@ -2139,7 +2239,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v231・2026-09-26</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v235・2026-10-18</div>
     <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
     <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
@@ -2249,7 +2349,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
     <div class="field" id="bag-tasks-field">
       <label style="display:flex;align-items:center;justify-content:space-between;gap:8px">
         <span>カバンの中身（やること）</span>
-        <button type="button" id="bag-task-sort-toggle" style="background:var(--surface2);border:1.5px solid var(--border);border-radius: var(--r-sm);color:var(--text-dim);font-size: var(--fs-xs);font-weight:800;padding:5px 10px;font-family:inherit;cursor:pointer;min-height:36px">≡ ならびかえ：OFF</button>
+        <button type="button" id="bag-task-sort-toggle" style="background:var(--surface2);border:1.5px solid var(--border);border-radius: var(--r-sm);color:var(--text-dim);font-size: var(--fs-xs);font-weight:800;padding:5px 10px;font-family:inherit;cursor:pointer;min-height:44px">≡ ならびかえ：OFF</button>
       </label>
       <!-- 名前から「やること」を提案する。手入力が最も重い箇所を1タップで済ませる -->
       <div id="bag-task-suggest" style="display:none;margin-bottom:8px"></div>
@@ -2426,7 +2526,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       <button type="button" class="parent-header-close" id="bag-copy-close-top" aria-label="とじる">✕</button>
     </div>
     <p class="info-text" id="info-28" style="font-size: var(--fs-xs);color:var(--text-dim);margin-bottom:10px;line-height:1.5">やること・曜日・時刻もそのままコピーされます。</p>
-    <div id="bag-copy-list" style="max-height:55vh;overflow-y:auto"></div>
+    <div id="bag-copy-list" style="max-height:55vh;max-height:55dvh;overflow-y:auto"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="bag-copy-cancel" style="width:100%">戻る</button>
     </div>
@@ -3486,6 +3586,20 @@ let scrollTimer = null;
 let PX_PER_MIN = data.timelineZoom||3.4;  // 1分の高さ（保護者設定の「タイムラインの間隔」で変更可）
 const TL_SIDE = 11;       // タイムライン左右の余白(%)（グラデーション帯の幅＝目盛り＋アイコン領域）
 
+// 帯の名前が指定の文字サイズで何px必要かを測る(canvasで実測。DOMに入れずに測れるので軽い)。
+// 文字の種類(ひらがな・漢字・数字・英字)で幅が違うため、文字数×サイズの概算では当てにならない。
+let _bandNameMeasureCtx = null;
+function measureBandNameWidth(name, px){
+  if(!name) return 0;
+  if(!_bandNameMeasureCtx){
+    const c = document.createElement('canvas');
+    _bandNameMeasureCtx = c.getContext('2d');
+  }
+  if(!_bandNameMeasureCtx) return String(name).length * px; // canvasが使えない環境では概算に落とす
+  _bandNameMeasureCtx.font = `800 ${px}px 'Hiragino Round Gothic Pro','Hiragino Sans','Noto Sans JP',sans-serif`;
+  return _bandNameMeasureCtx.measureText(String(name)).width;
+}
+
 // 予定同士の時間帯の重なりを検出し、重なっているグループ内で「列番号/総列数」を割り当てる。
 // カレンダーアプリの多列レイアウトと同じ考え方：重なっている予定は同じグループとして扱い、
 // グループ内の人数だけ横幅を均等に分ける。「今どれか選ぶ」候補どうしに限らず、単に予定として
@@ -3735,6 +3849,24 @@ function renderTimeline(){
   // ※ splitMode判定はlg/rg作成前（上部）に移動済み。ここでは幅の計算だけ行う。rgLeftPctも上部で定義済み。
   const LEFT_RAIL_RIGHT = splitMode ? (100-rgLeftPct) : SIDE; // 本体の右端(%)
 
+  // ── 帯の名前・時刻の文字サイズは「帯の実測幅」で決める(画面の幅では決めない) ──
+  // 画面の幅で決めていた時は、スマホを横にすると画面844pxで「広い」と判定されるのに
+  // 帯は154pxしかなく文字が収まらなかった。逆に帯が重なって2分割されるとタブレットでも104pxになる。
+  const tlInnerWidthPx = (scroll.clientWidth||0) * (Math.max(0, 100 - TL_SIDE - LEFT_RAIL_RIGHT)/100);
+  // 「帯の幅」だけでなく「その名前が実際に何px必要か」をcanvasで測り、
+  // 省略されずに収まる中でいちばん大きい文字サイズを選ぶ。
+  //   帯の幅 - 69px(左右の余白・枠・内側の余白の合計) = 文字に使える幅。
+  //   fs-xl(22px)で収まる → fs-xl / fs-lg(18px)で収まる → fs-lg /
+  //   どちらも収まらない → 折り返して全部見せる(ふつうはfs-sm、極端に細いレールはfs-xs)
+  // これで「短い名前はレールでも大きく」「長い名前は小さくても全部見える」が両立する。
+  const bandNameClassFor = (w, name) => {
+    const area = Math.max(0, w - 69);
+    if (area >= measureBandNameWidth(name, 22)) return 'tl-band-name tl-band-wide';
+    if (area >= measureBandNameWidth(name, 18)) return 'tl-band-name';
+    return area >= 60 ? 'tl-band-name-mid' : 'tl-band-name-narrow';
+  };
+  const bandTagClass  = (w) => (w>=335) ? 'tl-band-tag tl-band-wide' : 'tl-band-tag';
+
   // 内側の絶対配置コンテナ（本体・中央寄せで狭める）
   const inner=document.createElement('div');
   inner.style.cssText=`position:absolute;left:${SIDE}%;right:${LEFT_RAIL_RIGHT}%;top:0;height:${24*60*PX_PER_MIN}px;`;
@@ -3747,7 +3879,12 @@ function renderTimeline(){
     rightPanel.id='now-right-panel';
     rightPanel.dataset.nowPanel='1';
     // 左レール右端(rgLeftPct)から始め、画面右端ぎりぎりまで（＝広げた余白グラデーションの上に重ねる）
-    rightPanel.style.cssText=`position:absolute;left:${rgLeftPct+1}%;right:2%;top:50%;transform:translateY(-50%);z-index:10;max-height:65vh;overflow-y:auto;`;
+    // 高さは「画面の65%」と「タイムライン列の高さ-12px」の小さい方。
+    // 65vhだけだと、ヘッダー・トレイ・やりたいことで列が短くなるスマホでカードが列をはみ出し、
+    // ヘッダーや時間未定トレイ・折りたたみつまみに重なって隠してしまう(左右の座標計算は変更していない)
+    // 右端のあけ幅は max(2%, 18px)。2%だけだとスマホでは7.8pxしか空かず、
+    // 画面端の⚡クイックタブ(15px)や、やりたいことパネルのつまみにカードが重なってしまう
+    rightPanel.style.cssText=`position:absolute;left:${rgLeftPct+1}%;right:max(2%, 18px);top:50%;transform:translateY(-50%);z-index:10;max-height:min(65vh, calc(100% - 12px));max-height:min(65dvh, calc(100% - 12px));overflow-y:auto;`;
     col.appendChild(rightPanel);
   }
 
@@ -3904,11 +4041,19 @@ function renderTimeline(){
           // 通常：今まで通り右下
           : `<button class="tl-time-edit-icon" type="button" title="じかんへんこう" aria-label="じかんを へんこうする">⏰</button>`)
         : '';
+      // 帯の実際の幅(px)を見て、横書きでは名前が「スイ…」程度しか出ない細さなら縦書きにする。
+      // 横書きの名前欄は帯の幅から約50px引いた分しか使えないため、帯が150px未満だと
+      // 名前が2〜3文字で切れて読めなくなる(スマホ縦では帯99px・名前欄51pxで実測)。
+      // レールの座標(RAIL_W_PCT等)は変更せず、文字の向きだけ切り替える。
+      const bandWidthPx = tlInnerWidthPx / ((oc&&oc.totalCols)?oc.totalCols:1);
+      const tooNarrowForName = bandWidthPx>0 && bandWidthPx<170;
       const useVertical = multiCandidate && data.verticalBandText;
+      // 帯の幅で3段階。細い(170px未満)＝小さい字で折り返す／ふつう＝fs-lg／広い(260px以上)＝fs-xl
+      const nameClass = bandNameClassFor(bandWidthPx, (ev.fromChild?'⭐ ':'')+ev.name);
       const nameHtml =
         useVertical
-          ? `<div class="tl-band-name-vertical">${ev.name}</div>`
-          : `<div class="tl-band-name">${ev.fromChild?'⭐ ':''}${ev.name}</div>`;
+          ? `<div class="tl-band-name-vertical">${ev.fromChild?'⭐ ':''}${ev.name}</div>`
+          : `<div class="${nameClass}">${ev.fromChild?'⭐ ':''}${ev.name}</div>`;
       const nameWrapper = tooShort ? '' :
         `<div style="position:sticky;top:0;z-index:2;min-width:0;${useVertical?'':'padding:4px 6px;border-radius: var(--r-sm);background:rgba(255,255,255,0.88);backdrop-filter:blur(2px);transform:translateZ(0);will-change:transform;'}${isPast?'opacity:0.75':''};${useVertical?'display:flex;align-items:center;justify-content:center;height:calc(100% - 8px);':''}">
           ${nameHtml}
@@ -3996,7 +4141,7 @@ function renderTimeline(){
       const soonClass = (ev.id===soonEvId) ? ' tl-band-soon' : '';
       const focusRing = isFocused ? 'box-shadow:0 0 0 3px var(--accent);' : '';
       block.innerHTML=`<div class="tl-band ${ev.type}${soonClass}" style="height:100%;width:100%;position:relative;min-height:0;overflow:visible;${pastStyle}${focusRing}">
-        <div style="position:sticky;top:0;z-index:2;min-width:0;padding:4px 6px;border-radius: var(--r-sm);background:rgba(255,255,255,0.88);backdrop-filter:blur(2px);transform:translateZ(0);will-change:transform;${isPast?'opacity:0.75':''}"><div class="tl-band-name">${ev.fromChild?'⭐ ':''}${ev.name}</div><div class="tl-band-tag" style="${isPast?'color:var(--text-dim)':''}">${ev.fromChild?'じぶんで きめた ・ ':''}${fmtTimeDisp(ev.time)}〜${ev.end?fmtTimeDisp(ev.end):''}${routineTag}</div></div>
+        <div style="position:sticky;top:0;z-index:2;min-width:0;padding:4px 6px;border-radius: var(--r-sm);background:rgba(255,255,255,0.88);backdrop-filter:blur(2px);transform:translateZ(0);will-change:transform;${isPast?'opacity:0.75':''}"><div class="${bandNameClassFor(tlInnerWidthPx-20, (ev.fromChild?'⭐ ':'')+ev.name)}">${ev.fromChild?'⭐ ':''}${ev.name}</div><div class="${bandTagClass(tlInnerWidthPx-20)}" style="${isPast?'color:var(--text-dim)':''}">${ev.fromChild?'じぶんで きめた ・ ':''}${fmtTimeDisp(ev.time)}〜${ev.end?fmtTimeDisp(ev.end):''}${routineTag}</div></div>
         ${tappable?'<button class="tl-time-edit-icon" type="button" title="じかんへんこう" aria-label="じかんを へんこうする">⏰</button>':''}
       </div>`;
       if(editMode){ setupDragForBlock(block, ev); }
@@ -4535,7 +4680,7 @@ function buildTaskCard(ev, isOvertime){
     ? `<button type="button" id="overtime-skip-btn" style="display:block;width:auto;margin:8px auto 0;padding:6px 16px;min-height:44px;border-radius: var(--r-md);border:1.5px solid var(--danger);background:#fff;color:var(--danger);font-weight:800;font-size: var(--fs-xs);cursor:pointer">😴 きょうは とばす</button>`
     : '';
 
-  return `<div class="${pulseClass.trim()}" style="background:${bgFill};border:10px solid ${borderColor};border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:72vh;overflow:hidden;transition:background 0.8s linear, border-color 0.8s linear">
+  return `<div class="${pulseClass.trim()}" style="background:${bgFill};border:10px solid ${borderColor};border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:72vh;max-height:72dvh;overflow:hidden;transition:background 0.8s linear, border-color 0.8s linear">
       <div style="padding:14px 18px 0;flex-shrink:0;text-align:center">
         ${overtimeTag}
         <div class="now-card-name" style="font-size: var(--fs-xl);margin-bottom:10px">${ev.fromChild?'⭐ ':''}${ev.name}</div>
@@ -4570,7 +4715,7 @@ function buildUntimedPromoCard(ev){
       : notReadyBarHTML(done, total);
   }
 
-  return `<div style="background:var(--surface2);border:10px solid var(--text-dim);border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:72vh;overflow:hidden">
+  return `<div style="background:var(--surface2);border:10px solid var(--text-dim);border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:72vh;max-height:72dvh;overflow:hidden">
       <div style="padding:14px 18px 0;flex-shrink:0">
         <div style="font-size: var(--fs-sm);font-weight:900;color:#fff;background:var(--text-dim);display:inline-block;padding:3px 12px;border-radius: var(--r-md);margin-bottom:6px">⏳ じかんが きまってないよ</div>
         <div style="margin-bottom:10px">
@@ -4752,9 +4897,16 @@ function updateClock(){
   const kanji=!!(getChild()&&getChild().kanjiMode);
   const days = kanji ? ['日','月','火','水','木','金','土'] : ['にち','げつ','か','すい','もく','きん','ど'];
   const dd=getDisplayDate();
-  let dateText = kanji
-    ? `${dd.getMonth()+1}月${dd.getDate()}日（${days[dd.getDay()]}）`
-    : `${dd.getMonth()+1}がつ${dd.getDate()}にち（${days[dd.getDay()]}）`;
+  // スマホ縦だけ「10/18（にち）」に短縮する。
+  // 「10がつ18にち（にち）」は fs-lg で約184px あり、日付送り(72px)＋時計チップ(179px)と
+  // 合わせると455pxになって使える幅370pxに収まらない。短縮することで、日付も時計も
+  // サイズを落とさずに1行へ収め、ヘッダーの背も低く保つ(曜日のかっこ表記は残す)
+  const narrowHeader = window.matchMedia('(orientation: portrait) and (max-width: 480px)').matches;
+  let dateText = narrowHeader
+    ? `${dd.getMonth()+1}/${dd.getDate()}（${days[dd.getDay()]}）`
+    : (kanji
+      ? `${dd.getMonth()+1}月${dd.getDate()}日（${days[dd.getDay()]}）`
+      : `${dd.getMonth()+1}がつ${dd.getDate()}にち（${days[dd.getDay()]}）`);
   document.getElementById('date-big').textContent=dateText;
   updateWeatherBadge();
   // 日付送り状態
@@ -6123,6 +6275,9 @@ function updateNowConnector(){
 }
 document.getElementById('timeline-scroll').addEventListener('scroll', ()=>requestAnimationFrame(updateNowConnector));
 window.addEventListener('resize', ()=>requestAnimationFrame(updateNowConnector));
+// 画面を回した時は、ヘッダーの日付表記(スマホ縦だけ短縮形)をすぐ切り替える。
+// tick()は60秒ごとなので、これが無いと回した直後に短縮形/通常形が食い違ったままになる
+window.addEventListener('resize', ()=>requestAnimationFrame(updateClock));
 
 function tick(){
   updateClock(); renderTimeline(); renderWantList(); updateNightMode(); checkTodayStamp();
@@ -6567,7 +6722,8 @@ function renderChildSwitcherTop(){
     const chip=document.createElement('button');
     chip.type='button';
     chip.textContent=(isActive?'✅ ':'')+child.name;
-    chip.style.cssText=`flex:1;min-width:0;padding:9px 10px;border-radius: var(--r-md);font-weight:900;font-size: var(--fs-sm);cursor:pointer;border:2px solid ${isActive?'var(--accent)':'var(--border)'};background:${isActive?'var(--surface2)':'var(--surface)'};color:var(--text)`;
+    // min-height:44px はタップ領域の基準(Apple HIG)。padding任せだと40pxしか出ずに基準を割る
+    chip.style.cssText=`flex:1;min-width:0;min-height:44px;display:flex;align-items:center;justify-content:center;padding:9px 10px;border-radius: var(--r-md);font-weight:900;font-size: var(--fs-sm);cursor:pointer;border:2px solid ${isActive?'var(--accent)':'var(--border)'};background:${isActive?'var(--surface2)':'var(--surface)'};color:var(--text)`;
     chip.addEventListener('click',()=>switchChild(i));
     row.appendChild(chip);
   });
@@ -6602,8 +6758,9 @@ function buildTimeSelect(containerId, value, onChange, allowEmpty, c){
   for(let i=0;i<24;i++) hopts+=`<option value="${i}" ${vh===i?'selected':''}>${hourLabel(i,c)}</option>`;
   let mopts='';
   for(let i=0;i<60;i+=5) mopts+=`<option value="${i}" ${vm===i?'selected':''}>${String(i).padStart(2,'0')}</option>`;
-  const stH='background:var(--surface);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-xs);padding:6px 3px;outline:none;font-family:inherit;font-weight:700;min-width:0';
-  const stM='background:var(--surface);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);padding:6px 4px;outline:none;font-family:inherit;font-weight:700;min-width:0';
+  // min-height:44px はタップ領域の基準(Apple HIG)。paddingだけだと32〜34pxしか出ない
+  const stH='background:var(--surface);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-xs);padding:6px 3px;outline:none;font-family:inherit;font-weight:700;min-width:0;min-height:44px';
+  const stM='background:var(--surface);border:2px solid var(--border);border-radius: var(--r-sm);color:var(--text);font-size: var(--fs-sm);padding:6px 4px;outline:none;font-family:inherit;font-weight:700;min-width:0;min-height:44px';
   wrap.innerHTML=`<div style="display:flex;align-items:center;gap:4px"><select data-part="h" style="${stH};flex:1.6">${hopts}</select><span style="font-size: var(--fs-xs)">:</span><select data-part="m" style="${stM};flex:1">${mopts}</select></div>`;
   const hSel=wrap.querySelector('[data-part=h]'), mSel=wrap.querySelector('[data-part=m]');
   const handler=()=>{
@@ -8677,6 +8834,7 @@ function renderBagColorPicker(){
     cell.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0';
     const dot=document.createElement('button');
     dot.type='button';
+    dot.className='bag-color-dot'; // 見た目36px・タップ領域44px(::beforeで拡張)
     const label = data.bagColorNames[i] || `いろ${i+1}`;
     dot.setAttribute('aria-label', `${label}を えらぶ`);
     const selected = i===bagColorIndex;
