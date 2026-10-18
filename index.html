@@ -171,12 +171,39 @@ body.viewing-other-day #date-big { color: var(--accent); }
    行ごと画面の高さを超えて伸び、タイムラインと時間未定トレイが画面外へ押し出される
    (横向きで5件以上で発生。html/bodyがoverflow:hiddenなのでスクロールでも戻せない) */
 #main { flex: 1; display: grid; grid-template-columns: 1fr var(--want-panel-w, 250px); grid-template-rows: minmax(0, 1fr); min-height: 0; position: relative; }
-#main.panels-collapsed { grid-template-columns: 1fr 0px; }
-#main.want-panel-disabled { grid-template-columns: 1fr !important; grid-template-rows: 1fr !important; }
-#main.want-panel-disabled #right-panel, #main.want-panel-disabled #panels-collapse-btn { display: none !important; }
-/* パネルを出さない設定では、時間未定トレイが画面の下端に接する */
-#main.want-panel-disabled #untimed-tray { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
-#main.panels-collapsed #right-panel { padding: 0; border: none; }
+/* 畳んだ時も「ずかん📚・そだてノート🌱・＋ついか」の並びだけは残す(案B・2026-10-18)。
+   以前は高さ(幅)0まで畳んでいたため、やりたいことが0件で自動的に畳まれると
+   ずかん・そだてノートに行く道が無くなっていた(実測: ボタンが画面の50px下に出て押せない)。
+   横向き＝幅60pxの細い帯にしてボタンを縦に並べる／縦向き＝見出し行(58px)だけ残す */
+/* 横向きの帯は、右のsafe-area(ホームバー/角丸)のぶんだけ広げる。
+   60pxのままだと、インセット34pxの端末で中身が26pxになり44pxのボタンが端にはみ出す */
+#main.panels-collapsed { grid-template-columns: 1fr calc(var(--want-collapsed-w, 60px) + env(safe-area-inset-right)); }
+#main.panels-collapsed #want-list-area { display: none; }
+#main.panels-collapsed #want-title { display: none; }
+#main.panels-collapsed #want-header { border-bottom: none; padding: 6px 4px; justify-content: center; }
+#main.panels-collapsed #want-actions { flex-direction: column; }
+/* 「やりたいことパネルを出さない」設定でも、ずかん📚・そだてノート🌱の入口だけは残す
+   (やりたいこと自体は使わない設定なので、＋ついか・見出し文字・つまみは出さない) */
+#main.want-panel-disabled { grid-template-columns: 1fr calc(var(--want-collapsed-w, 60px) + env(safe-area-inset-right)) !important; grid-template-rows: minmax(0, 1fr) !important; }
+#main.want-panel-disabled #panels-collapse-btn,
+#main.want-panel-disabled #want-list-area,
+#main.want-panel-disabled #want-title,
+#main.want-panel-disabled #want-add-btn { display: none !important; }
+#main.want-panel-disabled #want-header { border-bottom: none; padding: 6px 4px; justify-content: center; }
+#main.want-panel-disabled #want-actions { flex-direction: column; }
+/* ── 画面のいちばん下に来る「列」に、ホームバーのぶんの余白を足す ──
+   viewport-fit=cover にしたことで画面の下端まで中身が描かれるようになったため、
+   最下段に来るものに余白が無いと、ホームバーに文字が重なって読めなくなる。
+   左の列(タイムライン＋時間未定トレイ)に付けておけば、トレイの有無に関係なく効く。
+   ・横向き → 左の列が常に最下段
+   ・縦向き → ふつうは やりたいことパネルが最下段(パネル側で対応済み)。
+              パネルを畳んだ時・使わない設定の時だけ左の列が最下段になる */
+@media (orientation: landscape) {
+  #left-col { padding-bottom: env(safe-area-inset-bottom); }
+}
+/* 縦向きは、畳んだ時も「出さない」設定の時も帯(やりたいことパネル)が最下段に残るため、
+   下のsafe-area余白はパネル側(#right-panel)だけで足りる */
+/* 畳んだ時も、下(縦向き)・右(横向き)のsafe-area余白はパネル側で確保したままにする */
 #left-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
 /* ── 左：タイムライン（1本・現在区間がせり出す） ── */
@@ -610,8 +637,17 @@ body.viewing-other-day #date-big { color: var(--accent); }
 }
 #panels-collapse-btn.vertical-mode::before { top: -19px; bottom: -19px; left: -18px; right: -18px; }
 /* 畳んだ時：パネル幅が0になるので、パネル基準(left:-16px)のままだと画面外にはみ出す。画面の右端基準に切り替える */
-#main.panels-collapsed #panels-collapse-btn { left: auto; right: 8px; }
-#main.panels-collapsed #panels-collapse-btn.vertical-mode { left: 50%; right: auto; top: -44px; }
+/* 畳んでも帯が残るようになったので、つまみは通常時と同じ「パネルの境目」に置けばよい
+   (以前はパネルが0幅になり、パネル基準だとつまみが画面外へ出るための特別扱いが必要だった)。
+   ただし横向きで畳んだ時は帯の幅が60pxしかなく、つまみのタップ領域(パネル側へ27px)が
+   「＋ついか」ボタンと重なって押せなくなる。畳んでいる間はタップ領域をタイムライン側へ広げる。 */
+#main.panels-collapsed #panels-collapse-btn:not(.vertical-mode)::before { left: -27px; right: -11px; }
+/* 横向きで畳んだ時、60pxの帯に縦に並ぶボタンと、画面右端の⚡タブ(高さ65%の位置・タップ判定は
+   左へ25px広い)が重なり、「＋ついか」が押せなくなっていた(実測: ⚡タブのz-index 110が上に乗る)。
+   画面が低い横向きの時だけ⚡タブを下へ逃がす(縦長の画面では元々重ならないので動かさない) */
+@media (orientation: landscape) and (max-height: 520px) {
+  #main.panels-collapsed #quick-fab { top: 88%; }
+}
 /* 横向きではパネル幅が250px固定なので、見出し＋ボタン類(ずかん・そだてノート・＋)が1行に収まらず
    「＋」ボタンが右に21px切れていた。収まらない時だけ折り返して、ボタンを必ず画面内に収める */
 #want-header {
@@ -1222,8 +1258,15 @@ body.idle-power-save-deep #topbar, body.idle-power-save-deep #main { filter: bri
 
 @media (orientation: portrait) {
   #main { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) var(--want-panel-h, 180px); }
-  #main.panels-collapsed { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) 0px; }
-  #main.panels-collapsed #right-panel { border-top-width: 0; }
+  #main.panels-collapsed { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; }
+  /* 縦向きは見出し行をそのまま(横並び)で残す */
+  #main.panels-collapsed #want-header { flex-direction: row; justify-content: space-between; padding: 6px 18px; }
+  #main.panels-collapsed #want-actions { flex-direction: row; }
+  #main.panels-collapsed #want-title { display: block; }
+  /* 「出さない」設定の時は、ずかん・そだてノートだけを右寄せで並べる */
+  #main.want-panel-disabled { grid-template-columns: 1fr !important; grid-template-rows: minmax(0, 1fr) auto !important; }
+  #main.want-panel-disabled #want-header { flex-direction: row; justify-content: flex-end; padding: 6px 18px; }
+  #main.want-panel-disabled #want-actions { flex-direction: row; }
   #right-panel {
     border-left: none; border-top: 3px solid var(--border);
     /* 縦向きではパネルが画面の下端に接する。ホームバーの下に項目が潜らないようにする */
@@ -2239,7 +2282,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v235・2026-10-18</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v238・2026-10-18</div>
     <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
     <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
