@@ -2284,7 +2284,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v239・2026-10-18</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v241・2026-10-18</div>
     <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
     <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
@@ -3924,12 +3924,20 @@ function renderTimeline(){
     rightPanel.id='now-right-panel';
     rightPanel.dataset.nowPanel='1';
     // 左レール右端(rgLeftPct)から始め、画面右端ぎりぎりまで（＝広げた余白グラデーションの上に重ねる）
-    // 高さは「画面の65%」と「タイムライン列の高さ-12px」の小さい方。
+    // 外枠はスクロールさせない(overflow:hidden)。中のやることリスト(.now-scroll-area)だけが
+    // スクロールするので、カバン名・残り時間・「きょうは とばす」は常に見えたままになる。
+    // ここをautoにしていた時は、中身(688px)が外枠(621px)より高いとカード全体がスクロールし、
+    // 上の見出しと下のボタンが画面の外へ出て「カードの上下が切れている」ように見えていた。
+    // 高さは「画面の85%」と「タイムライン列の高さ-12px」の小さい方。
+    // 以前は65%だったが、その制限が守っていたのはカードの上下の「空の余白」だけで、
+    // レール(帯)・時刻目盛り・現在時刻マーカーはカードの左側にあり元々隠れない。
+    // 85%に上げるとスマホで見えるやることが4.3個→6個に増える(2026-10-18、実測して変更)。
+    // なお85%より上げても「列の高さ-12px」が先に効くため結果は変わらない。
     // 65vhだけだと、ヘッダー・トレイ・やりたいことで列が短くなるスマホでカードが列をはみ出し、
     // ヘッダーや時間未定トレイ・折りたたみつまみに重なって隠してしまう(左右の座標計算は変更していない)
     // 右端のあけ幅は max(2%, 18px)。2%だけだとスマホでは7.8pxしか空かず、
     // 画面端の⚡クイックタブ(15px)や、やりたいことパネルのつまみにカードが重なってしまう
-    rightPanel.style.cssText=`position:absolute;left:${rgLeftPct+1}%;right:max(2%, 18px);top:50%;transform:translateY(-50%);z-index:10;max-height:min(65vh, calc(100% - 12px));max-height:min(65dvh, calc(100% - 12px));overflow-y:auto;`;
+    rightPanel.style.cssText=`position:absolute;left:${rgLeftPct+1}%;right:max(2%, 18px);top:50%;transform:translateY(-50%);z-index:10;display:flex;flex-direction:column;max-height:min(85vh, calc(100% - 12px));max-height:min(85dvh, calc(100% - 12px));overflow:hidden;`;
     col.appendChild(rightPanel);
   }
 
@@ -4131,7 +4139,10 @@ function renderTimeline(){
       if(isSplitNow && rightPanel){
         rightPanel.innerHTML='';
         const card=document.createElement('div');
-        card.style.cssText='position:relative;';
+        // 外枠(パネル)→この入れ物→カード本体→やることリスト、と高さの制約を伝える必要がある。
+        // ここでflex/min-height:0が抜けていると、カード本体が中身の高さのまま伸びて
+        // パネルからはみ出し、上下が切れて見える
+        card.style.cssText='position:relative;display:flex;flex-direction:column;flex:1 1 auto;min-height:0;';
         card.innerHTML=buildTaskCard(ev, isOvertimeCandidate);
         rightPanel.appendChild(card);
         if(isOvertimeCandidate){
@@ -4725,7 +4736,7 @@ function buildTaskCard(ev, isOvertime){
     ? `<button type="button" id="overtime-skip-btn" style="display:block;width:auto;margin:8px auto 0;padding:6px 16px;min-height:44px;border-radius: var(--r-md);border:1.5px solid var(--danger);background:#fff;color:var(--danger);font-weight:800;font-size: var(--fs-xs);cursor:pointer">😴 きょうは とばす</button>`
     : '';
 
-  return `<div class="${pulseClass.trim()}" style="background:${bgFill};border:10px solid ${borderColor};border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:72vh;max-height:72dvh;overflow:hidden;transition:background 0.8s linear, border-color 0.8s linear">
+  return `<div class="${pulseClass.trim()}" style="background:${bgFill};border:10px solid ${borderColor};border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;flex:1 1 auto;min-height:0;overflow:hidden;transition:background 0.8s linear, border-color 0.8s linear">
       <div style="padding:14px 18px 0;flex-shrink:0;text-align:center">
         ${overtimeTag}
         <div class="now-card-name" style="font-size: var(--fs-xl);margin-bottom:10px">${ev.fromChild?'⭐ ':''}${ev.name}</div>
@@ -4760,7 +4771,7 @@ function buildUntimedPromoCard(ev){
       : notReadyBarHTML(done, total);
   }
 
-  return `<div style="background:var(--surface2);border:10px solid var(--text-dim);border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;max-height:72vh;max-height:72dvh;overflow:hidden">
+  return `<div style="background:var(--surface2);border:10px solid var(--text-dim);border-radius: var(--r-lg);box-shadow:0 8px 22px rgba(0,0,0,0.16);box-sizing:border-box;display:flex;flex-direction:column;flex:1 1 auto;min-height:0;overflow:hidden">
       <div style="padding:14px 18px 0;flex-shrink:0">
         <div style="font-size: var(--fs-sm);font-weight:900;color:#fff;background:var(--text-dim);display:inline-block;padding:3px 12px;border-radius: var(--r-md);margin-bottom:6px">⏳ じかんが きまってないよ</div>
         <div style="margin-bottom:10px">
