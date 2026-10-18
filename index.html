@@ -1109,6 +1109,8 @@ body.idle-power-save-deep #topbar, body.idle-power-save-deep #main { filter: bri
   display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
   padding: 16px 18px; background: none; border: none; cursor: pointer;
   font-family: inherit; font-size: var(--fs-md); font-weight: 800; color: var(--text-dim);
+  /* 低い画面(スマホ横)では余白を詰めるため、paddingだけでは43pxになり44px基準を1px割る */
+  min-height: 44px;
 }
 .acc-head .acc-chevron { margin-left: auto; font-size: var(--fs-xs); transition: transform 0.2s; color: var(--text-dim); }
 .acc-section.open .acc-head { border-bottom: 1.5px solid var(--border); color: var(--text-dim); }
@@ -2282,7 +2284,7 @@ body.fab-left #quick-sheet.open { transform: translateY(-50%) scale(1); }
       </div>
     </div>
 
-    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v238・2026-10-18</div>
+    <div style="text-align:center;font-size: var(--fs-xs);color:var(--text-dim);margin-top:2px">v239・2026-10-18</div>
     <button class="btn btn-secondary" id="force-update-btn" type="button" style="width:100%;margin-top:8px;font-size: var(--fs-xs)">🔄 さいしんばんに 更新する</button>
     <p class="info-text info-open" style="font-size: var(--fs-xs);color:var(--text-dim);margin-top:4px;margin-bottom:0;line-height:1.5">アップデートしたはずなのに バージョン番号が変わらない時に押してください。保存済みのデータは消えません。</p>
     <div class="modal-actions">
